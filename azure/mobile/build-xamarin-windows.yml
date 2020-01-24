@@ -1,0 +1,126 @@
+parameters:
+- name: build_windows
+  type: boolean
+  default: true
+- name: solution_filename
+  type: string
+- name: solution_build_configuration
+  type: string
+  default: Release
+- name: build_platform
+  type: string
+  default: 'Any CPU'
+- name: windows_package_manifest_filename
+  type: string
+- name: build_number
+  type: string
+  default: '$(Build.BuildId)'
+- name: full_version_number
+  type: string
+  default: '1.0.$(Build.BuildId)'
+- name: nuget_version
+  type: string
+  default: '4.4.1'
+- name: net_core_version 
+  type: string 
+  default: '3.0.x'
+- name: artifact_name
+  type: string
+  default: 'drop'
+- name: artifact_folder
+  type: string
+  default: 'Windows'
+
+stages:
+- stage: Windows
+  dependsOn: [] 
+  condition: ${{ parameters.build_windows }}
+  
+  pool:
+    vmImage: 'windows-latest'
+
+  jobs:
+  - job: BuildWindows
+
+    steps:
+    - task: NuGetToolInstaller@0
+      displayName: 'Use NuGet ${{ parameters.nuget_version }}'
+      inputs:
+        versionSpec: '${{ parameters.nuget_version }}'
+
+    - task: NuGetCommand@2
+      displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
+      inputs:
+        restoreSolution: '${{ parameters.solution_filename }}'
+
+    - task: MagicChunks@2
+      displayName: 'Set version number - ${{ parameters.windows_package_manifest_filename }}'
+      inputs:
+        sourcePath: ${{ parameters.windows_package_manifest_filename }}
+        fileType: Xml
+        targetPathType: 'source'
+        transformationType: 'json'
+        transformations: |
+          {
+            "Package/Identity/@Version": "${{ parameters.full_version_number }}.0"
+          }
+
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+        script: |
+          Write-Host "Start adding the PFX file to the certificate store."
+
+          $pfxpath = '$(Build.SourcesDirectory)\src\Apps\DotNet\XF\InspectorXF\InspectorXF.UWP\InspectorXF.UWP_TemporaryKey.pfx'
+          $password = ''
+          
+          Add-Type -AssemblyName System.Security
+          $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+          $cert.Import($pfxpath, $password, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]"PersistKeySet")
+          $store = new-object system.security.cryptography.X509Certificates.X509Store -argumentlist "MY", CurrentUser
+          $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]"ReadWrite")
+          $store.Add($cert)
+          $store.Close() 
+          
+          ConvertTo-Json $cert | Write-Host
+
+    - task: VSBuild@1
+      displayName: 'Build solution ${{ parameters.solution_filename }}'
+      inputs:
+        solution: ${{ parameters.solution_filename }}
+        msbuildArgs: '/p:AppxBundlePlatforms="$(uwpBuildPlatform)" /p:DebugSymbols=false /p:DebugType=None /p:AppxBundle=Always /p:AppxPackageSigningEnabled=true /p:UapAppxPackageBuildMode=StoreUpload /p:platform="x86" /p:PackageCertificateThumbprint="39FF16DD985CFD26FE9F3E16AC30489C7D02F758" /p:PackageCertificateKeyFile="$(Build.SourcesDirectory)\src\Apps\DotNet\XF\InspectorXF\InspectorXF.UWP\InspectorXF.UWP_TemporaryKey.pfx" /p:PackageCertificatePassword=""'
+        configuration: '${{ parameters.solution_build_configuration }}'
+
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "Write out authenticode signature"
+
+          Get-AuthenticodeSignature .\**\*.appxbundle | Write-Host
+
+    - task: CopyFiles@2
+      inputs:
+        contents: '**/*.appxbundle'
+        targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
+        flattenFolders: false
+        overWrite: true
+    - task: CopyFiles@2
+      inputs:
+        contents: '**/*.appxupload' 
+        targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
+        flattenFolders: false
+        overWrite: true
+    - task: CopyFiles@2
+      inputs:
+        contents: '**/*.cer'
+        targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
+        flattenFolders: false
+        overWrite: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
+      inputs:
+        pathtoPublish: '$(build.artifactStagingDirectory)' 
+        artifactName: '${{ parameters.artifact_name }}' 
+        publishLocation: 'Container'
