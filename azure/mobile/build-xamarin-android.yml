@@ -43,7 +43,7 @@ parameters:
 stages:
 - stage: Android
   dependsOn: [] 
-  condition: ${{ or(contains(parameters.build_android, 'true'), contains(parameters.build_android, 'True')) }}
+  # condition: ${{ or(contains(parameters.build_android, 'true'), contains(parameters.build_android, 'True')) }}
 
   pool:
     vmImage: 'windows-latest'
@@ -52,7 +52,13 @@ stages:
   - job: BuildAndroid
 
     steps:
-    - task: NuGetToolInstaller@0
+      - task: PowerShell@2
+      inputs:
+        targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+        script: |
+          Write-Host "Enabled: ->${{parameters.build_android}}<-"
+
+      - task: NuGetToolInstaller@0
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
       inputs:
         versionSpec: '${{ parameters.nuget_version }}'
