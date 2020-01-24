@@ -49,7 +49,7 @@ parameters:
 stages:
 - stage: iOS
   dependsOn: [] 
-  condition: ${{ contains(eq(parameters.build_ios, 'true'), contains(parameters.build_ios, 'True')) }}
+  condition: ${{ or(contains(parameters.build_ios, 'true'), contains(parameters.build_ios, 'True')) }}
   pool:
     vmImage: 'macos-latest'
 
