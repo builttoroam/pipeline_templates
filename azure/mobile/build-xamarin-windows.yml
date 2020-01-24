@@ -34,7 +34,7 @@ parameters:
 stages:
 - stage: Windows
   dependsOn: [] 
-  condition: ${{ eq(parameters.build_windows, 'true') }}
+  condition: ${{ if eq(parameters.build_windows, 'true') }}
   
   pool:
     vmImage: 'windows-latest'
