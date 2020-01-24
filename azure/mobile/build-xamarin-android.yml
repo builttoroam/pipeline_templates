@@ -1,7 +1,7 @@
 parameters:
 - name: build_android
-  type: boolean
-  default: true
+  type: string
+  default: 'true'
 - name: solution_filename
   type: string
 - name: solution_build_configuration
@@ -43,7 +43,7 @@ parameters:
 stages:
 - stage: Android
   dependsOn: [] 
-  condition: ${{ parameters.build_android }}
+  condition: ${{ if eq(parameters.build_android, 'true') }}
 
   pool:
     vmImage: 'windows-latest'
