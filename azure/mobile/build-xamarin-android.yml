@@ -62,7 +62,7 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         script: |
-          Write-Host "Enabled: ->${{parameters.build_android}}<->${{ eq(parameters.build_android,'true') }}"
+          Write-Host "Enabled: ->${{parameters.build_android}}<->${{ eq(join(parameters.build_android,''),'true') }}"
 
     - task: NuGetToolInstaller@0
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
