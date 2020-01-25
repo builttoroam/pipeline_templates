@@ -45,16 +45,16 @@ stages:
 - stage: Android
   dependsOn: [] 
 
-  # variables:
-  # - name: build_enabled
-  #   value: $[ parameters.build_android ]
+  variables:
+  - name: build_enabled
+    value: $[ parameters.build_android ]
 
   pool:
     vmImage: 'windows-latest'
 
   jobs:
   - job: BuildAndroid
-    condition: eq( $[ parameters.build_android ], true )
+    condition: eq( variables.build_enabled, true )
 
     steps:
     - task: PowerShell@2
