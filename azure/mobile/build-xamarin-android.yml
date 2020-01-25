@@ -47,7 +47,7 @@ stages:
     - name: build_enabled
       value: ${{ parameters.build_android }}
 
-  # condition: ${{ parameters.build_android }}
+  condition: eq( variables['build_enabled'],'true')
 
   pool:
     vmImage: 'windows-latest'
