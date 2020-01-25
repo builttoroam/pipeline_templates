@@ -47,13 +47,13 @@ stages:
     - name: build_enabled
       value: ${{ parameters.build_android }}
 
-  condition: eq( variables['build_enabled'],'true')
 
   pool:
     vmImage: 'windows-latest'
 
   jobs:
   - job: BuildAndroid
+    condition: eq( variables['build_enabled'],'true')
     steps:
       
     - script: echo 'Param ${{ parameters.build_android }}'
