@@ -40,13 +40,15 @@ parameters:
   type: string
   default: 'SignedAndroid.aab'
 
-variables:
-  - name: build_enabled
-    value: ${{ parameters.build_android }}
 
 stages:
 - stage: Android
   dependsOn: [] 
+
+  variables:
+    - name: build_enabled
+      value: ${{ parameters.build_android }}
+  
   condition: $(eq(variables.build_enabled, 'true')) 
 
   pool:
