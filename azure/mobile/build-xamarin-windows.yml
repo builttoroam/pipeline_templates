@@ -9,7 +9,10 @@ parameters:
   default: Release
 - name: build_platform
   type: string
-  default: 'Any CPU'
+  default: 'x86'
+- name: uwpBuildPlatform
+  type: string
+  default: 'x86|x64|ARM'
 - name: windows_package_manifest_filename
   type: string
 - name:  windows_cert_securefiles_filename
@@ -99,7 +102,7 @@ stages:
           Write-Host "Start adding the PFX file to the certificate store."
 
           $pfxpath = '$(signing_certificate.secureFilePath)'
-          $password = '$(windows_cert_password)'
+          $password = '${{ parameters.windows_cert_password }}'
           
           Add-Type -AssemblyName System.Security
           $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
@@ -118,17 +121,17 @@ stages:
       displayName: 'Build solution ${{ parameters.solution_filename }}'
       inputs:
         solution: ${{ parameters.solution_filename }}
-        msbuildArgs: '/p:AppxBundlePlatforms="$(uwpBuildPlatform)" 
+        msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpBuildPlatform }}" 
               /p:DebugSymbols=false 
               /p:DebugType=None 
-              /p:AppxPackageDir="$(appxPackageDir)"
+              /p:AppxPackageDir="${{ parameters.appxPackageDir }}"
               /p:AppxBundle=Always 
               /p:AppxPackageSigningEnabled=true 
               /p:UapAppxPackageBuildMode=StoreUpload 
-              /p:platform="x86" 
+              /p:platform="${{ parameters.build_platform }}" 
               /p:PackageCertificateThumbprint="$(cert_thumbprint)" 
               /p:PackageCertificateKeyFile="$(signing_certificate.secureFilePath)" 
-              /p:PackageCertificatePassword="$(windows_cert_password)"'
+              /p:PackageCertificatePassword="${{ parameters.windows_cert_password }}"'
         configuration: '${{ parameters.solution_build_configuration }}'
 
     - task: CopyFiles@2
