@@ -144,7 +144,7 @@ stages:
         msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpBuildPlatform }}" 
               /p:DebugSymbols=false 
               /p:DebugType=None 
-              /p:AppxPackageDir="${{ parameters.appxPackageDir }}"
+              /p:AppxPackageDir="$(appxPackageDir)"
               /p:AppxBundle=Always 
               /p:AppxPackageSigningEnabled=true 
               /p:UapAppxPackageBuildMode=StoreUpload 
