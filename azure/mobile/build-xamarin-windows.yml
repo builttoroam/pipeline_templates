@@ -1,7 +1,7 @@
 parameters:
 - name: build_windows
-  type: string
-  default: 'true'
+  type: boolean
+  default: true
 - name: solution_filename
   type: string
 - name: solution_build_configuration
@@ -34,7 +34,7 @@ parameters:
 stages:
 - stage: Windows
   dependsOn: [] 
-  condition: ${{ or(contains(parameters.build_windows, 'true'), contains(parameters.build_windows, 'True')) }}
+  condition: ${{ parameters.build_windows }}
   
   pool:
     vmImage: 'windows-latest'
