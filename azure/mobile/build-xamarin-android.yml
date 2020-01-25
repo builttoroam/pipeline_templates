@@ -44,13 +44,17 @@ parameters:
 stages:
 - stage: Android
   dependsOn: [] 
-  condition: eq( ${{ parameters.build_android }}, true )
+
+  # variables:
+  # - name: build_enabled
+  #   value: $[ parameters.build_android ]
 
   pool:
     vmImage: 'windows-latest'
 
   jobs:
   - job: BuildAndroid
+    condition: $[ eq( parameters.build_android, true ) ]
 
     steps:
     - task: PowerShell@2
