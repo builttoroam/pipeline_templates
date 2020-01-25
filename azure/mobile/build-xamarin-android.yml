@@ -49,7 +49,7 @@ stages:
     - name: build_enabled
       value: ${{ parameters.build_android }}
   
-  condition: eq(variables.build_enabled, 'true') 
+  # condition: eq(variables.build_enabled, 'true') 
 
   pool:
     vmImage: 'windows-latest'
@@ -62,7 +62,7 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         script: |
-          Write-Host "Enabled: ->${{parameters.build_android}}<-"
+          Write-Host "Enabled: ->${{parameters.build_android}}<->${{ eq(parameters.build_android,'true') }}"
 
     - task: NuGetToolInstaller@0
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
