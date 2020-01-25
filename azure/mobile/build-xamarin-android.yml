@@ -44,7 +44,7 @@ parameters:
 stages:
 - stage: Android
   dependsOn: [] 
-  condition: eq('$(android_enabled)', 'true')
+  condition: $[ eq( ${{ parameters.build_android }}, true ) ]
 
   pool:
     vmImage: 'windows-latest'
