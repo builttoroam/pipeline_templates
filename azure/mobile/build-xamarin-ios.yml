@@ -36,15 +36,18 @@ parameters:
 - name: net_core_version 
   type: string 
   default: '3.0.x'
+- name: xamarin_sdk_version
+  type: string 
+  default: '6_4_0'
 - name: artifact_name
   type: string
   default: 'drop'
 - name: artifact_folder
   type: string
   default: 'iOS'
-- name: xamarin_sdk_version
-  type: string 
-  default: '6_4_0'
+- name: ios_ipa_name
+  type: string
+  default: 'SignediOS.ipa'
 
 stages:
 - stage: iOS
@@ -129,6 +132,13 @@ stages:
         flattenFolders: true
         overWrite: true
 
+    - task: PowerShell@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Get-ChildItem -Filter "*.ipa" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.ios_ipa_name }}" | Write-Host
+  
     - task: PublishBuildArtifacts@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
