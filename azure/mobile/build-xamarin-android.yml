@@ -61,7 +61,7 @@ stages:
     - script: echo 'Local var $(build_enabled)'
 
     - task: PowerShell@2
-      condition: eq( '$(android_enabled)','true')
+      condition: $( eq( variables.android_enabled,'true') )
       inputs:
         targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         script: |
