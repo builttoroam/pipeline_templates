@@ -54,7 +54,7 @@ stages:
 
   jobs:
   - job: BuildAndroid
-    condition: $[ eq( parameters.build_android, true ) ]
+    condition: eq( $[ parameters.build_android ], true )
 
     steps:
     - task: PowerShell@2
