@@ -1,7 +1,7 @@
 parameters:
 - name: build_windows
-  type: boolean
-  default: true
+  type: string
+  default: 'true'
 - name: solution_filename
   type: string
 - name: solution_build_configuration
@@ -34,7 +34,9 @@ parameters:
 stages:
 - stage: Windows
   dependsOn: [] 
-  condition: ${{ parameters.build_windows }}
+  variables: 
+    - name: build_enabled
+      value: ${{ parameters.build_windows }}
   
   pool:
     vmImage: 'windows-latest'
@@ -44,16 +46,19 @@ stages:
 
     steps:
     - task: NuGetToolInstaller@0
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
       inputs:
         versionSpec: '${{ parameters.nuget_version }}'
 
     - task: NuGetCommand@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
     - task: MagicChunks@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Set version number - ${{ parameters.windows_package_manifest_filename }}'
       inputs:
         sourcePath: ${{ parameters.windows_package_manifest_filename }}
@@ -66,6 +71,7 @@ stages:
           }
 
     - task: PowerShell@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         script: |
@@ -85,6 +91,7 @@ stages:
           ConvertTo-Json $cert | Write-Host
 
     - task: VSBuild@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Build solution ${{ parameters.solution_filename }}'
       inputs:
         solution: ${{ parameters.solution_filename }}
@@ -92,6 +99,7 @@ stages:
         configuration: '${{ parameters.solution_build_configuration }}'
 
     - task: PowerShell@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'
         script: |
@@ -100,18 +108,21 @@ stages:
           Get-AuthenticodeSignature .\**\*.appxbundle | Write-Host
 
     - task: CopyFiles@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '**/*.appxbundle'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: false
         overWrite: true
     - task: CopyFiles@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '**/*.appxupload' 
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: false
         overWrite: true
     - task: CopyFiles@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '**/*.cer'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
@@ -119,6 +130,7 @@ stages:
         overWrite: true
 
     - task: PublishBuildArtifacts@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
         pathtoPublish: '$(build.artifactStagingDirectory)' 

@@ -49,7 +49,10 @@ parameters:
 stages:
 - stage: iOS
   dependsOn: [] 
-  condition: ${{ parameters.build_ios }}
+  variables: 
+    - name: build_enabled
+      value: ${{ parameters.build_ios }}
+
   pool:
     vmImage: 'macos-latest'
 
@@ -58,6 +61,7 @@ stages:
 
     steps:
     - task: InstallAppleCertificate@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Install Signing Certificate'
       inputs:
         certSecureFile: '${{ parameters.ios_cert_securefiles_filename }}'
@@ -66,6 +70,7 @@ stages:
         deleteCert: true  
 
     - task: InstallAppleProvisioningProfile@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Install Provisioning Profile'
       inputs:
         provisioningProfileLocation: 'secureFiles'
@@ -73,24 +78,29 @@ stages:
         removeProfile: true
 
     - script: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh '${{ parameters.xamarin_sdk_version }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Select the Xamarin SDK version'
 
     - task: UseDotNet@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Use .Net Core sdk ${{ parameters.net_core_version }}'
       inputs:
         version: '${{ parameters.net_core_version }}'
 
     - task: NuGetToolInstaller@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
       inputs:
         versionSpec: '${{ parameters.nuget_version }}'
 
     - task: NuGetCommand@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
     - task: ios-bundle-version@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Setting application version in ${{ parameters.ios_plist_filename }}'
       inputs:
         sourcePath: '${{ parameters.ios_plist_filename }}'
@@ -100,6 +110,7 @@ stages:
         printFile: true
 
     - task: XamariniOS@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Building solution ${{ parameters.solution_filename }}'
       inputs:
         solutionFile: '${{ parameters.solution_filename }}'
@@ -110,6 +121,7 @@ stages:
         signingProvisioningProfileID: '${{ parameters.ios_provisioning_profile_id }}'
 
     - task: CopyFiles@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
       inputs:
         contents: '**/*.ipa'
@@ -118,6 +130,7 @@ stages:
         overWrite: true
 
     - task: PublishBuildArtifacts@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
         pathtoPublish: '$(build.artifactStagingDirectory)' 
