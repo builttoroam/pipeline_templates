@@ -1,7 +1,7 @@
 parameters:
 - name: build_android
-  type: boolean
-  default: true
+  type: string
+  default: 'true'
 - name: solution_filename
   type: string
 - name: solution_build_configuration
@@ -43,16 +43,32 @@ parameters:
 stages:
 - stage: Android
   dependsOn: [] 
-  condition: ${{ parameters.build_android }}
+  variables: 
+    - name: build_enabled
+      value: ${{ parameters.build_android }}
+
+  # condition: ${{ parameters.build_android }}
 
   pool:
     vmImage: 'windows-latest'
 
   jobs:
   - job: BuildAndroid
-
     steps:
+      
+      - script: echo 'Param ${{ parameters.build_android }}'
+      - script: echo 'Global var $(android_enabled)'
+      - script: echo 'Local var $(build_enabled)'
+
+    - task: PowerShell@2
+      condition: eq( $(build_enabled),'true')
+      inputs:
+        targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+        script: |
+          Write-Host "Android enabled $(android_enabled)."
+
     - task: NuGetToolInstaller@0
+      condition:
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
       inputs:
         versionSpec: '${{ parameters.nuget_version }}'
