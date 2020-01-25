@@ -1,7 +1,7 @@
 parameters:
 - name: build_android
-  type: boolean
-  default: true
+  type: string
+  default: 'true'
 - name: solution_filename
   type: string
 - name: solution_build_configuration
@@ -43,26 +43,30 @@ parameters:
 stages:
 - stage: Android
   dependsOn: [] 
-  condition: ${{ parameters.build_android }}
+  variables: 
+    - name: build_enabled
+      value: ${{ parameters.build_android }}
 
   pool:
     vmImage: 'windows-latest'
 
   jobs:
   - job: BuildAndroid
-
     steps:
     - task: NuGetToolInstaller@0
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
       inputs:
         versionSpec: '${{ parameters.nuget_version }}'
 
     - task: NuGetCommand@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
     - task: android-manifest-version@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         sourcePath: '${{ parameters.android_manifest_filename }}'
         versionCodeOption: 'buildid'
@@ -71,6 +75,7 @@ stages:
         printFile: true
 
     - task: DownloadSecureFile@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Download secure file'
       name: signing_keystore
       inputs:
@@ -78,6 +83,7 @@ stages:
           
 
     - task: VSBuild@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Build solution ${{ parameters.solution_filename }}'
       inputs:
         solution: '${{ parameters.solution_filename }}'
@@ -92,6 +98,7 @@ stages:
         /p:AndroidSigningStorePass="${{ parameters.keystore_password }}"' 
 
     - task: CopyFiles@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
       inputs:
         contents: '**/*-Signed.aab'
@@ -100,12 +107,14 @@ stages:
         overWrite: true
 
     - task: PowerShell@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
           Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.android_bundle_name }}" | Write-Host
 
     - task: PublishBuildArtifacts@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
         pathtoPublish: '$(build.artifactStagingDirectory)' 

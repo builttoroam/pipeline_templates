@@ -1,7 +1,7 @@
 parameters:
 - name: build_windows
-  type: boolean
-  default: true
+  type: string
+  default: 'true'
 - name: solution_filename
   type: string
 - name: solution_build_configuration
@@ -11,6 +11,10 @@ parameters:
   type: string
   default: 'Any CPU'
 - name: windows_package_manifest_filename
+  type: string
+- name:  windows_cert_securefiles_filename
+  type: string
+- name: windows_cert_password
   type: string
 - name: build_number
   type: string
@@ -30,11 +34,23 @@ parameters:
 - name: artifact_folder
   type: string
   default: 'Windows'
+- name: windows_bundle_name
+  type: string
+  default: 'SignedWindows.appxbundle'
+- name: windows_appxupload_name
+  type: string
+  default: 'Windows.appxupload'
 
 stages:
 - stage: Windows
   dependsOn: [] 
-  condition: ${{ parameters.build_windows }}
+  variables: 
+    - name: build_enabled
+      value: ${{ parameters.build_windows }}
+    - name: cert_thumbprint
+      value: ''
+    - name: appxPackageDir
+      value: '$(System.DefaultWorkingDirectory)\AppxPackages'
   
   pool:
     vmImage: 'windows-latest'
@@ -44,16 +60,19 @@ stages:
 
     steps:
     - task: NuGetToolInstaller@0
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
       inputs:
         versionSpec: '${{ parameters.nuget_version }}'
 
     - task: NuGetCommand@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
     - task: MagicChunks@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Set version number - ${{ parameters.windows_package_manifest_filename }}'
       inputs:
         sourcePath: ${{ parameters.windows_package_manifest_filename }}
@@ -65,14 +84,22 @@ stages:
             "Package/Identity/@Version": "${{ parameters.full_version_number }}.0"
           }
 
+    - task: DownloadSecureFile@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Download secure file'
+      name: signing_certificate
+      inputs:
+        secureFile: '${{ parameters.windows_cert_securefiles_filename }}'
+
     - task: PowerShell@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         script: |
           Write-Host "Start adding the PFX file to the certificate store."
 
-          $pfxpath = '$(Build.SourcesDirectory)\src\Apps\DotNet\XF\InspectorXF\InspectorXF.UWP\InspectorXF.UWP_TemporaryKey.pfx'
-          $password = ''
+          $pfxpath = '$(signing_certificate.secureFilePath)'
+          $password = '$(windows_cert_password)'
           
           Add-Type -AssemblyName System.Security
           $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
@@ -82,43 +109,54 @@ stages:
           $store.Add($cert)
           $store.Close() 
           
+          ##vso[task.setvariable variable=cert_thumbprint;]$cert.thumbprint"
+
           ConvertTo-Json $cert | Write-Host
 
     - task: VSBuild@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Build solution ${{ parameters.solution_filename }}'
       inputs:
         solution: ${{ parameters.solution_filename }}
-        msbuildArgs: '/p:AppxBundlePlatforms="$(uwpBuildPlatform)" /p:DebugSymbols=false /p:DebugType=None /p:AppxBundle=Always /p:AppxPackageSigningEnabled=true /p:UapAppxPackageBuildMode=StoreUpload /p:platform="x86" /p:PackageCertificateThumbprint="39FF16DD985CFD26FE9F3E16AC30489C7D02F758" /p:PackageCertificateKeyFile="$(Build.SourcesDirectory)\src\Apps\DotNet\XF\InspectorXF\InspectorXF.UWP\InspectorXF.UWP_TemporaryKey.pfx" /p:PackageCertificatePassword=""'
+        msbuildArgs: '/p:AppxBundlePlatforms="$(uwpBuildPlatform)" 
+              /p:DebugSymbols=false 
+              /p:DebugType=None 
+              /p:AppxPackageDir="$(appxPackageDir)"
+              /p:AppxBundle=Always 
+              /p:AppxPackageSigningEnabled=true 
+              /p:UapAppxPackageBuildMode=StoreUpload 
+              /p:platform="x86" 
+              /p:PackageCertificateThumbprint="$(cert_thumbprint)" 
+              /p:PackageCertificateKeyFile="$(signing_certificate.secureFilePath)" 
+              /p:PackageCertificatePassword="$(windows_cert_password)"'
         configuration: '${{ parameters.solution_build_configuration }}'
 
+    - task: CopyFiles@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      inputs:
+        contents: '$(appxPackageDir)\*.appxbundle'
+        targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
+        flattenFolders: true
+        overWrite: true
+
+    - task: CopyFiles@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      inputs:
+        contents: '$(appxPackageDir)\*.appxupload' 
+        targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
+        flattenFolders: true
+        overWrite: true
+
     - task: PowerShell@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
-        targetType: 'inline'
+        targetType: 'inline'                                                                                                 
         script: |
-          Write-Host "Write out authenticode signature"
-
-          Get-AuthenticodeSignature .\**\*.appxbundle | Write-Host
-
-    - task: CopyFiles@2
-      inputs:
-        contents: '**/*.appxbundle'
-        targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
-        flattenFolders: false
-        overWrite: true
-    - task: CopyFiles@2
-      inputs:
-        contents: '**/*.appxupload' 
-        targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
-        flattenFolders: false
-        overWrite: true
-    - task: CopyFiles@2
-      inputs:
-        contents: '**/*.cer'
-        targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
-        flattenFolders: false
-        overWrite: true
-
+          Get-ChildItem -Filter "*.appxbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_bundle_name }}" | Write-Host
+          Get-ChildItem -Filter "*.appxupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
+  
     - task: PublishBuildArtifacts@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
         pathtoPublish: '$(build.artifactStagingDirectory)' 
