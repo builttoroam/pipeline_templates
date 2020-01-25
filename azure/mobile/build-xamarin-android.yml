@@ -67,63 +67,63 @@ stages:
         script: |
           Write-Host "Android enabled $(android_enabled)."
 
-    - task: NuGetToolInstaller@0
-      condition:
-      displayName: 'Use NuGet ${{ parameters.nuget_version }}'
-      inputs:
-        versionSpec: '${{ parameters.nuget_version }}'
+    # - task: NuGetToolInstaller@0
+    #   condition:
+    #   displayName: 'Use NuGet ${{ parameters.nuget_version }}'
+    #   inputs:
+    #     versionSpec: '${{ parameters.nuget_version }}'
 
-    - task: NuGetCommand@2
-      displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
-      inputs:
-        restoreSolution: '${{ parameters.solution_filename }}'
+    # - task: NuGetCommand@2
+    #   displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
+    #   inputs:
+    #     restoreSolution: '${{ parameters.solution_filename }}'
 
-    - task: android-manifest-version@1
-      inputs:
-        sourcePath: '${{ parameters.android_manifest_filename }}'
-        versionCodeOption: 'buildid'
-        versionCode: '${{ parameters.build_number }}'
-        versionName: '${{ parameters.full_version_number }}' 
-        printFile: true
+    # - task: android-manifest-version@1
+    #   inputs:
+    #     sourcePath: '${{ parameters.android_manifest_filename }}'
+    #     versionCodeOption: 'buildid'
+    #     versionCode: '${{ parameters.build_number }}'
+    #     versionName: '${{ parameters.full_version_number }}' 
+    #     printFile: true
 
-    - task: DownloadSecureFile@1
-      displayName: 'Download secure file'
-      name: signing_keystore
-      inputs:
-        secureFile: '${{ parameters.secure_file_keystore_filename }}'
+    # - task: DownloadSecureFile@1
+    #   displayName: 'Download secure file'
+    #   name: signing_keystore
+    #   inputs:
+    #     secureFile: '${{ parameters.secure_file_keystore_filename }}'
           
 
-    - task: VSBuild@1
-      displayName: 'Build solution ${{ parameters.solution_filename }}'
-      inputs:
-        solution: '${{ parameters.solution_filename }}'
-        configuration: '${{ parameters.solution_build_configuration }}'
-        msbuildArgs: '/p:platform="${{ parameters.build_platform }}" 
-        /p:AndroidBuildApplicationPackage="true" 
-        /p:AndroidPackageFormat="aab"
-        /p:AndroidKeyStore="True" 
-        /p:AndroidSigningKeyStore="$(signing_keystore.secureFilePath)"
-        /p:AndroidSigningKeyPass="${{ parameters.keystore_password }}" 
-        /p:AndroidSigningKeyAlias="${{ parameters.keystore_alias }}" 
-        /p:AndroidSigningStorePass="${{ parameters.keystore_password }}"' 
+    # - task: VSBuild@1
+    #   displayName: 'Build solution ${{ parameters.solution_filename }}'
+    #   inputs:
+    #     solution: '${{ parameters.solution_filename }}'
+    #     configuration: '${{ parameters.solution_build_configuration }}'
+    #     msbuildArgs: '/p:platform="${{ parameters.build_platform }}" 
+    #     /p:AndroidBuildApplicationPackage="true" 
+    #     /p:AndroidPackageFormat="aab"
+    #     /p:AndroidKeyStore="True" 
+    #     /p:AndroidSigningKeyStore="$(signing_keystore.secureFilePath)"
+    #     /p:AndroidSigningKeyPass="${{ parameters.keystore_password }}" 
+    #     /p:AndroidSigningKeyAlias="${{ parameters.keystore_alias }}" 
+    #     /p:AndroidSigningStorePass="${{ parameters.keystore_password }}"' 
 
-    - task: CopyFiles@2
-      displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
-      inputs:
-        contents: '**/*-Signed.aab'
-        targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
-        flattenFolders: true
-        overWrite: true
+    # - task: CopyFiles@2
+    #   displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
+    #   inputs:
+    #     contents: '**/*-Signed.aab'
+    #     targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
+    #     flattenFolders: true
+    #     overWrite: true
 
-    - task: PowerShell@2
-      inputs:
-        targetType: 'inline'                                                                                                 
-        script: |
-          Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.android_bundle_name }}" | Write-Host
+    # - task: PowerShell@2
+    #   inputs:
+    #     targetType: 'inline'                                                                                                 
+    #     script: |
+    #       Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.android_bundle_name }}" | Write-Host
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
-      inputs:
-        pathtoPublish: '$(build.artifactStagingDirectory)' 
-        artifactName: '${{ parameters.artifact_name }}' 
-        publishLocation: 'Container'
+    # - task: PublishBuildArtifacts@1
+    #   displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
+    #   inputs:
+    #     pathtoPublish: '$(build.artifactStagingDirectory)' 
+    #     artifactName: '${{ parameters.artifact_name }}' 
+    #     publishLocation: 'Container'
