@@ -159,7 +159,7 @@ stages:
     - task: CopyFiles@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
-        contents: '$(appxPackageDir)\*.appxbundle'
+        contents: '$(appxPackageDir)\**\*.appxbundle'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: true
         overWrite: true
@@ -167,7 +167,7 @@ stages:
     - task: CopyFiles@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
-        contents: '$(appxPackageDir)\*.appxupload' 
+        contents: '$(appxPackageDir)\**\*.appxupload' 
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: true
         overWrite: true
