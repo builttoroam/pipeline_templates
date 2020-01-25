@@ -47,14 +47,14 @@ stages:
 
   variables:
   - name: build_enabled
-    value: $[ parameters.build_android ]
+    value: ${{ parameters.build_android }}
 
   pool:
     vmImage: 'windows-latest'
 
   jobs:
   - job: BuildAndroid
-    condition: eq( variables.build_enabled, true )
+    condition: eq( $[ build_enabled ], true )
 
     steps:
     - task: PowerShell@2
