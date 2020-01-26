@@ -64,7 +64,6 @@ parameters:
   type: stepList
   default: []
 
-
 stages:
 - stage: iOS
   dependsOn: [] 
@@ -162,10 +161,8 @@ stages:
         script: |
           Get-ChildItem -Filter "*.ipa" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.ios_ipa_name }}" | Write-Host
 
-
     - ${{ parameters.prePublish }}
 
-          
     - task: PublishBuildArtifacts@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'

@@ -142,6 +142,7 @@ stages:
       inputs:
         solution: ${{ parameters.solution_filename }}
         msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpBuildPlatform }}" 
+
               /p:DebugSymbols=false 
               /p:DebugType=None 
               /p:AppxPackageDir="$(appxPackageDir)"
@@ -182,7 +183,7 @@ stages:
 
     - ${{ parameters.prePublish }}
 
-  
+ 
     - task: PublishBuildArtifacts@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
