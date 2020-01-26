@@ -142,7 +142,6 @@ stages:
       inputs:
         solution: ${{ parameters.solution_filename }}
         msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpBuildPlatform }}" 
-
               /p:DebugSymbols=false 
               /p:DebugType=None 
               /p:AppxPackageDir="$(appxPackageDir)"
