@@ -48,6 +48,21 @@ parameters:
 - name: ios_ipa_name
   type: string
   default: 'SignediOS.ipa'
+- name: onStart
+  type: stepList
+  default: []
+- name: preBuild
+  type: stepList
+  default: []
+- name: postBuild
+  type: stepList
+  default: []
+- name: prePublish
+  type: stepList
+  default: []
+- name: onEnd
+  type: stepList
+  default: []
 
 stages:
 - stage: iOS
@@ -63,6 +78,9 @@ stages:
   - job: BuildiOS
 
     steps:
+
+    - ${{ parameters.onStart }}
+
     - task: InstallAppleCertificate@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Install Signing Certificate'
@@ -112,6 +130,8 @@ stages:
         versionName: '${{ parameters.full_version_number }}' 
         printFile: true
 
+    - ${{ parameters.preBuild }}
+
     - task: XamariniOS@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Building solution ${{ parameters.solution_filename }}'
@@ -122,6 +142,8 @@ stages:
         packageApp: true
         signingIdentity: '${{ parameters.ios_signing_identity }}'
         signingProvisioningProfileID: '${{ parameters.ios_provisioning_profile_id }}'
+
+    - ${{ parameters.postBuild }}
 
     - task: CopyFiles@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
@@ -138,7 +160,9 @@ stages:
         targetType: 'inline'                                                                                                 
         script: |
           Get-ChildItem -Filter "*.ipa" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.ios_ipa_name }}" | Write-Host
-  
+
+    - ${{ parameters.prePublish }}
+
     - task: PublishBuildArtifacts@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
@@ -146,4 +170,9 @@ stages:
         pathtoPublish: '$(build.artifactStagingDirectory)' 
         artifactName: '${{ parameters.artifact_name }}' 
         publishLocation: 'Container'
+
+    - ${{ parameters.onEnd }}
+
+
+
 

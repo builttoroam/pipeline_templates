@@ -9,7 +9,10 @@ parameters:
   default: Release
 - name: build_platform
   type: string
-  default: 'Any CPU'
+  default: 'x86'
+- name: uwpBuildPlatform
+  type: string
+  default: 'x86|x64|ARM'
 - name: windows_package_manifest_filename
   type: string
 - name:  windows_cert_securefiles_filename
@@ -40,6 +43,21 @@ parameters:
 - name: windows_appxupload_name
   type: string
   default: 'Windows.appxupload'
+- name: onStart
+  type: stepList
+  default: []
+- name: preBuild
+  type: stepList
+  default: []
+- name: postBuild
+  type: stepList
+  default: []
+- name: prePublish
+  type: stepList
+  default: []
+- name: onEnd
+  type: stepList
+  default: []
 
 stages:
 - stage: Windows
@@ -59,6 +77,9 @@ stages:
   - job: BuildWindows
 
     steps:
+
+    - ${{ parameters.onStart }}
+
     - task: NuGetToolInstaller@0
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
@@ -99,7 +120,7 @@ stages:
           Write-Host "Start adding the PFX file to the certificate store."
 
           $pfxpath = '$(signing_certificate.secureFilePath)'
-          $password = '$(windows_cert_password)'
+          $password = '${{ parameters.windows_cert_password }}'
           
           Add-Type -AssemblyName System.Security
           $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
@@ -113,28 +134,33 @@ stages:
 
           ConvertTo-Json $cert | Write-Host
 
+    - ${{ parameters.preBuild }}
+
     - task: VSBuild@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Build solution ${{ parameters.solution_filename }}'
       inputs:
         solution: ${{ parameters.solution_filename }}
-        msbuildArgs: '/p:AppxBundlePlatforms="$(uwpBuildPlatform)" 
+        msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpBuildPlatform }}" 
+
               /p:DebugSymbols=false 
               /p:DebugType=None 
               /p:AppxPackageDir="$(appxPackageDir)"
               /p:AppxBundle=Always 
               /p:AppxPackageSigningEnabled=true 
               /p:UapAppxPackageBuildMode=StoreUpload 
-              /p:platform="x86" 
+              /p:platform="${{ parameters.build_platform }}" 
               /p:PackageCertificateThumbprint="$(cert_thumbprint)" 
               /p:PackageCertificateKeyFile="$(signing_certificate.secureFilePath)" 
-              /p:PackageCertificatePassword="$(windows_cert_password)"'
+              /p:PackageCertificatePassword="${{ parameters.windows_cert_password }}"'
         configuration: '${{ parameters.solution_build_configuration }}'
+
+    - ${{ parameters.postBuild }}
 
     - task: CopyFiles@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
-        contents: '$(appxPackageDir)\*.appxbundle'
+        contents: '$(appxPackageDir)\**\*.appxbundle'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: true
         overWrite: true
@@ -142,7 +168,7 @@ stages:
     - task: CopyFiles@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
-        contents: '$(appxPackageDir)\*.appxupload' 
+        contents: '$(appxPackageDir)\**\*.appxupload' 
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: true
         overWrite: true
@@ -154,7 +180,10 @@ stages:
         script: |
           Get-ChildItem -Filter "*.appxbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_bundle_name }}" | Write-Host
           Get-ChildItem -Filter "*.appxupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
-  
+
+    - ${{ parameters.prePublish }}
+
+ 
     - task: PublishBuildArtifacts@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
@@ -162,3 +191,7 @@ stages:
         pathtoPublish: '$(build.artifactStagingDirectory)' 
         artifactName: '${{ parameters.artifact_name }}' 
         publishLocation: 'Container'
+
+    - ${{ parameters.onEnd }}
+
+

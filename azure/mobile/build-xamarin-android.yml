@@ -39,6 +39,21 @@ parameters:
 - name: android_bundle_name
   type: string
   default: 'SignedAndroid.aab'
+- name: onStart
+  type: stepList
+  default: []
+- name: preBuild
+  type: stepList
+  default: []
+- name: postBuild
+  type: stepList
+  default: []
+- name: prePublish
+  type: stepList
+  default: []
+- name: onEnd
+  type: stepList
+  default: []
 
 stages:
 - stage: Android
@@ -53,6 +68,9 @@ stages:
   jobs:
   - job: BuildAndroid
     steps:
+
+    - ${{ parameters.onStart }}
+
     - task: NuGetToolInstaller@0
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
@@ -81,6 +99,7 @@ stages:
       inputs:
         secureFile: '${{ parameters.secure_file_keystore_filename }}'
           
+    - ${{ parameters.preBuild }}
 
     - task: VSBuild@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
@@ -96,6 +115,8 @@ stages:
         /p:AndroidSigningKeyPass="${{ parameters.keystore_password }}" 
         /p:AndroidSigningKeyAlias="${{ parameters.keystore_alias }}" 
         /p:AndroidSigningStorePass="${{ parameters.keystore_password }}"' 
+
+    - ${{ parameters.postBuild }}
 
     - task: CopyFiles@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
@@ -113,6 +134,8 @@ stages:
         script: |
           Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.android_bundle_name }}" | Write-Host
 
+    - ${{ parameters.prePublish }}
+
     - task: PublishBuildArtifacts@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
@@ -120,3 +143,5 @@ stages:
         pathtoPublish: '$(build.artifactStagingDirectory)' 
         artifactName: '${{ parameters.artifact_name }}' 
         publishLocation: 'Container'
+
+    - ${{ parameters.onEnd }}
