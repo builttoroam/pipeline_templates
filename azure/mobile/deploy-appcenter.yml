@@ -49,11 +49,11 @@ stages:
                 serverEndpoint: ${{ parameters.appcenter_service_connection }}
                 appSlug: '${{ parameters.appcenter_organisation }}/${{ parameters.appcenter_applicationid }}'
                 appFile: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
-                ${{ if contains(${{ parameters.application_package }}, 'appbundle') }}:
+                ${{ if contains( parameters.application_package , 'appbundle') }}:
                   symbolsOption: UWP
-                ${{ if contains(${{ parameters.application_package }}, 'apk') }}:
+                ${{ if contains( parameters.application_package , 'apk') }}:
                   symbolsOption: Android
-                ${{ if contains(${{ parameters.application_package }}, 'ipa') }}:
+                ${{ if contains( parameters.application_package , 'ipa') }}:
                   symbolsOption: iOS
                 releaseNotesInput: ${{ parameters.appcenter_release_notes }}
                 isSilent: false
