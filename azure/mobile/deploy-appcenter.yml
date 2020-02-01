@@ -54,6 +54,7 @@ stages:
                 script: |
                   Write-Host "Downloading bundletool jar"
                   Invoke-WebRequest 'https://github.com/google/bundletool/releases/download/0.12.0/bundletool-all-0.12.0.jar' -OutFile  '$(Pipeline.Workspace)\bundle.jar'
+                  Get-ChildItem -Path $(Pipeline.Workspace) | Format-Table | Write-Host
                   Write-Host "Downloading bundletool jar COMPLETE"
 
             - script: java -jar '$(Pipeline.Workspace)\bundle.jar' build-apks --bundle='$(application_fullpath)' --mode=universal --output='$(Pipeline.Workspace)\fatapk.zip'
