@@ -57,14 +57,14 @@ stages:
                   Get-ChildItem -Path $(Pipeline.Workspace) | Format-Table | Write-Host
                   Write-Host "Downloading bundletool jar COMPLETE"
 
-                  $args = '-jar', '$(Pipeline.Workspace)\bundle.jar', 'build-apks', '--bundle=$(application_fullpath)', '--mode=universal', '--output=$(Pipeline.Workspace)\fatapk.zip'
+                  $args = '-jar', '$(Pipeline.Workspace)\bundle.jar', 'build-apks', '--bundle=$(application_fullpath)', '--mode=universal', '--output=$(Pipeline.Workspace)\fatapk.apks'
                   Write-Host "Running Java with args $args"
                   Start-Process -FilePath java -ArgumentList $args -Wait | Write-Host
                   Write-Host "Bundle extract complete"
 
                   Write-Host "Unzipping fat apk"
                   Add-Type -AssemblyName System.IO.Compression.FileSystem
-                  [System.IO.Compression.ZipFile]::ExtractToDirectory('$(Pipeline.Workspace)\fatapk.zip', '$(Pipeline.Workspace)\fatapkextract')
+                  [System.IO.Compression.ZipFile]::ExtractToDirectory('$(Pipeline.Workspace)\fatapk.apks', '$(Pipeline.Workspace)\fatapkextract')
                   Write-Host "Apk extracted"
                   Write-Host "##vso[task.setvariable variable=application_fullpath]'$(Pipeline.Workspace)\fatapkextract\universal.apk'"                  
                   Write-Host "App path updated"
