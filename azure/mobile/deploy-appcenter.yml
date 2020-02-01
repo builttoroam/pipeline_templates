@@ -23,9 +23,13 @@ parameters:
   type: string
   default: 'Initial release'
 
+
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
+  variables:
+  - name: application_fullpath
+    value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
   
   pool:
     vmImage: 'windows-latest'
@@ -41,14 +45,41 @@ stages:
         deploy:
           steps:
             - download: current
+              displayName: Download Artifacts
               artifact: ${{ parameters.artifact_name }}
 
+            - task: PowerShell@2
+              displayName: Download Bundletool
+              condition: contains( ${{ parameters.application_package }},'.aab') )
+              inputs:
+                targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+                script: |
+                  Write-Host "Downloading bundletool jar"
+                  Invoke-WebRequest 'https://github.com/google/bundletool/releases/download/0.12.0/bundletool-all-0.12.0.jar' -OutFile  '$(Pipeline.Workspace)\bundle.jar'
+                  Write-Host "Downloading bundletool jar COMPLETE"
+
+            - script: java -jar '$(Pipeline.Workspace)\bundle.jar' build-apks --bundle='$(application_fullpath)' --mode=universal --output='$(Pipeline.Workspace)\fatapk.zip'
+              condition: contains( ${{ parameters.application_package }},'.aab') )
+              displayName: 'Extract fat APK'
+                
+            - task: PowerShell@2
+              displayName: 'Unzip Fat Apk'
+              condition: contains( ${{ parameters.application_package }},'.aab') )
+              inputs:
+                targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+                script: |
+                  Write-Host "Unzipping fat apk"
+                  Add-Type -AssemblyName System.IO.Compression.FileSystem
+                  [System.IO.Compression.ZipFile]::ExtractToDirectory('$(Pipeline.Workspace)\fatapk.zip', '$(Pipeline.Workspace)\fatapkextract')
+                  Write-Host "Apk extracted"
+                  Write-Host "##vso[task.setvariable variable=application_fullpath]'$(Pipeline.Workspace)\fatapkextract\universal.apk'"                  
+                  
             - task: AppCenterDistribute@3
               displayName: 'Deploy to Visual Studio App Center'
               inputs:
                 serverEndpoint: ${{ parameters.appcenter_service_connection }}
                 appSlug: '${{ parameters.appcenter_organisation }}/${{ parameters.appcenter_applicationid }}'
-                appFile: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
+                appFile: '$(application_fullpath)'
                 ${{ if contains( parameters.application_package , 'appbundle') }}:
                   symbolsOption: UWP
                 ${{ if contains( parameters.application_package , 'apk') }}:
