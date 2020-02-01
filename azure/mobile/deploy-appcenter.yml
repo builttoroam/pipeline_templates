@@ -50,7 +50,7 @@ stages:
 
             - task: PowerShell@2
               displayName: Download Bundletool
-              condition: contains( '${{ parameters.application_package }}','.aab') )
+              condition: contains( '${{ parameters.application_package }}','.aab') 
               inputs:
                 targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
                 script: |
@@ -59,12 +59,12 @@ stages:
                   Write-Host "Downloading bundletool jar COMPLETE"
 
             - script: java -jar '$(Pipeline.Workspace)\bundle.jar' build-apks --bundle='$(application_fullpath)' --mode=universal --output='$(Pipeline.Workspace)\fatapk.zip'
-              condition: contains( '${{ parameters.application_package }}','.aab') )
+              condition: contains( '${{ parameters.application_package }}','.aab') 
               displayName: 'Extract fat APK'
                 
             - task: PowerShell@2
               displayName: 'Unzip Fat Apk'
-              condition: contains( '${{ parameters.application_package }}','.aab') )
+              condition: contains( '${{ parameters.application_package }}','.aab') 
               inputs:
                 targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
                 script: |
