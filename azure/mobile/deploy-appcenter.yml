@@ -57,7 +57,7 @@ stages:
                   Get-ChildItem -Path $(Pipeline.Workspace) | Format-Table | Write-Host
                   Write-Host "Downloading bundletool jar COMPLETE"
 
-                  $args = '-jar', '$(Pipeline.Workspace)\bundle.jar', 'build-apks', "--bundle=$(application_fullpath)', '--mode=universal', '--output=$(Pipeline.Workspace)\fatapk.zip'
+                  $args = '-jar', '$(Pipeline.Workspace)\bundle.jar', 'build-apks', '--bundle=$(application_fullpath)', '--mode=universal', '--output=$(Pipeline.Workspace)\fatapk.zip'
                   Write-Host "Running Java with args $args"
                   Start-Process -FilePath java -ArgumentList $args -Wait | Write-Host
                   Write-Host "Bundle extract complete"
