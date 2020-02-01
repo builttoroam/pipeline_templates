@@ -1,4 +1,7 @@
 parameters:
+- name: stage_name
+  type: string
+  default: 'DeployAppCenter'
 - name: depends_on
   default: []
 - name: environment_name
@@ -21,7 +24,7 @@ parameters:
   default: 'Initial release'
 
 stages:
-- stage: DeployAppCenter
+- stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
   
   pool:
