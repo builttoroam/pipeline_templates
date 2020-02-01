@@ -1,0 +1,57 @@
+parameters:
+- name: depends_on
+  default: []
+- name: environment_name
+  type: string
+- name: artifact_name
+  type: string
+  default: 'drop'
+- name: artifact_folder
+  type: string
+- name: application_package
+  type: string
+- name: appcenter_service_connection
+  type: string
+- name: appcenter_organisation
+  type: string
+- name: appcenter_applicationid
+  type: string
+- name: appcenter_release_notes
+  type: string
+  default: 'Initial release'
+
+stages:
+- stage: DeployAppCenter
+  dependsOn: ${{ parameters.depends_on }} 
+  
+  pool:
+    vmImage: 'windows-latest'
+
+  jobs:
+  - deployment: Deploy
+    displayName: deploy Windows app to App Center
+    pool:
+      vmImage: 'windows-latest'
+    environment: ${{ parameters.environment_name }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - download: current
+              artifact: ${{ parameters.artifact_name }}
+
+            - task: AppCenterDistribute@3
+              displayName: 'Deploy to Visual Studio App Center'
+              inputs:
+                serverEndpoint: ${{ parameters.appcenter_service_connection }}
+                appSlug: '${{ parameters.appcenter_organisation }}/${{ parameters.appcenter_applicationid }}'
+                appFile: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
+                ${{ if contains(${{ parameters.application_package }}, 'appbundle') }}:
+                  symbolsOption: UWP
+                ${{ if contains(${{ parameters.application_package }}, 'apk') }}:
+                  symbolsOption: Android
+                ${{ if contains(${{ parameters.application_package }}, 'ipa') }}:
+                  symbolsOption: iOS
+                releaseNotesInput: ${{ parameters.appcenter_release_notes }}
+                isSilent: false
+
