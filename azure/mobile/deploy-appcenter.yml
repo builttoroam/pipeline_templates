@@ -36,9 +36,7 @@ stages:
 
   jobs:
   - deployment: Deploy
-    displayName: deploy Windows app to App Center
-    pool:
-      vmImage: 'windows-latest'
+    displayName: Deploy app to App Center
     environment: ${{ parameters.environment_name }}
     strategy:
       runOnce:
