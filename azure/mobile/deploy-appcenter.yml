@@ -28,6 +28,18 @@ parameters:
   type: string
 - name: keystore_password
   type: string
+- name: onStart
+  type: stepList
+  default: []
+- name: postArtifactDownload
+  type: stepList
+  default: []
+- name: preAppCenterPublish
+  type: stepList
+  default: []
+- name: onEnd
+  type: stepList
+  default: []
 
 
 stages:
@@ -48,9 +60,13 @@ stages:
       runOnce:
         deploy:
           steps:
+            - ${{ parameters.onStart }}
+
             - download: current
               displayName: Download Artifacts
               artifact: ${{ parameters.artifact_name }}
+
+            - ${{ parameters.postArtifactDownload }}
 
             - task: DownloadSecureFile@1
               condition: contains( '${{ parameters.application_package }}','.aab') 
@@ -81,27 +97,7 @@ stages:
                   Write-Host "##vso[task.setvariable variable=application_fullpath]$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/fatapkextract/universal.apk"                  
                   Write-Host "App path updated - $(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/fatapkextract/universal.apk"
 
-            # - task: CopyFiles@2
-            #   inputs:
-            #     sourceFolder: 
-            #     contents: '**/*.apk'
-            #     targetFolder: '$(Build.SourcesDirectory)'
-
-            # - script: java -jar '$(Pipeline.Workspace)\bundle.jar' build-apks --bundle='$(application_fullpath)' --mode=universal --output='$(Pipeline.Workspace)\fatapk.zip'
-            #   condition: contains( '${{ parameters.application_package }}','.aab') 
-            #   displayName: 'Extract fat APK'
-                
-            # - task: PowerShell@2
-            #   displayName: 'Unzip Fat Apk'
-            #   condition: contains( '${{ parameters.application_package }}','.aab') 
-            #   inputs:
-            #     targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-            #     script: |
-            #       Write-Host "Unzipping fat apk"
-            #       Add-Type -AssemblyName System.IO.Compression.FileSystem
-            #       [System.IO.Compression.ZipFile]::ExtractToDirectory('$(Pipeline.Workspace)\fatapk.zip', '$(Pipeline.Workspace)\fatapkextract')
-            #       Write-Host "Apk extracted"
-            #       Write-Host "##vso[task.setvariable variable=application_fullpath]'$(Pipeline.Workspace)\fatapkextract\universal.apk'"                  
+            - ${{ parameters.preAppCenterPublish }}
                   
             - task: AppCenterDistribute@3
               displayName: 'Deploy to Visual Studio App Center'
@@ -117,4 +113,6 @@ stages:
                   symbolsOption: iOS
                 releaseNotesInput: ${{ parameters.appcenter_release_notes }}
                 isSilent: false
+
+            - ${{ parameters.onEnd }}
 
