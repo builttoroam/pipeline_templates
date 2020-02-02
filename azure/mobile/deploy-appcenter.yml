@@ -54,7 +54,6 @@ stages:
                 script: |
                   Write-Host "Downloading bundletool jar"
                   Invoke-WebRequest 'https://github.com/google/bundletool/releases/download/0.12.0/bundletool-all-0.12.0.jar' -OutFile  '$(Pipeline.Workspace)\bundle.jar'
-                  Get-ChildItem -Path $(Pipeline.Workspace) | Format-Table | Write-Host
                   Write-Host "Downloading bundletool jar COMPLETE"
 
                   $args = '-jar', '$(Pipeline.Workspace)\bundle.jar', 'build-apks', '--bundle=$(application_fullpath)', '--mode=universal', '--output=$(Pipeline.Workspace)\fatapk.apks'
@@ -64,10 +63,10 @@ stages:
 
                   Write-Host "Unzipping fat apk"
                   Add-Type -AssemblyName System.IO.Compression.FileSystem
-                  [System.IO.Compression.ZipFile]::ExtractToDirectory('$(Pipeline.Workspace)\fatapk.apks', '$(Pipeline.Workspace)\fatapkextract')
+                  [System.IO.Compression.ZipFile]::ExtractToDirectory('$(Pipeline.Workspace)\fatapk.apks', '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/fatapkextract')
                   Write-Host "Apk extracted"
-                  Write-Host "##vso[task.setvariable variable=application_fullpath]'..\fatapkextract\universal.apk'"                  
-                  Write-Host "App path updated"
+                  Write-Host "##vso[task.setvariable variable=application_fullpath]$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/fatapkextract/universal.apk"                  
+                  Write-Host "App path updated - $(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/fatapkextract/universal.apk"
 
             # - task: CopyFiles@2
             #   inputs:
