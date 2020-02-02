@@ -66,8 +66,14 @@ stages:
                   Add-Type -AssemblyName System.IO.Compression.FileSystem
                   [System.IO.Compression.ZipFile]::ExtractToDirectory('$(Pipeline.Workspace)\fatapk.apks', '$(Pipeline.Workspace)\fatapkextract')
                   Write-Host "Apk extracted"
-                  Write-Host "##vso[task.setvariable variable=application_fullpath]'$(Pipeline.Workspace)\fatapkextract\universal.apk'"                  
+                  Write-Host "##vso[task.setvariable variable=application_fullpath]'..\fatapkextract\universal.apk'"                  
                   Write-Host "App path updated"
+
+            # - task: CopyFiles@2
+            #   inputs:
+            #     sourceFolder: 
+            #     contents: '**/*.apk'
+            #     targetFolder: '$(Build.SourcesDirectory)'
 
             # - script: java -jar '$(Pipeline.Workspace)\bundle.jar' build-apks --bundle='$(application_fullpath)' --mode=universal --output='$(Pipeline.Workspace)\fatapk.zip'
             #   condition: contains( '${{ parameters.application_package }}','.aab') 
