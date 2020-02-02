@@ -1,4 +1,7 @@
 parameters:
+- name: stage_name
+  type: string
+  default: 'Android'
 - name: build_android
   type: string
   default: 'true'
@@ -56,7 +59,7 @@ parameters:
   default: []
 
 stages:
-- stage: Android
+- stage: ${{ parameters.stage_name }}
   dependsOn: [] 
   variables: 
     - name: build_enabled

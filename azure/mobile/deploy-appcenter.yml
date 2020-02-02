@@ -1,0 +1,121 @@
+parameters:
+- name: stage_name
+  type: string
+  default: 'DeployAppCenter'
+- name: depends_on
+  default: []
+- name: environment_name
+  type: string
+- name: artifact_name
+  type: string
+  default: 'drop'
+- name: artifact_folder
+  type: string
+- name: application_package
+  type: string
+- name: appcenter_service_connection
+  type: string
+- name: appcenter_organisation
+  type: string
+- name: appcenter_applicationid
+  type: string
+- name: appcenter_release_notes
+  type: string
+  default: 'Initial release'
+- name: secure_file_keystore_filename
+  type: string
+  default: ''
+- name: keystore_alias
+  type: string
+  default: ''
+- name: keystore_password
+  type: string
+  default: ''
+- name: onStart
+  type: stepList
+  default: []
+- name: postArtifactDownload
+  type: stepList
+  default: []
+- name: preAppCenterPublish
+  type: stepList
+  default: []
+- name: onEnd
+  type: stepList
+  default: []
+
+
+stages:
+- stage: ${{ parameters.stage_name }}
+  dependsOn: ${{ parameters.depends_on }} 
+  variables:
+  - name: application_fullpath
+    value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
+  
+  pool:
+    vmImage: 'windows-latest'
+
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy app to App Center
+    environment: ${{ parameters.environment_name }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - ${{ parameters.onStart }}
+
+            - download: current
+              displayName: Download Artifacts
+              artifact: ${{ parameters.artifact_name }}
+
+            - ${{ parameters.postArtifactDownload }}
+
+            - task: DownloadSecureFile@1
+              condition: contains( '${{ parameters.application_package }}','.aab') 
+              displayName: 'Download keystore'
+              name: signing_keystore
+              inputs:
+                secureFile: '${{ parameters.secure_file_keystore_filename }}'
+        
+            - task: PowerShell@2
+              displayName: Use Bundletool to extract and sign APK
+              condition: contains( '${{ parameters.application_package }}','.aab') 
+              inputs:
+                targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+                script: |
+                  Write-Host "Downloading bundletool jar"
+                  Invoke-WebRequest 'https://github.com/google/bundletool/releases/download/0.12.0/bundletool-all-0.12.0.jar' -OutFile  '$(Pipeline.Workspace)\bundle.jar'
+                  Write-Host "Downloading bundletool jar COMPLETE"
+
+                  $args = '-jar', '$(Pipeline.Workspace)\bundle.jar', 'build-apks', '--bundle=$(application_fullpath)', '--mode=universal', '--output=$(Pipeline.Workspace)\fatapk.apks', '--ks=$(signing_keystore.secureFilePath)', '--ks-key-alias=${{ parameters.keystore_alias }}', '--ks-pass=pass:${{ parameters.keystore_password }}'
+                  Write-Host "Running Java with args $args"
+                  Start-Process -FilePath java -ArgumentList $args -Wait | Write-Host
+                  Write-Host "Bundle extract complete"
+
+                  Write-Host "Unzipping fat apk"
+                  Add-Type -AssemblyName System.IO.Compression.FileSystem
+                  [System.IO.Compression.ZipFile]::ExtractToDirectory('$(Pipeline.Workspace)\fatapk.apks', '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/fatapkextract')
+                  Write-Host "Apk extracted"
+                  Write-Host "##vso[task.setvariable variable=application_fullpath]$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/fatapkextract/universal.apk"                  
+                  Write-Host "App path updated - $(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/fatapkextract/universal.apk"
+
+            - ${{ parameters.preAppCenterPublish }}
+                  
+            - task: AppCenterDistribute@3
+              displayName: 'Deploy to Visual Studio App Center'
+              inputs:
+                serverEndpoint: ${{ parameters.appcenter_service_connection }}
+                appSlug: '${{ parameters.appcenter_organisation }}/${{ parameters.appcenter_applicationid }}'
+                appFile: '$(application_fullpath)'
+                ${{ if contains( parameters.application_package , 'appbundle') }}:
+                  symbolsOption: UWP
+                ${{ if contains( parameters.application_package , 'apk') }}:
+                  symbolsOption: Android
+                ${{ if contains( parameters.application_package , 'ipa') }}:
+                  symbolsOption: iOS
+                releaseNotesInput: ${{ parameters.appcenter_release_notes }}
+                isSilent: false
+
+            - ${{ parameters.onEnd }}
+
