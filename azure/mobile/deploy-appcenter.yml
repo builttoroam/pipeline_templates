@@ -24,10 +24,13 @@ parameters:
   default: 'Initial release'
 - name: secure_file_keystore_filename
   type: string
+  default: ''
 - name: keystore_alias
   type: string
+  default: ''
 - name: keystore_password
   type: string
+  default: ''
 - name: onStart
   type: stepList
   default: []
