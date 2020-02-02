@@ -22,6 +22,12 @@ parameters:
 - name: appcenter_release_notes
   type: string
   default: 'Initial release'
+- name: secure_file_keystore_filename
+  type: string
+- name: keystore_alias
+  type: string
+- name: keystore_password
+  type: string
 
 
 stages:
@@ -46,8 +52,15 @@ stages:
               displayName: Download Artifacts
               artifact: ${{ parameters.artifact_name }}
 
+            - task: DownloadSecureFile@1
+              condition: contains( '${{ parameters.application_package }}','.aab') 
+              displayName: 'Download keystore'
+              name: signing_keystore
+              inputs:
+                secureFile: '${{ parameters.secure_file_keystore_filename }}'
+        
             - task: PowerShell@2
-              displayName: Download Bundletool
+              displayName: Use Bundletool to extract and sign APK
               condition: contains( '${{ parameters.application_package }}','.aab') 
               inputs:
                 targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
@@ -56,7 +69,7 @@ stages:
                   Invoke-WebRequest 'https://github.com/google/bundletool/releases/download/0.12.0/bundletool-all-0.12.0.jar' -OutFile  '$(Pipeline.Workspace)\bundle.jar'
                   Write-Host "Downloading bundletool jar COMPLETE"
 
-                  $args = '-jar', '$(Pipeline.Workspace)\bundle.jar', 'build-apks', '--bundle=$(application_fullpath)', '--mode=universal', '--output=$(Pipeline.Workspace)\fatapk.apks'
+                  $args = '-jar', '$(Pipeline.Workspace)\bundle.jar', 'build-apks', '--bundle=$(application_fullpath)', '--mode=universal', '--output=$(Pipeline.Workspace)\fatapk.apks', '--ks=$(signing_keystore.secureFilePath)', '--ks-key-alias=${{ parameters.keystore_alias }}', '--ks-pass=pass:${{ parameters.keystore_password }}'
                   Write-Host "Running Java with args $args"
                   Start-Process -FilePath java -ArgumentList $args -Wait | Write-Host
                   Write-Host "Bundle extract complete"
