@@ -62,8 +62,10 @@ stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: [] 
   variables: 
-    - name: build_enabled
-      value: ${{ parameters.build_android }}
+    build_enabled: ${{ parameters.build_android }}
+    ANDROID_NDK_HOME: C:\Microsoft\AndroidNDK64\android-ndk-r16b
+    ANDROID_NDK_PATH: C:\Microsoft\AndroidNDK64\android-ndk-r16b
+    AndroidNdkDirectory: C:\Microsoft\AndroidNDK64\android-ndk-r16b
 
   pool:
     vmImage: 'windows-latest'
