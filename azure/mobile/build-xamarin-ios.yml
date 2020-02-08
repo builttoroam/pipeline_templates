@@ -115,11 +115,11 @@ stages:
         versionName: '${{ parameters.full_version_number }}' 
         printFile: true
 
-    - task: PowerShell@2
+    - task: PowerShellOnTargetMachines@3
       condition: and( succeeded(), and( eq( variables['signing_identity'], ''), eq( variables['build_enabled'],'true') ) )
       inputs:
-        targetType: 'inline'                                                                                                 
-        script: |
+        scriptType: 'inline'                                                                                                 
+        inlineScript: |
           Write-Host "Making password secure string"
           $pass = ConvertTo-SecureString -String '${{ parameters.ios_cert_password }}' -AsPlainText -Force
           Write-Host "Extracting certificate data"
