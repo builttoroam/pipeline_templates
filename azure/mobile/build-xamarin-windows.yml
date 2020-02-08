@@ -122,10 +122,14 @@ stages:
           $store.Add($cert)
           $store.Close() 
           
-          Write-Host "##vso[task.setvariable variable=cert_thumbprint;]$cert.thumbprint"
-          Write-Host "##vso[task.setvariable variable=cert_subject;]$cert.subject"
+          $thumb = $cert.thumbprint
+          $subject = $cert.subject
+          Write-Host "Thumbprint: $thumb  Subject: $subject"
 
-          ConvertTo-Json $cert | Write-Host    
+          Write-Host "##vso[task.setvariable variable=cert_thumbprint]$thumb"
+          Write-Host "##vso[task.setvariable variable=cert_subject]$subject"
+
+          Write-Host "Variables exported"
 
     - task: MagicChunks@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
