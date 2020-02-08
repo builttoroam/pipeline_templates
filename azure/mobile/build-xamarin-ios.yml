@@ -48,7 +48,7 @@ parameters:
 - name: artifact_folder
   type: string
   default: 'iOS'
-- name: ios_ipa_name
+- name: application_package
   type: string
   default: 'SignediOS.ipa'
 - name: onStart
@@ -162,7 +162,7 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Get-ChildItem -Filter "*.ipa" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.ios_ipa_name }}" | Write-Host
+          Get-ChildItem -Filter "*.ipa" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
 
     - ${{ parameters.prePublish }}
 

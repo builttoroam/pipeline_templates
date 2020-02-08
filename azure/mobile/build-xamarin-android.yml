@@ -39,7 +39,7 @@ parameters:
 - name: artifact_folder
   type: string
   default: 'Android'
-- name: android_bundle_name
+- name: application_package
   type: string
   default: 'SignedAndroid.aab'
 - name: onStart
@@ -137,7 +137,7 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.android_bundle_name }}" | Write-Host
+          Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
 
     - ${{ parameters.prePublish }}
 

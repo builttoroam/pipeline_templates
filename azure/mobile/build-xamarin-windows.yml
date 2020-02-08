@@ -40,7 +40,7 @@ parameters:
 - name: artifact_folder
   type: string
   default: 'Windows'
-- name: windows_bundle_name
+- name: application_package
   type: string
   default: 'SignedWindows.appxbundle'
 - name: windows_appxupload_name
@@ -180,7 +180,7 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Get-ChildItem -Filter "*.appxbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_bundle_name }}" | Write-Host
+          Get-ChildItem -Filter "*.appxbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
           Get-ChildItem -Filter "*.appxupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
 
     - ${{ parameters.prePublish }}
