@@ -15,6 +15,7 @@ parameters:
   default: 'Any CPU'
 - name: android_manifest_filename
   type: string
+  default: ''
 - name: build_number
   type: string
   default: '$(Build.BuildId)'
@@ -39,7 +40,7 @@ parameters:
 - name: artifact_folder
   type: string
   default: 'Android'
-- name: android_bundle_name
+- name: application_package
   type: string
   default: 'SignedAndroid.aab'
 - name: onStart
@@ -64,6 +65,14 @@ stages:
   variables: 
     - name: build_enabled
       value: ${{ parameters.build_android }}
+    - name: ANDROID_NDK_HOME
+      value: C:\Microsoft\AndroidNDK64\android-ndk-r16b
+    - name: ANDROID_NDK_PATH
+      value: C:\Microsoft\AndroidNDK64\android-ndk-r16b
+    - name: AndroidNdkDirectory
+      value: C:\Microsoft\AndroidNDK64\android-ndk-r16b
+    - name: manifestPath
+      value: ${{ parameters.android_manifest_filename }}
 
   pool:
     vmImage: 'windows-latest'
@@ -71,9 +80,34 @@ stages:
   jobs:
   - job: BuildAndroid
     steps:
+    - task: DownloadSecureFile@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Download secure file'
+      name: signing_keystore
+      inputs:
+        secureFile: '${{ parameters.secure_file_keystore_filename }}'
 
     - ${{ parameters.onStart }}
 
+    - task: PowerShell@2
+      condition: and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Finding Package Manifest (ie AndroidManifest.xml). Set android_manifest_filename parameter to override"
+          $manifest = (Get-ChildItem -Filter "AndroidManifest.xml" -Path "$(System.DefaultWorkingDirectory)" -Recurse | Select-Object -First 1 ).FullName
+          Write-Host "Found at $manifest"
+          Write-Host "##vso[task.setvariable variable=manifestPath]$manifest"
+
+    - task: android-manifest-version@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      inputs:
+        sourcePath: '$(manifestPath)'
+        versionCodeOption: 'buildid'
+        versionCode: '${{ parameters.build_number }}'
+        versionName: '${{ parameters.full_version_number }}' 
+        printFile: true
+          
     - task: NuGetToolInstaller@0
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
@@ -86,22 +120,6 @@ stages:
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
-    - task: android-manifest-version@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      inputs:
-        sourcePath: '${{ parameters.android_manifest_filename }}'
-        versionCodeOption: 'buildid'
-        versionCode: '${{ parameters.build_number }}'
-        versionName: '${{ parameters.full_version_number }}' 
-        printFile: true
-
-    - task: DownloadSecureFile@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Download secure file'
-      name: signing_keystore
-      inputs:
-        secureFile: '${{ parameters.secure_file_keystore_filename }}'
-          
     - ${{ parameters.preBuild }}
 
     - task: VSBuild@1
@@ -135,7 +153,7 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.android_bundle_name }}" | Write-Host
+          Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
 
     - ${{ parameters.prePublish }}
 

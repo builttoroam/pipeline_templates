@@ -18,6 +18,7 @@ parameters:
   default: 'x86|x64|ARM'
 - name: windows_package_manifest_filename
   type: string
+  default: ''
 - name:  windows_cert_securefiles_filename
   type: string
 - name: windows_cert_password
@@ -40,7 +41,7 @@ parameters:
 - name: artifact_folder
   type: string
   default: 'Windows'
-- name: windows_bundle_name
+- name: application_package
   type: string
   default: 'SignedWindows.appxbundle'
 - name: windows_appxupload_name
@@ -70,8 +71,12 @@ stages:
       value: ${{ parameters.build_windows }}
     - name: cert_thumbprint
       value: ''
+    - name: cert_subject
+      value: ''
     - name: appxPackageDir
       value: '$(System.DefaultWorkingDirectory)\AppxPackages'
+    - name: manifestPath
+      value: ${{ parameters.windows_package_manifest_filename}}
   
   pool:
     vmImage: 'windows-latest'
@@ -80,40 +85,24 @@ stages:
   - job: BuildWindows
 
     steps:
-
-    - ${{ parameters.onStart }}
-
-    - task: NuGetToolInstaller@0
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Use NuGet ${{ parameters.nuget_version }}'
-      inputs:
-        versionSpec: '${{ parameters.nuget_version }}'
-
-    - task: NuGetCommand@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
-      inputs:
-        restoreSolution: '${{ parameters.solution_filename }}'
-
-    - task: MagicChunks@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Set version number - ${{ parameters.windows_package_manifest_filename }}'
-      inputs:
-        sourcePath: ${{ parameters.windows_package_manifest_filename }}
-        fileType: Xml
-        targetPathType: 'source'
-        transformationType: 'json'
-        transformations: |
-          {
-            "Package/Identity/@Version": "${{ parameters.full_version_number }}.0"
-          }
-
     - task: DownloadSecureFile@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Download secure file'
       name: signing_certificate
       inputs:
         secureFile: '${{ parameters.windows_cert_securefiles_filename }}'
+
+    - ${{ parameters.onStart }}
+
+    - task: PowerShell@2
+      condition: and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Finding Package Manifest (ie .appxmanifest). Set windows_package_manifest_filename parameter to override"
+          $manifest = (Get-ChildItem -Filter "*.appxmanifest" -Path "$(System.DefaultWorkingDirectory)"  -Recurse | Select-Object -First 1 ).FullName
+          Write-Host "Found at $manifest"
+          Write-Host "##vso[task.setvariable variable=manifestPath]$manifest"
 
     - task: PowerShell@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
@@ -133,9 +122,40 @@ stages:
           $store.Add($cert)
           $store.Close() 
           
-          ##vso[task.setvariable variable=cert_thumbprint;]$cert.thumbprint"
+          $thumb = $cert.thumbprint
+          $subject = $cert.subject
+          Write-Host "Thumbprint: $thumb  Subject: $subject"
 
-          ConvertTo-Json $cert | Write-Host
+          Write-Host "##vso[task.setvariable variable=cert_thumbprint]$thumb"
+          Write-Host "##vso[task.setvariable variable=cert_subject]$subject"
+
+          Write-Host "Variables exported"
+
+    - task: MagicChunks@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Set version number - $(manifestPath)'
+      inputs:
+        sourcePath: $(manifestPath)
+        fileType: Xml
+        targetPathType: 'source'
+        transformationType: 'json'
+        transformations: |
+          {
+            "Package/Identity/@Version": "${{ parameters.full_version_number }}.0",
+            "Package/Identity/@Publisher": "$(cert_subject)"
+          }
+        
+    - task: NuGetToolInstaller@0
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Use NuGet ${{ parameters.nuget_version }}'
+      inputs:
+        versionSpec: '${{ parameters.nuget_version }}'
+
+    - task: NuGetCommand@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
+      inputs:
+        restoreSolution: '${{ parameters.solution_filename }}'
 
     - ${{ parameters.preBuild }}
 
@@ -162,15 +182,15 @@ stages:
     - task: CopyFiles@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
-        contents: '$(appxPackageDir)\**\*.appxbundle'
+        contents: '$(appxPackageDir)\**\*.*xbundle'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: true
-        overWrite: true
+        overWrite: true       
 
     - task: CopyFiles@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
-        contents: '$(appxPackageDir)\**\*.appxupload' 
+        contents: '$(appxPackageDir)\**\*.*xupload' 
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: true
         overWrite: true
@@ -180,8 +200,8 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Get-ChildItem -Filter "*.appxbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_bundle_name }}" | Write-Host
-          Get-ChildItem -Filter "*.appxupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
+          Get-ChildItem -Filter "*.*xbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
+          Get-ChildItem -Filter "*.*xupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
 
     - ${{ parameters.prePublish }}
 

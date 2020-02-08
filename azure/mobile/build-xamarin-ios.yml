@@ -12,6 +12,7 @@ parameters:
   default: Release
 - name: ios_plist_filename
   type: string
+  default: ''
 - name: ios_cert_securefiles_filename 
   type: string 
   default: ''
@@ -48,7 +49,7 @@ parameters:
 - name: artifact_folder
   type: string
   default: 'iOS'
-- name: ios_ipa_name
+- name: application_package
   type: string
   default: 'SignediOS.ipa'
 - name: onStart
@@ -73,6 +74,8 @@ stages:
   variables: 
     - name: build_enabled
       value: ${{ parameters.build_ios }}
+    - name: manifestPath
+      value: ${{ parameters.ios_plist_filename }}
 
   pool:
     vmImage: 'macos-latest'
@@ -83,6 +86,26 @@ stages:
     steps:
 
     - ${{ parameters.onStart }}
+
+    - task: PowerShell@2
+      condition: and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Finding Package Plist (ie Info.plist). Set ios_plist_filename parameter to override"
+          $manifest = (Get-ChildItem -Filter "Info.plist" -Path "$(System.DefaultWorkingDirectory)"  -Recurse | Select-Object -First 1 ).FullName
+          Write-Host "Found at $manifest"
+          Write-Host "##vso[task.setvariable variable=manifestPath]$manifest"
+
+    - task: ios-bundle-version@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Setting application version in ${{ parameters.ios_plist_filename }}'
+      inputs:
+        sourcePath: '$(manifestPath)'
+        versionCodeOption: 'buildid'
+        versionCode: '${{ parameters.build_number }}'
+        versionName: '${{ parameters.full_version_number }}' 
+        printFile: true
 
     - task: InstallAppleCertificate@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
@@ -123,16 +146,6 @@ stages:
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
-    - task: ios-bundle-version@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Setting application version in ${{ parameters.ios_plist_filename }}'
-      inputs:
-        sourcePath: '${{ parameters.ios_plist_filename }}'
-        versionCodeOption: 'buildid'
-        versionCode: '${{ parameters.build_number }}'
-        versionName: '${{ parameters.full_version_number }}' 
-        printFile: true
-
     - ${{ parameters.preBuild }}
 
     - task: XamariniOS@2
@@ -162,7 +175,7 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Get-ChildItem -Filter "*.ipa" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.ios_ipa_name }}" | Write-Host
+          Get-ChildItem -Filter "*.ipa" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
 
     - ${{ parameters.prePublish }}
 
