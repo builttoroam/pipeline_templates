@@ -76,6 +76,8 @@ stages:
       value: ${{ parameters.build_ios }}
     - name: manifestPath
       value: ${{ parameters.ios_plist_filename }}
+    - name: signing_identity
+      value: ${{ parameters.ios_signing_identity }}
 
   pool:
     vmImage: 'macos-latest'
@@ -114,7 +116,7 @@ stages:
         printFile: true
 
     - task: PowerShell@2
-      condition: and( succeeded(), and( eq( variables['ios_signing_identity'], ''), eq( variables['build_enabled'],'true') ) )
+      condition: and( succeeded(), and( eq( variables['signing_identity'], ''), eq( variables['build_enabled'],'true') ) )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -123,7 +125,7 @@ stages:
           Write-Host "Subject: $subject"
           $cn = ($subject.split(",") | Where-Object { $_.trim().split("=")[0] -eq "CN"}).split("=")[1]
           Write-Host "Signing Identity: $cn"
-          Write-Host "##vso[task.setvariable variable=ios_signing_identity]$cn"
+          Write-Host "##vso[task.setvariable variable=signing_identity]$cn"
 
         
     - task: InstallAppleCertificate@2
@@ -175,7 +177,7 @@ stages:
         configuration: '${{ parameters.solution_build_configuration }}'
         buildForSimulator: false
         packageApp: true
-        signingIdentity: '${{ parameters.ios_signing_identity }}'
+        signingIdentity: '$(signing_identity)'
         signingProvisioningProfileID: '${{ parameters.ios_provisioning_profile_id }}'
 
     - ${{ parameters.postBuild }}
