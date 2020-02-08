@@ -151,7 +151,7 @@ stages:
         transformations: |
           {
             "Package/Identity/@Version": "${{ parameters.full_version_number }}.0",
-            "Package/Identity/@Publisher": "${cert_subject}"
+            "Package/Identity/@Publisher": "$(cert_subject)"
           }
 
     - ${{ parameters.preBuild }}
