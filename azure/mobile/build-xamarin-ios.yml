@@ -115,20 +115,20 @@ stages:
         versionName: '${{ parameters.full_version_number }}' 
         printFile: true
 
-    - task: PowerShell@2
-      condition: and( succeeded(), and( eq( variables['signing_identity'], ''), eq( variables['build_enabled'],'true') ) )
-      inputs:
-        targetType: 'inline'                                                                                                 
-        script: |
-          Write-Host "Extracting certificate CN"
-          $certpath='$(secure_cert.secureFilePath)'
-          Write-Host "Looking for cert at $certpath"
-          $pass = ConvertTo-SecureString -String '${{ parameters.ios_cert_password }}' -AsPlainText -Force
-          $subject =(Get-PfxCertificate -FilePath $certpath -Password $pass).Subject
-          Write-Host "Subject: $subject"
-          $cn = ($subject.split(",") | Where-Object { $_.trim().split("=")[0] -eq "CN"}).split("=")[1]
-          Write-Host "Signing Identity: $cn"
-          Write-Host "##vso[task.setvariable variable=signing_identity]$cn"
+    # - task: PowerShell@2
+    #   condition: and( succeeded(), and( eq( variables['signing_identity'], ''), eq( variables['build_enabled'],'true') ) )
+    #   inputs:
+    #     targetType: 'inline'                                                                                                 
+    #     script: |
+    #       Write-Host "Extracting certificate CN"
+    #       $certpath='$(secure_cert.secureFilePath)'
+    #       Write-Host "Looking for cert at $certpath"
+    #       $pass = ConvertTo-SecureString -String '${{ parameters.ios_cert_password }}' -AsPlainText -Force
+    #       $subject =(Get-PfxCertificate -FilePath $certpath -Password $pass).Subject
+    #       Write-Host "Subject: $subject"
+    #       $cn = ($subject.split(",") | Where-Object { $_.trim().split("=")[0] -eq "CN"}).split("=")[1]
+    #       Write-Host "Signing Identity: $cn"
+    #       Write-Host "##vso[task.setvariable variable=signing_identity]$cn"
 
         
     - task: InstallAppleCertificate@2
