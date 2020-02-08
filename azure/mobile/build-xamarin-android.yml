@@ -96,12 +96,12 @@ stages:
           Write-Host "Updated $manifest"
           ##vso[task.setvariable variable=manifestPath]'$manifest'"
 
-    - task: PowerShell@2
-      inputs:
-        targetType: 'inline'                                                                                                 
-        script: |
-          Write-Host "Manifest path $(variables['manifestPath'])"
-          Write-Host "Manifest path $env:MANIFESTPATH"
+    # - task: PowerShell@2
+    #   inputs:
+    #     targetType: 'inline'                                                                                                 
+    #     script: |
+    #       Write-Host "Manifest path $(variables.manifestPath)"
+    #       Write-Host "Manifest path $env:MANIFESTPATH"
 
     - task: android-manifest-version@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
