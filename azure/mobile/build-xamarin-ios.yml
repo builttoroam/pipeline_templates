@@ -97,6 +97,16 @@ stages:
           Write-Host "Found at $manifest"
           Write-Host "##vso[task.setvariable variable=manifestPath]$manifest"
 
+    - task: ios-bundle-version@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Setting application version in ${{ parameters.ios_plist_filename }}'
+      inputs:
+        sourcePath: '$(manifestPath)'
+        versionCodeOption: 'buildid'
+        versionCode: '${{ parameters.build_number }}'
+        versionName: '${{ parameters.full_version_number }}' 
+        printFile: true
+
     - task: InstallAppleCertificate@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Install Signing Certificate'
@@ -135,16 +145,6 @@ stages:
       displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
-
-    - task: ios-bundle-version@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Setting application version in ${{ parameters.ios_plist_filename }}'
-      inputs:
-        sourcePath: '${{ parameters.ios_plist_filename }}'
-        versionCodeOption: 'buildid'
-        versionCode: '${{ parameters.build_number }}'
-        versionName: '${{ parameters.full_version_number }}' 
-        printFile: true
 
     - ${{ parameters.preBuild }}
 
