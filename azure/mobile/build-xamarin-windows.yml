@@ -182,15 +182,15 @@ stages:
     - task: CopyFiles@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
-        contents: '$(appxPackageDir)\**\*.appxbundle'
+        contents: '$(appxPackageDir)\**\*.*xbundle'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: true
-        overWrite: true
+        overWrite: true       
 
     - task: CopyFiles@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
-        contents: '$(appxPackageDir)\**\*.appxupload' 
+        contents: '$(appxPackageDir)\**\*.*xupload' 
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: true
         overWrite: true
@@ -200,8 +200,8 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Get-ChildItem -Filter "*.appxbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
-          Get-ChildItem -Filter "*.appxupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
+          Get-ChildItem -Filter "*.*xbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
+          Get-ChildItem -Filter "*.*xupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
 
     - ${{ parameters.prePublish }}
 
