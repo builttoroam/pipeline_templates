@@ -85,6 +85,12 @@ stages:
   - job: BuildWindows
 
     steps:
+    - task: DownloadSecureFile@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Download secure file'
+      name: signing_certificate
+      inputs:
+        secureFile: '${{ parameters.windows_cert_securefiles_filename }}'
 
     - ${{ parameters.onStart }}
 
@@ -97,25 +103,6 @@ stages:
           $manifest = (Get-ChildItem -Filter "*.appxmanifest" -Path "$(System.DefaultWorkingDirectory)"  -Recurse | Select-Object -First 1 ).FullName
           Write-Host "Found at $manifest"
           ##vso[task.setvariable variable=manifestPath;]$manifest"
-
-    - task: NuGetToolInstaller@0
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Use NuGet ${{ parameters.nuget_version }}'
-      inputs:
-        versionSpec: '${{ parameters.nuget_version }}'
-
-    - task: NuGetCommand@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
-      inputs:
-        restoreSolution: '${{ parameters.solution_filename }}'
-
-    - task: DownloadSecureFile@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Download secure file'
-      name: signing_certificate
-      inputs:
-        secureFile: '${{ parameters.windows_cert_securefiles_filename }}'
 
     - task: PowerShell@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
@@ -138,7 +125,7 @@ stages:
           Write-Host "##vso[task.setvariable variable=cert_thumbprint;]$cert.thumbprint"
           Write-Host "##vso[task.setvariable variable=cert_subject;]$cert.subject"
 
-          ConvertTo-Json $cert | Write-Host
+          ConvertTo-Json $cert | Write-Host    
 
     - task: MagicChunks@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
@@ -153,6 +140,18 @@ stages:
             "Package/Identity/@Version": "${{ parameters.full_version_number }}.0",
             "Package/Identity/@Publisher": "$(cert_subject)"
           }
+        
+    - task: NuGetToolInstaller@0
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Use NuGet ${{ parameters.nuget_version }}'
+      inputs:
+        versionSpec: '${{ parameters.nuget_version }}'
+
+    - task: NuGetCommand@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
+      inputs:
+        restoreSolution: '${{ parameters.solution_filename }}'
 
     - ${{ parameters.preBuild }}
 
