@@ -92,13 +92,14 @@ stages:
           Write-Host "Finding Package Manifest (ie AndroidManifest.xml). Set android_manifest_filename parameter to override"
           $manifest = (Get-ChildItem -Filter "AndroidManifest.xml" -Path "$(System.DefaultWorkingDirectory)" -Recurse | Select-Object -First 1 ).FullName
           Write-Host "Found at $manifest"
-          ##vso[task.setvariable variable=manifestPath;]$manifest"
+          ##vso[task.setvariable variable=manifestPath]$manifest"
 
     - task: PowerShell@2
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
           Write-Host "Manifest path $(manifestPath)"
+          Write-Host "Manifest path $env:MANIFESTPATH"
 
     - task: android-manifest-version@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
