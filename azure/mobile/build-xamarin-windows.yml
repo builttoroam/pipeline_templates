@@ -18,6 +18,7 @@ parameters:
   default: 'x86|x64|ARM'
 - name: windows_package_manifest_filename
   type: string
+  default: ''
 - name:  windows_cert_securefiles_filename
   type: string
 - name: windows_cert_password
@@ -70,8 +71,12 @@ stages:
       value: ${{ parameters.build_windows }}
     - name: cert_thumbprint
       value: ''
+    - name: cert_subject
+      value: ''
     - name: appxPackageDir
       value: '$(System.DefaultWorkingDirectory)\AppxPackages'
+    - name: manifestPath
+      value: ${{ parameters.windows_package_manifest_filename}}
   
   pool:
     vmImage: 'windows-latest'
@@ -82,6 +87,16 @@ stages:
     steps:
 
     - ${{ parameters.onStart }}
+
+    - task: PowerShell@2
+      condition: and( eq( $(manifestPath), ''), eq( variables['build_enabled'],'true') )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Finding Package Manifest (ie .appxmanifest). Set windows_package_manifest_filename parameter to override"
+          $manifest = (Get-ChildItem -Filter "*.appxmanifest" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 ).FullName
+          Write-Host "Found at $manifest"
+          ##vso[task.setvariable variable=manifestPath;]$manifest"
 
     - task: NuGetToolInstaller@0
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
@@ -94,19 +109,6 @@ stages:
       displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
-
-    - task: MagicChunks@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Set version number - ${{ parameters.windows_package_manifest_filename }}'
-      inputs:
-        sourcePath: ${{ parameters.windows_package_manifest_filename }}
-        fileType: Xml
-        targetPathType: 'source'
-        transformationType: 'json'
-        transformations: |
-          {
-            "Package/Identity/@Version": "${{ parameters.full_version_number }}.0"
-          }
 
     - task: DownloadSecureFile@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
@@ -134,8 +136,23 @@ stages:
           $store.Close() 
           
           ##vso[task.setvariable variable=cert_thumbprint;]$cert.thumbprint"
+          ##vso[task.setvariable variable=cert_subject;]$cert.subject"
 
           ConvertTo-Json $cert | Write-Host
+
+    - task: MagicChunks@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Set version number - $(manifestPath)'
+      inputs:
+        sourcePath: $(manifestPath)
+        fileType: Xml
+        targetPathType: 'source'
+        transformationType: 'json'
+        transformations: |
+          {
+            "Package/Identity/@Version": "${{ parameters.full_version_number }}.0",
+            "Package/Identity/@Publisher": "${cert_subject}"
+          }
 
     - ${{ parameters.preBuild }}
 

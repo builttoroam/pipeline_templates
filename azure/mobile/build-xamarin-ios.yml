@@ -12,6 +12,7 @@ parameters:
   default: Release
 - name: ios_plist_filename
   type: string
+  default: ''
 - name: ios_cert_securefiles_filename 
   type: string 
   default: ''
@@ -73,6 +74,8 @@ stages:
   variables: 
     - name: build_enabled
       value: ${{ parameters.build_ios }}
+    - name: manifestPath
+      value: ${{ parameters.ios_plist_filename }}
 
   pool:
     vmImage: 'macos-latest'
@@ -83,6 +86,17 @@ stages:
     steps:
 
     - ${{ parameters.onStart }}
+
+    - task: PowerShell@2
+      condition: and( eq( $(manifestPath), ''), eq( variables['build_enabled'],'true') )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Finding Package Plist (ie Info.plist). Set ios_plist_filename parameter to override"
+          $manifest = (Get-ChildItem -Filter "Info.plist" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 ).FullName
+          Write-Host "Found at $manifest"
+          ##vso[task.setvariable variable=manifestPath;]$manifest"
+
 
     - task: InstallAppleCertificate@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
