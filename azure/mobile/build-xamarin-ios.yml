@@ -93,22 +93,22 @@ stages:
       inputs:
         secureFile: '${{ parameters.ios_cert_securefiles_filename }}'
 
-      - task: InstallAppleCertificate@2
-        condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-        displayName: 'Install Signing Certificate'
-        inputs:
-          certSecureFile: '${{ parameters.ios_cert_securefiles_filename }}'
-          certPwd: '${{ parameters.ios_cert_password }}'
-          keychain: 'temp'
-          deleteCert: true  
-  
-      - task: InstallAppleProvisioningProfile@1
-        condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-        displayName: 'Install Provisioning Profile'
-        inputs:
-          provisioningProfileLocation: 'secureFiles'
-          provProfileSecureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
-          removeProfile: true
+    - task: InstallAppleCertificate@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Install Signing Certificate'
+      inputs:
+        certSecureFile: '${{ parameters.ios_cert_securefiles_filename }}'
+        certPwd: '${{ parameters.ios_cert_password }}'
+        keychain: 'temp'
+        deleteCert: true  
+
+    - task: InstallAppleProvisioningProfile@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Install Provisioning Profile'
+      inputs:
+        provisioningProfileLocation: 'secureFiles'
+        provProfileSecureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
+        removeProfile: true
   
 
     - ${{ parameters.onStart }}
