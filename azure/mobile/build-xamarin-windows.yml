@@ -135,8 +135,8 @@ stages:
           $store.Add($cert)
           $store.Close() 
           
-          ##vso[task.setvariable variable=cert_thumbprint;]$cert.thumbprint"
-          ##vso[task.setvariable variable=cert_subject;]$cert.subject"
+          Write-Host "##vso[task.setvariable variable=cert_thumbprint;]$cert.thumbprint"
+          Write-Host "##vso[task.setvariable variable=cert_subject;]$cert.subject"
 
           ConvertTo-Json $cert | Write-Host
 

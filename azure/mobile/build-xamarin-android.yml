@@ -63,11 +63,16 @@ stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: [] 
   variables: 
-    build_enabled: ${{ parameters.build_android }}
-    ANDROID_NDK_HOME: C:\Microsoft\AndroidNDK64\android-ndk-r16b
-    ANDROID_NDK_PATH: C:\Microsoft\AndroidNDK64\android-ndk-r16b
-    AndroidNdkDirectory: C:\Microsoft\AndroidNDK64\android-ndk-r16b
-    manifestPath: ${{ parameters.android_manifest_filename }}
+    - name: build_enabled
+      value: ${{ parameters.build_android }}
+    - name: ANDROID_NDK_HOME
+      value: C:\Microsoft\AndroidNDK64\android-ndk-r16b
+    - name: ANDROID_NDK_PATH
+      value: C:\Microsoft\AndroidNDK64\android-ndk-r16b
+    - name: AndroidNdkDirectory
+      value: C:\Microsoft\AndroidNDK64\android-ndk-r16b
+    - name: manifestPath
+      value: ${{ parameters.android_manifest_filename }}
 
   pool:
     vmImage: 'windows-latest'
@@ -94,19 +99,19 @@ stages:
           Write-Host "Found at $manifest"
           $manifest = $manifest.Replace("$(System.DefaultWorkingDirectory)","")
           Write-Host "Updated $manifest"
-          ##vso[task.setvariable variable=manifestPath]'$manifest'"
+          Write-Host "##vso[task.setvariable variable=manifestPath]$manifest"
 
-    # - task: PowerShell@2
-    #   inputs:
-    #     targetType: 'inline'                                                                                                 
-    #     script: |
-    #       Write-Host "Manifest path $(variables.manifestPath)"
-    #       Write-Host "Manifest path $env:MANIFESTPATH"
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Manifest path $(manifestPath)"
+          Write-Host "Manifest path $env:MANIFESTPATH"
 
     - task: android-manifest-version@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
-        sourcePath: $(manifestPath)
+        sourcePath: '$(manifestPath)'
         versionCodeOption: 'buildid'
         versionCode: '${{ parameters.build_number }}'
         versionName: '${{ parameters.full_version_number }}' 
