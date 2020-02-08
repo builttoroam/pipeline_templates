@@ -75,6 +75,12 @@ stages:
   jobs:
   - job: BuildAndroid
     steps:
+    - task: DownloadSecureFile@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Download secure file'
+      name: signing_keystore
+      inputs:
+        secureFile: '${{ parameters.secure_file_keystore_filename }}'
 
     - ${{ parameters.onStart }}
 
@@ -88,6 +94,15 @@ stages:
           Write-Host "Found at $manifest"
           ##vso[task.setvariable variable=manifestPath;]$manifest"
 
+    - task: android-manifest-version@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      inputs:
+        sourcePath: '$(manifestPath)'
+        versionCodeOption: 'buildid'
+        versionCode: '${{ parameters.build_number }}'
+        versionName: '${{ parameters.full_version_number }}' 
+        printFile: true
+          
     - task: NuGetToolInstaller@0
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
@@ -100,22 +115,6 @@ stages:
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
-    - task: android-manifest-version@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      inputs:
-        sourcePath: '$(manifestPath)'
-        versionCodeOption: 'buildid'
-        versionCode: '${{ parameters.build_number }}'
-        versionName: '${{ parameters.full_version_number }}' 
-        printFile: true
-
-    - task: DownloadSecureFile@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Download secure file'
-      name: signing_keystore
-      inputs:
-        secureFile: '${{ parameters.secure_file_keystore_filename }}'
-          
     - ${{ parameters.preBuild }}
 
     - task: VSBuild@1
