@@ -93,6 +93,24 @@ stages:
       inputs:
         secureFile: '${{ parameters.ios_cert_securefiles_filename }}'
 
+      - task: InstallAppleCertificate@2
+        condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+        displayName: 'Install Signing Certificate'
+        inputs:
+          certSecureFile: '${{ parameters.ios_cert_securefiles_filename }}'
+          certPwd: '${{ parameters.ios_cert_password }}'
+          keychain: 'temp'
+          deleteCert: true  
+  
+      - task: InstallAppleProvisioningProfile@1
+        condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+        displayName: 'Install Provisioning Profile'
+        inputs:
+          provisioningProfileLocation: 'secureFiles'
+          provProfileSecureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
+          removeProfile: true
+  
+
     - ${{ parameters.onStart }}
 
     - task: PowerShell@2
@@ -129,24 +147,7 @@ stages:
           $cn = ($subject.split(",") | Where-Object { $_.trim().split("=")[0] -eq "CN"}).split("=")[1]
           Write-Host "Signing Identity: $cn"
           Write-Host "##vso[task.setvariable variable=signing_identity]$cn"
-
-        
-    - task: InstallAppleCertificate@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Install Signing Certificate'
-      inputs:
-        certSecureFile: '${{ parameters.ios_cert_securefiles_filename }}'
-        certPwd: '${{ parameters.ios_cert_password }}'
-        keychain: 'temp'
-        deleteCert: true  
-
-    - task: InstallAppleProvisioningProfile@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Install Provisioning Profile'
-      inputs:
-        provisioningProfileLocation: 'secureFiles'
-        provProfileSecureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
-        removeProfile: true
+       
 
     - script: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh '${{ parameters.xamarin_sdk_version }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
