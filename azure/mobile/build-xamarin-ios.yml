@@ -120,8 +120,12 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Write-Host "Extracting certificate CN"
-          $subject =(Get-PfxCertificate -FilePath '$(signing_certificate.secureFilePath)').Subject
+          Write-Host "Making password secure string"
+          $pass = ConvertTo-SecureString -String '${{ parameters.ios_cert_password }}' -AsPlainText -Force
+          Write-Host "Extracting certificate data"
+          $pfx = Get-PfxData -FilePath $(signing_certificate.secureFilePath) -Password $pass
+          Write-Host "Extracting Subject"
+          $subject = $pfx.EndEntityCertificates.Subject
           Write-Host "Subject: $subject"
           $cn = ($subject.split(",") | Where-Object { $_.trim().split("=")[0] -eq "CN"}).split("=")[1]
           Write-Host "Signing Identity: $cn"
