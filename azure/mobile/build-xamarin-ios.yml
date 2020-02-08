@@ -150,8 +150,7 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Write-Host "Extracting profile id CN $env:APPLE_PROV_PROFILE_UUID"
-          Write-Host "Extracting profile name CN $env:provisioningProfileName"
+          Write-Host "Extracting profile id $env:APPLE_PROV_PROFILE_UUID"
           
           $cn = $env:APPLE_PROV_PROFILE_UUID
           Write-Host "Provisioning Profile: $cn"
