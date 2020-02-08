@@ -120,7 +120,7 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Write-Host "Extracting certificate CN $(signingIdentity)"
+          Write-Host "Extracting certificate CN $env:APPLE_CERTIFICATE_SIGNING_IDENTITY"
           $certpath='$(secure_cert.secureFilePath)'
           Write-Host "Looking for cert at $certpath"
           $pass = ConvertTo-SecureString -String '${{ parameters.ios_cert_password }}' -AsPlainText -Force
