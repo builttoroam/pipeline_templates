@@ -95,8 +95,7 @@ stages:
           Write-Host "Finding Package Plist (ie Info.plist). Set ios_plist_filename parameter to override"
           $manifest = (Get-ChildItem -Filter "Info.plist" -Path "$(System.DefaultWorkingDirectory)"  -Recurse | Select-Object -First 1 ).FullName
           Write-Host "Found at $manifest"
-          ##vso[task.setvariable variable=manifestPath;]$manifest"
-
+          Write-Host "##vso[task.setvariable variable=manifestPath]$manifest"
 
     - task: InstallAppleCertificate@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
