@@ -122,7 +122,7 @@ stages:
         script: |
           Write-Host "Extracting certificate CN"
           $pass = ConvertTo-SecureString -String '${{ parameters.ios_cert_password }}' -AsPlainText -Force
-          $subject =(Get-PfxCertificate -FilePath '$(signing_certificate.secureFilePath)' -Password $pass).Subject
+          $subject =(Get-PfxCertificate -FilePath '$(Agent.TempDirectory)/${{ parameters.ios_cert_securefiles_filename }}' -Password $pass).Subject
           Write-Host "Subject: $subject"
           $cn = ($subject.split(",") | Where-Object { $_.trim().split("=")[0] -eq "CN"}).split("=")[1]
           Write-Host "Signing Identity: $cn"
