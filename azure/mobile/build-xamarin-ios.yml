@@ -88,7 +88,7 @@ stages:
     - ${{ parameters.onStart }}
 
     - task: PowerShell@2
-      condition: and( eq( $(manifestPath), ''), eq( variables['build_enabled'],'true') )
+      condition: and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
