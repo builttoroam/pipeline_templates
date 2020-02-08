@@ -78,7 +78,9 @@ stages:
       value: ${{ parameters.ios_plist_filename }}
     - name: signing_identity
       value: ${{ parameters.ios_signing_identity }}
-
+    - name: prov_profile
+      value: ${{ parameters.ios_provisioning_profile_id }}
+      
   pool:
     vmImage: 'macos-latest'
 
@@ -143,6 +145,19 @@ stages:
           Write-Host "Signing Identity: $cn"
           Write-Host "##vso[task.setvariable variable=signing_identity]$cn"
 
+    - task: PowerShell@2
+      condition: and( succeeded(), and( eq( variables['prov_profile'], ''), eq( variables['build_enabled'],'true') ) )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Extracting profile id CN $env:APPLE_PROV_PROFILE_UUID"
+          Write-Host "Extracting profile name CN $env:provisioningProfileName"
+          
+          $cn = $env:APPLE_PROV_PROFILE_UUID
+          Write-Host "Provisioning Profile: $cn"
+          Write-Host "##vso[task.setvariable variable=prov_profile]$cn"
+
+          
     - script: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh '${{ parameters.xamarin_sdk_version }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Select the Xamarin SDK version'
@@ -176,7 +191,7 @@ stages:
         buildForSimulator: false
         packageApp: true
         signingIdentity: '$(signing_identity)'
-        signingProvisioningProfileID: '${{ parameters.ios_provisioning_profile_id }}'
+        signingProvisioningProfileID: '$(prov_profile)'
 
     - ${{ parameters.postBuild }}
 
