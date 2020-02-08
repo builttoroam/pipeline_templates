@@ -84,7 +84,7 @@ stages:
         targetType: 'inline'                                                                                                 
         script: |
           Write-Host "Finding Package Manifest (ie AndroidManifest.xml). Set android_manifest_filename parameter to override"
-          $manifest = (Get-ChildItem -Filter "AndroidManifest.xml" -Path "$(System.DefaultWorkingDirectory)" | Select-Object -First 1 ).FullName
+          $manifest = (Get-ChildItem -Filter "AndroidManifest.xml" -Path "$(System.DefaultWorkingDirectory)" -Recurse | Select-Object -First 1 ).FullName
           Write-Host "Found at $manifest"
           ##vso[task.setvariable variable=manifestPath;]$manifest"
 
@@ -149,7 +149,7 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
+          Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
 
     - ${{ parameters.prePublish }}
 

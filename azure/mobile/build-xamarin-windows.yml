@@ -94,7 +94,7 @@ stages:
         targetType: 'inline'                                                                                                 
         script: |
           Write-Host "Finding Package Manifest (ie .appxmanifest). Set windows_package_manifest_filename parameter to override"
-          $manifest = (Get-ChildItem -Filter "*.appxmanifest" -Path "$(System.DefaultWorkingDirectory)" | Select-Object -First 1 ).FullName
+          $manifest = (Get-ChildItem -Filter "*.appxmanifest" -Path "$(System.DefaultWorkingDirectory)"  -Recurse | Select-Object -First 1 ).FullName
           Write-Host "Found at $manifest"
           ##vso[task.setvariable variable=manifestPath;]$manifest"
 
@@ -197,8 +197,8 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Get-ChildItem -Filter "*.appxbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
-          Get-ChildItem -Filter "*.appxupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
+          Get-ChildItem -Filter "*.appxbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
+          Get-ChildItem -Filter "*.appxupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
 
     - ${{ parameters.prePublish }}
 
