@@ -94,7 +94,7 @@ stages:
         targetType: 'inline'                                                                                                 
         script: |
           Write-Host "Finding Package Manifest (ie .appxmanifest). Set windows_package_manifest_filename parameter to override"
-          $manifest = (Get-ChildItem -Filter "*.appxmanifest" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}" | Select-Object -First 1 ).FullName
+          $manifest = (Get-ChildItem -Filter "*.appxmanifest" -Path "$(System.DefaultWorkingDirectory)" | Select-Object -First 1 ).FullName
           Write-Host "Found at $manifest"
           ##vso[task.setvariable variable=manifestPath;]$manifest"
 
