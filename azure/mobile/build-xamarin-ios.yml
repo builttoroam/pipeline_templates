@@ -173,7 +173,7 @@ stages:
         versionName: '${{ parameters.full_version_number }}' 
         printFile: true
 
-    - task: ios-bundle-version@1
+    - task: ios-bundle-identifier@1
       condition: and( succeeded(), and( ne( variables['bundle_id'], ''), eq( variables['build_enabled'],'true') ) )
       displayName: 'Setting application bundle id ${{ parameters.ios_plist_filename }}'
       inputs:
