@@ -178,7 +178,7 @@ stages:
       displayName: 'Setting application bundle id ${{ parameters.ios_plist_filename }}'
       inputs:
         sourcePath: '$(manifestPath)'
-        bundleIdenifier: '$(bundle_id)'
+        bundleIdentifier: '$(bundle_id)'
         printFile: true
  
 
