@@ -80,6 +80,8 @@ stages:
       value: ${{ parameters.ios_signing_identity }}
     - name: prov_profile
       value: ${{ parameters.ios_provisioning_profile_id }}
+    - name: bundle_id
+      value: ''
       
   pool:
     vmImage: 'macos-latest'
@@ -112,8 +114,44 @@ stages:
         provProfileSecureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
         removeProfile: true
   
-
+    - task: DownloadSecureFile@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Download secure file'
+      name: provision_profile_file
+      inputs:
+        secureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
+  
     - ${{ parameters.onStart }}
+
+    - task: PowerShell@2
+      condition: and( succeeded(), and( eq( variables['bundle_id'], ''), eq( variables['build_enabled'],'true') ) )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Loading content"
+          $content = Get-Content $(provision_profile_file.secureFilePath) -Raw
+          Write-Host "Content loaded"
+          $pattern = '<key>.*<\/key>\s*<string>.*<\/string>'
+          Write-Host "Pattern: $pattern"
+          $valuepattern = '<string>(.*)<\/string>'
+          Write-Host "Value Pattern: $valuepattern"
+          $matches = $content | Select-String $pattern -AllMatches
+          Write-Host "Matches: $matches.Matches"
+          $idkvp = ($matches.Matches | Where-Object {$_.Value.contains('application-identifier')}).Value
+          Write-Host "ID key value pair: $idkvp"
+          $idmatch = $idkvp | Select-String $valuepattern
+          Write-Host "ID match: $idmatch"
+          $id = $idmatch.Matches[0].Groups[1].Value
+          Write-Host "ID: $id"
+          $teamkvp = ($matches.Matches | Where-Object {$_.Value.contains('com.apple.developer.team-identifier')}).Value
+          Write-Host "Team key value pair: $teamkvp"
+          $teammatch = $teamkvp | Select-String $valuepattern
+          Write-Host "Team match: $teammatch"
+          $teamid = $teammatch.Matches[0].Groups[1].Value
+          Write-Host "Team id: $teamid"
+          $bundleid = $id.Replace($teamid + ".","")
+          Write-Host "Bundle id : $bundleid"
+          Write-Host "##vso[task.setvariable variable=bundle_id]$bundleid"
 
     - task: PowerShell@2
       condition: and( succeeded(), and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') ) )
@@ -134,6 +172,15 @@ stages:
         versionCode: '${{ parameters.build_number }}'
         versionName: '${{ parameters.full_version_number }}' 
         printFile: true
+
+    - task: ios-bundle-version@1
+      condition: and( succeeded(), and( eq( variables['bundle_id'], ''), eq( variables['build_enabled'],'true') ) )
+      displayName: 'Setting application bundle id ${{ parameters.ios_plist_filename }}'
+      inputs:
+        sourcePath: '$(manifestPath)'
+        bundleIdenifier: '$(bundle_id)'
+        printFile: true
+ 
 
     - task: PowerShell@2
       condition: and( succeeded(), and( eq( variables['signing_identity'], ''), eq( variables['build_enabled'],'true') ) )
