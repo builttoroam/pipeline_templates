@@ -76,7 +76,13 @@ stages:
       value: ${{ parameters.build_ios }}
     - name: manifestPath
       value: ${{ parameters.ios_plist_filename }}
-
+    - name: signing_identity
+      value: ${{ parameters.ios_signing_identity }}
+    - name: prov_profile
+      value: ${{ parameters.ios_provisioning_profile_id }}
+    - name: bundle_id
+      value: ''
+      
   pool:
     vmImage: 'macos-latest'
 
@@ -84,11 +90,71 @@ stages:
   - job: BuildiOS
 
     steps:
+    - task: DownloadSecureFile@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Download secure file'
+      name: secure_cert
+      inputs:
+        secureFile: '${{ parameters.ios_cert_securefiles_filename }}'
 
+    - task: InstallAppleCertificate@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Install Signing Certificate'
+      inputs:
+        certSecureFile: '${{ parameters.ios_cert_securefiles_filename }}'
+        certPwd: '${{ parameters.ios_cert_password }}'
+        keychain: 'temp'
+        deleteCert: true  
+
+    - task: InstallAppleProvisioningProfile@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Install Provisioning Profile'
+      inputs:
+        provisioningProfileLocation: 'secureFiles'
+        provProfileSecureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
+        removeProfile: true
+  
+    - task: DownloadSecureFile@1
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      displayName: 'Download secure file'
+      name: provision_profile_file
+      inputs:
+        secureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
+  
     - ${{ parameters.onStart }}
 
     - task: PowerShell@2
-      condition: and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') )
+      condition: and( succeeded(), and( eq( variables['bundle_id'], ''), eq( variables['build_enabled'],'true') ) )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Loading content"
+          $content = Get-Content $(provision_profile_file.secureFilePath) -Raw
+          Write-Host "Content loaded"
+          $pattern = '<key>.*<\/key>\s*<string>.*<\/string>'
+          Write-Host "Pattern: $pattern"
+          $valuepattern = '<string>(.*)<\/string>'
+          Write-Host "Value Pattern: $valuepattern"
+          $matches = $content | Select-String $pattern -AllMatches
+          Write-Host "Matches: $matches.Matches"
+          $idkvp = ($matches.Matches | Where-Object {$_.Value.contains('application-identifier')}).Value
+          Write-Host "ID key value pair: $idkvp"
+          $idmatch = $idkvp | Select-String $valuepattern
+          Write-Host "ID match: $idmatch"
+          $id = $idmatch.Matches[0].Groups[1].Value
+          Write-Host "ID: $id"
+          $teamkvp = ($matches.Matches | Where-Object {$_.Value.contains('com.apple.developer.team-identifier')}).Value
+          Write-Host "Team key value pair: $teamkvp"
+          $teammatch = $teamkvp | Select-String $valuepattern
+          Write-Host "Team match: $teammatch"
+          $teamid = $teammatch.Matches[0].Groups[1].Value
+          Write-Host "Team id: $teamid"
+          $bundleid = $id.Replace($teamid + ".","")
+          Write-Host "Bundle id : $bundleid"
+          Write-Host "##vso[task.setvariable variable=bundle_id]$bundleid"
+
+    - task: PowerShell@2
+      condition: and( succeeded(), and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') ) )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -107,23 +173,37 @@ stages:
         versionName: '${{ parameters.full_version_number }}' 
         printFile: true
 
-    - task: InstallAppleCertificate@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Install Signing Certificate'
+    - task: ios-bundle-identifier@1
+      condition: and( succeeded(), and( ne( variables['bundle_id'], ''), eq( variables['build_enabled'],'true') ) )
+      displayName: 'Setting application bundle id ${{ parameters.ios_plist_filename }}'
       inputs:
-        certSecureFile: '${{ parameters.ios_cert_securefiles_filename }}'
-        certPwd: '${{ parameters.ios_cert_password }}'
-        keychain: 'temp'
-        deleteCert: true  
+        sourcePath: '$(manifestPath)'
+        bundleIdentifier: '$(bundle_id)'
+        printFile: true
+ 
 
-    - task: InstallAppleProvisioningProfile@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Install Provisioning Profile'
+    - task: PowerShell@2
+      condition: and( succeeded(), and( eq( variables['signing_identity'], ''), eq( variables['build_enabled'],'true') ) )
       inputs:
-        provisioningProfileLocation: 'secureFiles'
-        provProfileSecureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
-        removeProfile: true
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Extracting certificate CN $env:APPLE_CERTIFICATE_SIGNING_IDENTITY"
+          $cn = $env:APPLE_CERTIFICATE_SIGNING_IDENTITY
+          Write-Host "Signing Identity: $cn"
+          Write-Host "##vso[task.setvariable variable=signing_identity]$cn"
 
+    - task: PowerShell@2
+      condition: and( succeeded(), and( eq( variables['prov_profile'], ''), eq( variables['build_enabled'],'true') ) )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Extracting profile id $env:APPLE_PROV_PROFILE_UUID"
+          
+          $cn = $env:APPLE_PROV_PROFILE_UUID
+          Write-Host "Provisioning Profile: $cn"
+          Write-Host "##vso[task.setvariable variable=prov_profile]$cn"
+
+          
     - script: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh '${{ parameters.xamarin_sdk_version }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Select the Xamarin SDK version'
@@ -156,8 +236,8 @@ stages:
         configuration: '${{ parameters.solution_build_configuration }}'
         buildForSimulator: false
         packageApp: true
-        signingIdentity: '${{ parameters.ios_signing_identity }}'
-        signingProvisioningProfileID: '${{ parameters.ios_provisioning_profile_id }}'
+        signingIdentity: '$(signing_identity)'
+        signingProvisioningProfileID: '$(prov_profile)'
 
     - ${{ parameters.postBuild }}
 
