@@ -51,6 +51,8 @@ stages:
   variables:
   - name: application_fullpath
     value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
+  - name: artifact_name_var
+    value: ${{ parameters.artifact_name }}
   
   pool:
     vmImage: 'windows-latest'
@@ -67,7 +69,7 @@ stages:
 
             - download: current
               displayName: Download Artifacts
-              artifact: ${{ parameters.artifact_name }}
+              artifact: $(artifact_name_var)
 
             - ${{ parameters.postArtifactDownload }}
 
