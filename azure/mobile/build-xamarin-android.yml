@@ -203,12 +203,14 @@ stages:
     # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}
 
-    - task: PublishPipelineArtifact@1
+    # Publish artifacts from this stage
+    - task: PublishBuildArtifacts@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
-        targetPath: '$(build.artifactStagingDirectory)' 
-        artifactName: '${{ parameters.artifact_name }}'
+        pathtoPublish: '$(build.artifactStagingDirectory)' 
+        artifactName: '${{ parameters.artifact_name }}' 
+        publishLocation: Container
 
     # onEnd steps - performs steps after publishing artifacts, at the end of the build stage
     - ${{ parameters.onEnd }}
