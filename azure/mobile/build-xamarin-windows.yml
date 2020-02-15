@@ -1,74 +1,123 @@
 parameters:
+# stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
+# Defaults to 'Build_Windows'
 - name: stage_name
   type: string
-  default: 'Windows'
-- name: build_windows
+  default: 'Build_Windows'
+# depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
+# any other stage
+- name: depends_on
+  type: stageList
+  default: []
+# build_windows_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
+# cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
+# any stages that depend on this stage will attempt to execute
+- name: build_windows_enabled
   type: string
   default: 'true'
-- name: solution_filename
-  type: string
-- name: solution_build_configuration
-  type: string
-  default: Release
-- name: build_platform
-  type: string
-  default: 'x86'
-- name: uwpBuildPlatform
-  type: string
-  default: 'x86|x64|ARM'
-- name: windows_package_manifest_filename
-  type: string
-  default: ''
-- name:  windows_cert_securefiles_filename
-  type: string
-- name: windows_cert_password
-  type: string
+
+# build_number - (Optional) The build number to be applied to the application. Defaults to Build.BuildId 
+# built in variable
 - name: build_number
   type: string
   default: '$(Build.BuildId)'
+# full_version_number - (Optional) The full application version number. Defaults to 1.0.XXX where XXX is the 
+# same as the build_number
 - name: full_version_number
   type: string
   default: '1.0.$(Build.BuildId)'
-- name: nuget_version
+
+# solution_filename - (Required) The relative path to the solution file that should be built
+- name: solution_filename
   type: string
-  default: '4.4.1'
-- name: net_core_version 
-  type: string 
-  default: '3.0.x'
+# solution_build_configuration - (Optional) The build configuration within the solution that should be invoked. 
+# Default is Release but can be overwritten if you want to do say a Debug build
+- name: solution_build_configuration
+  type: string
+  default: Release
+# solution_target_platform - (Optional) The target platform that the solution build will use. 
+# Defaults to Any CPU
+- name: solution_target_platform
+  type: string
+  default: 'x86'
+# uwpPackagePlatforms - (Optional) The platforms the the application package will include
+# Defaults to 'x86|x64|ARM'
+- name: uwpPackagePlatforms
+  type: string
+  default: 'x86|x64|ARM'
+
+# windows_package_manifest_filename - (Optional) The relative path to the package.appxmanifest file
+# that defines the application manifest. If not specified, template will search for package.appxmanifest file
+- name: windows_package_manifest_filename
+  type: string
+  default: ''
+# windows_cert_securefiles_filename - (Required) The certificate file used to sign the application. This is the name
+# of the certificate in Secure Files
+- name:  windows_cert_securefiles_filename
+  type: string
+# windows_cert_password - (Optional) The password to unlock the certificate so it can be used. This is required
+# if the certificate has a password set
+- name: windows_cert_password
+  type: string
+  default: ''
+
+# artifact_name - (Optional) The name of the artifact to copy application to
 - name: artifact_name
   type: string
   default: 'drop'
+# artifact_folder - (Optional) The name of the folder to copy application to in the artifact
 - name: artifact_folder
   type: string
   default: 'Windows'
+# application_package - (Optional) The name of the application package to output
 - name: application_package
   type: string
   default: 'SignedWindows.appxbundle'
-- name: windows_appxupload_name
+# windows_upload_name - (Optional) The name of the upload package that can be submitted to the Microsoft Store
+- name: windows_upload_name
   type: string
-  default: 'Windows.appxupload'
+  default: ''
+
+# onStart - Steps to be executed before stage starts
 - name: onStart
   type: stepList
   default: []
+# preBuild - Steps to be executed before the build starts
 - name: preBuild
   type: stepList
   default: []
+# postBuild - Steps to be executed after the build has been invoked
 - name: postBuild
   type: stepList
   default: []
+# prePublish - Steps to be executed before application package is published to artifact
 - name: prePublish
   type: stepList
   default: []
+# onEnd - Steps to be executed at the end of the stage
 - name: onEnd
   type: stepList
   default: []
 
+# nuget_version - (Optional) Use to override the NuGet version (defaults to 4.4.1)
+- name: nuget_version
+  type: string
+  default: '4.4.1'
+# net_core_version - (Optional) Use to override the .NET Core version (defaults to 3.0.x)
+- name: net_core_version 
+  type: string 
+  default: '3.0.x'
+# xamarin_sdk_version - (Optional) Use to override the Xamarin SDK version (defaults to 6.4.0)
+- name: xamarin_sdk_version
+  type: string 
+  default: '6_4_0'
+
 stages:
 - stage: ${{ parameters.stage_name }}
-  dependsOn: [] 
+  dependsOn: ${{ parameters.depends_on }} 
   variables: 
     - name: build_enabled
-      value: ${{ parameters.build_windows }}
+      value: ${{ parameters.build_windows_enabled }}
     - name: cert_thumbprint
       value: ''
     - name: cert_subject
@@ -77,6 +126,8 @@ stages:
       value: '$(System.DefaultWorkingDirectory)\AppxPackages'
     - name: manifestPath
       value: ${{ parameters.windows_package_manifest_filename}}
+    - name: windows_upload_filename
+      value: ${{ parameters. windows_upload_name }}
   
   pool:
     vmImage: 'windows-latest'
@@ -85,16 +136,24 @@ stages:
   - job: BuildWindows
 
     steps:
+    # Download the signing certificate from secure files with the name
+    # specified in the parameter windows_cert_securefiles_filename
     - task: DownloadSecureFile@1
+      displayName: 'Download secure file ${{ parameters.windows_cert_securefiles_filename }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Download secure file'
       name: signing_certificate
       inputs:
         secureFile: '${{ parameters.windows_cert_securefiles_filename }}'
 
+    # onStart steps - performed after any secure files are downloaded but before 
+    # any other build steps are executed
     - ${{ parameters.onStart }}
 
+    # This task searches for the package.appxmanifest file so that the version information can be updated
+    # The windows_package_manifest_filename property can be used to set this location if the source code includes
+    # multiple windows projects
     - task: PowerShell@2
+      displayName: 'Determine the location of the package.appxmanifest file'
       condition: and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                 
@@ -104,7 +163,25 @@ stages:
           Write-Host "Found at $manifest"
           Write-Host "##vso[task.setvariable variable=manifestPath]$manifest"
 
+    # This task determines the name of the upload file, based on the bundle file name (specified
+    # via the application_package parameter). This can be overridden by specifying the 
+    # windows_upload_name parameter
     - task: PowerShell@2
+      displayName: 'Determine upload file name'
+      condition: and( eq( variables['windows_upload_filename'], ''), eq( variables['build_enabled'],'true') )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Setting upload filename"
+          $uploadFilename = '${{ parameters.application_package }}'.replace('bundle','upload')
+          Write-Host "Upload filename $uploadFilename"
+          Write-Host "##vso[task.setvariable variable=windows_upload_filename]$uploadFilename"
+
+    # This task installs the signing certificate (windows_cert_securefiles_filename parameter that is the name
+    # of the Secure File) so that it can be used for signing. It also extracts the thumbprint
+    # and subject of the certificate
+    - task: PowerShell@2
+      displayName: Extract certificate thumbnail and subject
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
@@ -131,9 +208,10 @@ stages:
 
           Write-Host "Variables exported"
 
+    # This task updates the version number and publisher in the package.manifest file
     - task: MagicChunks@2
+      displayName: 'Updating manifest file with version number and publisher - $(manifestPath)'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Set version number - $(manifestPath)'
       inputs:
         sourcePath: $(manifestPath)
         fileType: Xml
@@ -145,41 +223,50 @@ stages:
             "Package/Identity/@Publisher": "$(cert_subject)"
           }
         
-    - task: NuGetToolInstaller@0
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+    # Select the NuGet version based on the nuget_version parameter          
+    - task: NuGetToolInstaller@1
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         versionSpec: '${{ parameters.nuget_version }}'
 
+    # NuGet restore for solution
     - task: NuGetCommand@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
+    # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
 
+    # Build the solution
     - task: VSBuild@1
+      displayName: 'Building solution ${{ parameters.solution_filename }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Build solution ${{ parameters.solution_filename }}'
       inputs:
         solution: ${{ parameters.solution_filename }}
-        msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpBuildPlatform }}" 
+        msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpPackagePlatforms }}" 
               /p:DebugSymbols=false 
               /p:DebugType=None 
               /p:AppxPackageDir="$(appxPackageDir)"
               /p:AppxBundle=Always 
               /p:AppxPackageSigningEnabled=true 
               /p:UapAppxPackageBuildMode=StoreUpload 
-              /p:platform="${{ parameters.build_platform }}" 
+              /p:platform="${{ parameters.solution_target_platform }}" 
               /p:PackageCertificateThumbprint="$(cert_thumbprint)" 
               /p:PackageCertificateKeyFile="$(signing_certificate.secureFilePath)" 
               /p:PackageCertificatePassword="${{ parameters.windows_cert_password }}"'
         configuration: '${{ parameters.solution_build_configuration }}'
 
+    # postBuild steps - performs steps immediately after executing the solution build
     - ${{ parameters.postBuild }}
 
+    # Copy bundle files to the correct directory in the staging folder. It uses flattenFolders
+    # so there is a risk that multiple artifacts could overwrite each other if they
+    # have the same filename
     - task: CopyFiles@2
+      displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '$(appxPackageDir)\**\*.*xbundle'
@@ -187,7 +274,11 @@ stages:
         flattenFolders: true
         overWrite: true       
 
+    # Copy upload files to the correct directory in the staging folder. It uses flattenFolders
+    # so there is a risk that multiple artifacts could overwrite each other if they
+    # have the same filename
     - task: CopyFiles@2
+      displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '$(appxPackageDir)\**\*.*xupload' 
@@ -195,25 +286,29 @@ stages:
         flattenFolders: true
         overWrite: true
 
+    # Rename the application package to the name specified in the application_package parameter
     - task: PowerShell@2
+      displayName: 'Rename application package'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
           Get-ChildItem -Filter "*.*xbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
-          Get-ChildItem -Filter "*.*xupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
+          Get-ChildItem -Filter "*.*xupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "$(windows_upload_filename)" | Write-Host
 
+    # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}
-
  
+    # Publish artifacts from this stage
     - task: PublishBuildArtifacts@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
         pathtoPublish: '$(build.artifactStagingDirectory)' 
         artifactName: '${{ parameters.artifact_name }}' 
-        publishLocation: 'Container'
+        publishLocation: Container
 
+    # onEnd steps - performs steps after publishing artifacts, at the end of the build stage
     - ${{ parameters.onEnd }}
 
 

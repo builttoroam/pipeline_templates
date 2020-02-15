@@ -1,45 +1,82 @@
 parameters:
+# stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
+# Defaults to 'Deploy_App_Center'
 - name: stage_name
   type: string
-  default: 'DeployAppCenter'
+  default: 'Deploy_App_Center'
+# depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
+# any other stage. However, since this is a deployment stage, you'll probably want to specify a build stage that
+# this stage depends on.
 - name: depends_on
+  type: stageList
   default: []
+# deploy_appcenter_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
+# cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
+# any stages that depend on this stage will attempt to execute
+- name: deploy_appcenter_enabled
+  type: string
+  default: 'true'
 - name: environment_name
   type: string
+
+# artifact_name - (Optional) The name of the artifact to copy application to
 - name: artifact_name
   type: string
   default: 'drop'
+# artifact_folder - (Required) The name of the folder to copy application to in the artifact
 - name: artifact_folder
   type: string
+# application_package - (Required) The name of the application package to output
 - name: application_package
   type: string
+
+# appcenter_service_connection - (Required) The name of the service connection that connects Azure DevOps
+# to App Center. Go to Service Connections in Azure DevOps to setup the connection and assign permissions
+# for pipelines to access it
 - name: appcenter_service_connection
   type: string
+# appcenter_organisation - (Required) The organisation (or individual) in App Center that the application 
+# is associated with. In AppCenter navigate to the application and extract organisation from URL
+# eg https://appcenter.ms/users/[organisation]/apps/[applicationid]
 - name: appcenter_organisation
   type: string
+# appcenter_applicationid - (Required) The application id in App Center that identifies 
+# the application. In AppCenter navigate to the application and extract application id from URL
+# eg https://appcenter.ms/users/[organisation]/apps/[applicationid]
 - name: appcenter_applicationid
   type: string
+# appcenter_release_notes - (Optional) The release notes to be set in App Center for the release. 
 - name: appcenter_release_notes
   type: string
-  default: 'Initial release'
+  default: 'Default release notes'
+
+# secure_file_keystore_filename - (Optiona) IMPORTANT: This is required if application package is an AAB. 
+# The keystore file used to sign the APK when extracte from an AAB. This is the name of the keystore in Secure Files. 
 - name: secure_file_keystore_filename
   type: string
   default: ''
+# keystore_alias - (Optional) IMPORTANT: This is required if application package is an AAB. The alias of the keystore. 
 - name: keystore_alias
   type: string
   default: ''
+# keystore_password - (Optional) IMPORTANT: This is required if application package is an AAB. The password to access the keystore
 - name: keystore_password
   type: string
   default: ''
+
+# onStart - Steps to be executed before stage starts
 - name: onStart
   type: stepList
   default: []
+# postArtifactDownload - Steps to be executed after artifacts from previous stages have been downloaded
 - name: postArtifactDownload
   type: stepList
   default: []
+# preAppCenterPublish - Steps to be executed before application package is published to App Center
 - name: preAppCenterPublish
   type: stepList
   default: []
+# onEnd - Steps to be executed at the end of the stage
 - name: onEnd
   type: stepList
   default: []
@@ -49,6 +86,8 @@ stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
   variables:
+  - name: deploy_enabled
+    value: ${{ parameters.deploy_appcenter_enabled }}
   - name: application_fullpath
     value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
   
@@ -63,24 +102,33 @@ stages:
       runOnce:
         deploy:
           steps:
-            - ${{ parameters.onStart }}
-
-            - download: current
-              displayName: Download Artifacts
-              artifact: ${{ parameters.artifact_name }}
-
-            - ${{ parameters.postArtifactDownload }}
-
+            # If the keystore has been specified, download it from secure files
             - task: DownloadSecureFile@1
-              condition: contains( '${{ parameters.application_package }}','.aab') 
-              displayName: 'Download keystore'
+              displayName: Download keystore from Secure Files (for repackaging AAB to APK)
+              condition: ne( '${{ parameters.secure_file_keystore_filename }}','') 
               name: signing_keystore
               inputs:
                 secureFile: '${{ parameters.secure_file_keystore_filename }}'
+
+            # onStart steps - performed after any secure files are downloaded but before 
+            # artifacts are downloaded and any other steps
+            - ${{ parameters.onStart }}
+
+            # Download the artifacts
+            - task: DownloadBuildArtifacts@0
+              displayName: Download pipeline artifacts
+              condition: and( succeeded(), eq( variables['deploy_enabled'],'true') )
+              inputs:
+                buildType: 'current' 
+                artifactName: ${{ parameters.artifact_name }}
+                downloadPath: '$(Pipeline.Workspace)'
+                buildVersionToDownload: 'latest'
+
+            - ${{ parameters.postArtifactDownload }}
         
             - task: PowerShell@2
               displayName: Use Bundletool to extract and sign APK
-              condition: contains( '${{ parameters.application_package }}','.aab') 
+              condition: and( and( succeeded(), eq( variables['deploy_enabled'],'true') ), contains( variables['application_fullpath'],'.aab') ) 
               inputs:
                 targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
                 script: |
@@ -104,6 +152,7 @@ stages:
                   
             - task: AppCenterDistribute@3
               displayName: 'Deploy to Visual Studio App Center'
+              condition: and( succeeded(), eq( variables['deploy_enabled'],'true') )
               inputs:
                 serverEndpoint: ${{ parameters.appcenter_service_connection }}
                 appSlug: '${{ parameters.appcenter_organisation }}/${{ parameters.appcenter_applicationid }}'

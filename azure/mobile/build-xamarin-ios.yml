@@ -1,79 +1,125 @@
 parameters:
+# stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
+# Defaults to 'Build_iOS'
 - name: stage_name
   type: string
-  default: 'iOS'
-- name: build_ios
+  default: 'Build_iOS'
+# depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
+# any other stage
+- name: depends_on
+  type: stageList
+  default: []
+# build_ios_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
+# cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
+# any stages that depend on this stage will attempt to execute
+- name: build_ios_enabled
   type: string
   default: 'true'
-- name: solution_filename
-  type: string
-- name: solution_build_configuration
-  type: string
-  default: Release
-- name: ios_plist_filename
-  type: string
-  default: ''
-- name: ios_cert_securefiles_filename 
-  type: string 
-  default: ''
-- name: ios_cert_password 
-  type: string 
-  default: ''
-- name: ios_provisioning_profile_securefiles_filename 
-  type: string 
-  default: ''
-- name: ios_signing_identity 
-  type: string 
-  default: ''
-- name: ios_provisioning_profile_id 
-  type: string 
-  default: ''
+
+# build_number - (Optional) The build number to be applied to the application. Defaults to Build.BuildId 
+# built in variable
 - name: build_number
   type: string
   default: '$(Build.BuildId)'
+# full_version_number - (Optional) The full application version number. Defaults to 1.0.XXX where XXX is the 
+# same as the build_number
 - name: full_version_number
   type: string
   default: '1.0.$(Build.BuildId)'
-- name: nuget_version
+
+# solution_filename - (Required) The relative path to the solution file that should be built
+- name: solution_filename
   type: string
-  default: '4.4.1'
-- name: net_core_version 
+# solution_build_configuration - (Optional) The build configuration within the solution that should be invoked. 
+# Default is Release but can be overwritten if you want to do say a Debug build
+- name: solution_build_configuration
+  type: string
+  default: Release
+
+# ios_plist_filename - (Optional) The Info.plist file that contains the application information such as bundle id
+# and version information. If not specified, template will locate the first Info.plist automatically.
+- name: ios_plist_filename
+  type: string
+  default: ''
+# ios_cert_securefiles_filename - (Required) The certificate file used to sign the application. This is the name
+# of the certificate in Secure Files
+- name: ios_cert_securefiles_filename 
   type: string 
-  default: '3.0.x'
-- name: xamarin_sdk_version
+# ios_cert_password - (Optional) The password to unlock the certificate so it can be used. This is required
+# if the certificate has a password set
+- name: ios_cert_password 
   type: string 
-  default: '6_4_0'
+  default: ''
+# ios_provisioning_profile_securefiles_filename - (Required) The provisioning profile to use when signing the application.
+# This is the name of the provisioning profile in Secure Files
+- name: ios_provisioning_profile_securefiles_filename 
+  type: string 
+# ios_signing_identity - (Optional) The signing identity that maps to the signing certificate. If not provided, the template
+# will use the value extracted during the certificate installation process.
+- name: ios_signing_identity 
+  type: string 
+  default: ''
+# ios_provisioning_profile_id - (Optional) The id of the provisioning profile. If not provided, the template will
+# use the value extracted during the installation of the provisioning profile
+- name: ios_provisioning_profile_id 
+  type: string 
+  default: ''
+
+# artifact_name - (Optional) The name of the artifact to copy application to
 - name: artifact_name
   type: string
   default: 'drop'
+# artifact_folder - (Optional) The name of the folder to copy application to in the artifact
 - name: artifact_folder
   type: string
   default: 'iOS'
+# application_package - (Optional) The name of the application package to output
 - name: application_package
   type: string
   default: 'SignediOS.ipa'
+
+# onStart - Steps to be executed before stage starts
 - name: onStart
   type: stepList
   default: []
+# preBuild - Steps to be executed before the build starts
 - name: preBuild
   type: stepList
   default: []
+# postBuild - Steps to be executed after the build has been invoked
 - name: postBuild
   type: stepList
   default: []
+# prePublish - Steps to be executed before application package is published to artifact
 - name: prePublish
   type: stepList
   default: []
+# onEnd - Steps to be executed at the end of the stage
 - name: onEnd
   type: stepList
   default: []
 
+# nuget_version - (Optional) Use to override the NuGet version (defaults to 4.4.1)
+- name: nuget_version
+  type: string
+  default: '4.4.1'
+# net_core_version - (Optional) Use to override the .NET Core version (defaults to 3.0.x)
+- name: net_core_version 
+  type: string 
+  default: '3.0.x'
+# xamarin_sdk_version - (Optional) Use to override the Xamarin SDK version (defaults to 6.4.0)
+- name: xamarin_sdk_version
+  type: string 
+  default: '6_4_0'
+
+
+
 stages:
 - stage: ${{ parameters.stage_name }}
-  dependsOn: [] 
+  dependsOn: ${{ parameters.depends_on }} 
   variables: 
     - name: build_enabled
-      value: ${{ parameters.build_ios }}
+      value: ${{ parameters.build_ios_enabled }}
     - name: manifestPath
       value: ${{ parameters.ios_plist_filename }}
     - name: signing_identity
@@ -90,40 +136,48 @@ stages:
   - job: BuildiOS
 
     steps:
-    - task: DownloadSecureFile@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Download secure file'
-      name: secure_cert
-      inputs:
-        secureFile: '${{ parameters.ios_cert_securefiles_filename }}'
-
+    # Download and install the ios signing certifcate from secure files
+    # with the name specified in parameter ios_cert_securefiles_filename
     - task: InstallAppleCertificate@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Install Signing Certificate'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         certSecureFile: '${{ parameters.ios_cert_securefiles_filename }}'
         certPwd: '${{ parameters.ios_cert_password }}'
         keychain: 'temp'
         deleteCert: true  
 
+    # Download and install the provisioning profile from secure files
+    # with the name specified in the parameter ios_provisioning_profile_securefiles_filename
     - task: InstallAppleProvisioningProfile@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Install Provisioning Profile'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         provisioningProfileLocation: 'secureFiles'
         provProfileSecureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
         removeProfile: true
-  
+
+    # Download the provisioning profile from secure files with the name
+    # specified in the parameter ios_provisioning_profile_securefiles_filename
+    # The script needs to do this because the previous task deletes the profile
+    # after its done installing it  
     - task: DownloadSecureFile@1
+      displayName: 'Download secure file ${{ parameters.ios_provisioning_profile_securefiles_filename }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Download secure file'
       name: provision_profile_file
       inputs:
         secureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
   
+    # onStart steps - performed after any secure files are downloaded but before 
+    # any other build steps are executed
     - ${{ parameters.onStart }}
 
+    # If the bundle_id variable hasn't been set, then extract it from within 
+    # the provisioning profile. This is very hacky as we're not really decoding
+    # the provisioning profile using CMS; instead we're just opening as text
+    # and searching for the correct key-value pair
     - task: PowerShell@2
+      displayName: 'Extract bundle id from provisioning profile'
       condition: and( succeeded(), and( eq( variables['bundle_id'], ''), eq( variables['build_enabled'],'true') ) )
       inputs:
         targetType: 'inline'                                                                                                 
@@ -153,7 +207,11 @@ stages:
           Write-Host "Bundle id : $bundleid"
           Write-Host "##vso[task.setvariable variable=bundle_id]$bundleid"
 
+    # If the ios_plist_filename parameter hasn't been specified then just search for working directory
+    # for Info.plist file. If you have multiple iOS projects you need to specify the ios_plist_filename 
+    # property otherwise this script will always pick the first Info.plist it finds
     - task: PowerShell@2
+      displayName: 'Find the Info.plist file'
       condition: and( succeeded(), and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') ) )
       inputs:
         targetType: 'inline'                                                                                                 
@@ -163,9 +221,10 @@ stages:
           Write-Host "Found at $manifest"
           Write-Host "##vso[task.setvariable variable=manifestPath]$manifest"
 
+    # Update the Info.plist with the verion information
     - task: ios-bundle-version@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Setting application version in ${{ parameters.ios_plist_filename }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         sourcePath: '$(manifestPath)'
         versionCodeOption: 'buildid'
@@ -173,16 +232,20 @@ stages:
         versionName: '${{ parameters.full_version_number }}' 
         printFile: true
 
+    # Update the Info.plist with the correct bundle id
     - task: ios-bundle-identifier@1
-      condition: and( succeeded(), and( ne( variables['bundle_id'], ''), eq( variables['build_enabled'],'true') ) )
       displayName: 'Setting application bundle id ${{ parameters.ios_plist_filename }}'
+      condition: and( succeeded(), and( ne( variables['bundle_id'], ''), eq( variables['build_enabled'],'true') ) )
       inputs:
         sourcePath: '$(manifestPath)'
         bundleIdentifier: '$(bundle_id)'
         printFile: true
  
-
+    # This task is linked to the InstallAppleCertificate task at the begining of this template
+    # As part of the InstallAppleCertificate the APPLE_CERTIFICATE_SIGNING_IDENTITY environment
+    # variable is set to the signing identity found in the certificate file
     - task: PowerShell@2
+      displayName: 'Extract signing identity'
       condition: and( succeeded(), and( eq( variables['signing_identity'], ''), eq( variables['build_enabled'],'true') ) )
       inputs:
         targetType: 'inline'                                                                                                 
@@ -192,45 +255,53 @@ stages:
           Write-Host "Signing Identity: $cn"
           Write-Host "##vso[task.setvariable variable=signing_identity]$cn"
 
+    # This task is linked to the InstallAppleProvisioningProfile task at the begining of this template
+    # As part of the InstallAppleProvisioningProfile the APPLE_PROV_PROFILE_UUID environment
+    # variable is set to the provisioning profile id found in the provisioning profile file
     - task: PowerShell@2
+      displayName: 'Extract provisioning profile id'
       condition: and( succeeded(), and( eq( variables['prov_profile'], ''), eq( variables['build_enabled'],'true') ) )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
           Write-Host "Extracting profile id $env:APPLE_PROV_PROFILE_UUID"
-          
           $cn = $env:APPLE_PROV_PROFILE_UUID
           Write-Host "Provisioning Profile: $cn"
           Write-Host "##vso[task.setvariable variable=prov_profile]$cn"
 
-          
+    # Select the Xamarin SDK version based on the xamarin_sdk_version parameter          
     - script: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh '${{ parameters.xamarin_sdk_version }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Select the Xamarin SDK version'
-
-    - task: UseDotNet@2
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+
+    # Select the .Net Core version based on the net_core_version parameter          
+    - task: UseDotNet@2
       displayName: 'Use .Net Core sdk ${{ parameters.net_core_version }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         version: '${{ parameters.net_core_version }}'
 
+    # Select the NuGet version based on the nuget_version parameter          
     - task: NuGetToolInstaller@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         versionSpec: '${{ parameters.nuget_version }}'
 
+    # NuGet restore for solution
     - task: NuGetCommand@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
+    # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
 
+    # Build the solution
     - task: XamariniOS@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Building solution ${{ parameters.solution_filename }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         solutionFile: '${{ parameters.solution_filename }}'
         configuration: '${{ parameters.solution_build_configuration }}'
@@ -239,34 +310,43 @@ stages:
         signingIdentity: '$(signing_identity)'
         signingProvisioningProfileID: '$(prov_profile)'
 
+    # postBuild steps - performs steps immediately after executing the solution build
     - ${{ parameters.postBuild }}
 
+    # Copy artifacts to the correct directory in the staging folder. It uses flattenFolders
+    # so there is a risk that multiple artifacts could overwrite each other if they
+    # have the same filename
     - task: CopyFiles@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '**/*.ipa'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: true
         overWrite: true
 
+    # Rename the application package to the name specified in the application_package parameter
     - task: PowerShell@2
+      displayName: 'Rename application package'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
           Get-ChildItem -Filter "*.ipa" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
 
+    # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}
 
+    # Publish artifacts from this stage
     - task: PublishBuildArtifacts@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
         pathtoPublish: '$(build.artifactStagingDirectory)' 
         artifactName: '${{ parameters.artifact_name }}' 
-        publishLocation: 'Container'
+        publishLocation: Container
 
+    # onEnd steps - performs steps after publishing artifacts, at the end of the build stage
     - ${{ parameters.onEnd }}
 
 
