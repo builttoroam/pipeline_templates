@@ -259,7 +259,7 @@ stages:
 
     - ${{ parameters.prePublish }}
 
-    - task: PublishPipelineArtifacts@1
+    - task: PublishPipelineArtifact@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
