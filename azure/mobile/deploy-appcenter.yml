@@ -4,6 +4,9 @@ parameters:
   default: 'DeployAppCenter'
 - name: depends_on
   default: []
+- name: deploy_appcenter_enabled
+  type: string
+  default: 'true'
 - name: environment_name
   type: string
 - name: artifact_name
@@ -49,10 +52,10 @@ stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
   variables:
+  - name: deploy_enabled
+    value: ${{ parameters.deploy_appcenter_enabled }}
   - name: application_fullpath
     value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
-  # - name: artifact_name_var
-  #   value: ${{ parameters.artifact_name }}
   
   pool:
     vmImage: 'windows-latest'
@@ -65,30 +68,32 @@ stages:
       runOnce:
         deploy:
           steps:
+            # If the keystore has been specified, download it from secure files
             - task: DownloadSecureFile@1
-              condition: contains( '${{ parameters.application_package }}','.aab') 
+              displayName: Download keystore from Secure Files (for repackaging AAB to APK)
+              condition: ne( '${{ parameters.secure_file_keystore_filename }}','') 
               displayName: 'Download keystore'
               name: signing_keystore
               inputs:
                 secureFile: '${{ parameters.secure_file_keystore_filename }}'
 
+            # onStart steps - performed after any secure files are downloaded but before 
+            # artifacts are downloaded and any other steps
             - ${{ parameters.onStart }}
 
+            # Download the artifacts
             - task: DownloadPipelineArtifact@2
+              displayName: Download pipeline artifacts
+              condition: and( succeeded(), eq( variables['deploy_enabled'],'true') )
               inputs:
                 source: 'current' 
                 path: '$(Pipeline.Workspace)'
 
-            # - download: current
-            #   displayName: Download Artifacts
-            #   artifact: $(artifact_name_var)
-
             - ${{ parameters.postArtifactDownload }}
-
         
             - task: PowerShell@2
               displayName: Use Bundletool to extract and sign APK
-              condition: contains( '${{ parameters.application_package }}','.aab') 
+              condition: and( and( succeeded(), eq( variables['deploy_enabled'],'true') ), contains( '${{ parameters.application_package }}','.aab') ) 
               inputs:
                 targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
                 script: |
@@ -112,6 +117,7 @@ stages:
                   
             - task: AppCenterDistribute@3
               displayName: 'Deploy to Visual Studio App Center'
+              condition: and( succeeded(), eq( variables['deploy_enabled'],'true') )
               inputs:
                 serverEndpoint: ${{ parameters.appcenter_service_connection }}
                 appSlug: '${{ parameters.appcenter_organisation }}/${{ parameters.appcenter_applicationid }}'

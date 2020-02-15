@@ -2,7 +2,9 @@ parameters:
 - name: stage_name
   type: string
   default: 'Windows'
-- name: build_windows
+- name: depends_on
+  default: []
+- name: build_windows_enabled
   type: string
   default: 'true'
 - name: solution_filename
@@ -65,10 +67,10 @@ parameters:
 
 stages:
 - stage: ${{ parameters.stage_name }}
-  dependsOn: [] 
+  dependsOn: ${{ parameters.depends_on }} 
   variables: 
     - name: build_enabled
-      value: ${{ parameters.build_windows }}
+      value: ${{ parameters.build_windows_enabled }}
     - name: cert_thumbprint
       value: ''
     - name: cert_subject
@@ -204,15 +206,13 @@ stages:
           Get-ChildItem -Filter "*.*xupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
 
     - ${{ parameters.prePublish }}
-
  
-    - task: PublishBuildArtifacts@1
+    - task: PublishPipelineArtifact@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
-        pathtoPublish: '$(build.artifactStagingDirectory)' 
-        artifactName: '${{ parameters.artifact_name }}' 
-        publishLocation: 'Container'
+        targetPath: '$(build.artifactStagingDirectory)' 
+        artifactName: '${{ parameters.artifact_name }}'
 
     - ${{ parameters.onEnd }}
 

@@ -2,7 +2,9 @@ parameters:
 - name: stage_name
   type: string
   default: 'Android'
-- name: build_android
+- name: depends_on
+  default: []
+- name: build_android_enabled
   type: string
   default: 'true'
 - name: solution_filename
@@ -61,10 +63,10 @@ parameters:
 
 stages:
 - stage: ${{ parameters.stage_name }}
-  dependsOn: [] 
+  dependsOn: ${{ parameters.depends_on }} 
   variables: 
     - name: build_enabled
-      value: ${{ parameters.build_android }}
+      value: ${{ parameters.build_android_enabled }}
     - name: ANDROID_NDK_HOME
       value: C:\Microsoft\AndroidNDK64\android-ndk-r16b
     - name: ANDROID_NDK_PATH
@@ -157,12 +159,11 @@ stages:
 
     - ${{ parameters.prePublish }}
 
-    - task: PublishBuildArtifacts@1
+    - task: PublishPipelineArtifact@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
-        pathtoPublish: '$(build.artifactStagingDirectory)' 
-        artifactName: '${{ parameters.artifact_name }}' 
-        publishLocation: 'Container'
+        targetPath: '$(build.artifactStagingDirectory)' 
+        artifactName: '${{ parameters.artifact_name }}'
 
     - ${{ parameters.onEnd }}

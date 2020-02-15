@@ -2,7 +2,9 @@ parameters:
 - name: stage_name
   type: string
   default: 'iOS'
-- name: build_ios
+- name: depends_on
+  default: []
+- name: build_ios_enabled
   type: string
   default: 'true'
 - name: solution_filename
@@ -70,9 +72,9 @@ parameters:
 
 stages:
 - stage: ${{ parameters.stage_name }}
-  dependsOn: [] 
+  dependsOn: ${{ parameters.depends_on }} 
   variables: 
-    - name: build_enabled
+    - name: build_ios_enabled
       value: ${{ parameters.build_ios }}
     - name: manifestPath
       value: ${{ parameters.ios_plist_filename }}
