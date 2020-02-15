@@ -51,8 +51,8 @@ stages:
   variables:
   - name: application_fullpath
     value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
-  - name: artifact_name_var
-    value: ${{ parameters.artifact_name }}
+  # - name: artifact_name_var
+  #   value: ${{ parameters.artifact_name }}
   
   pool:
     vmImage: 'windows-latest'
@@ -65,20 +65,26 @@ stages:
       runOnce:
         deploy:
           steps:
-            - ${{ parameters.onStart }}
-
-            - download: current
-              displayName: Download Artifacts
-              artifact: $(artifact_name_var)
-
-            - ${{ parameters.postArtifactDownload }}
-
             - task: DownloadSecureFile@1
               condition: contains( '${{ parameters.application_package }}','.aab') 
               displayName: 'Download keystore'
               name: signing_keystore
               inputs:
                 secureFile: '${{ parameters.secure_file_keystore_filename }}'
+
+            - ${{ parameters.onStart }}
+
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                source: 'current' 
+                path: '$(Pipeline.Workspace)'
+
+            # - download: current
+            #   displayName: Download Artifacts
+            #   artifact: $(artifact_name_var)
+
+            - ${{ parameters.postArtifactDownload }}
+
         
             - task: PowerShell@2
               displayName: Use Bundletool to extract and sign APK

@@ -259,13 +259,12 @@ stages:
 
     - ${{ parameters.prePublish }}
 
-    - task: PublishBuildArtifacts@1
+    - task: PublishPipelineArtifacts@1
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
-        pathtoPublish: '$(build.artifactStagingDirectory)' 
+        targetPath: '$(build.artifactStagingDirectory)' 
         artifactName: '${{ parameters.artifact_name }}' 
-        publishLocation: 'Container'
 
     - ${{ parameters.onEnd }}
 
