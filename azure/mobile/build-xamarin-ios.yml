@@ -75,8 +75,8 @@ stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
   variables: 
-    - name: build_ios_enabled
-      value: ${{ parameters.build_ios }}
+    - name: build_enabled
+      value: ${{ parameters.build_ios_enabled }}
     - name: manifestPath
       value: ${{ parameters.ios_plist_filename }}
     - name: signing_identity
