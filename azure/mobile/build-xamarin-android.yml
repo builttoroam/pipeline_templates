@@ -1,66 +1,104 @@
 parameters:
+# stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
+# Defaults to 'Build_Android'
 - name: stage_name
   type: string
-  default: 'Android'
+  default: 'Build_Android'
+# depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
+# any other stage
 - name: depends_on
   type: stageList
   default: []
+# build_android_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
+# cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
+# any stages that depend on this stage will attempt to execute
 - name: build_android_enabled
   type: string
   default: 'true'
-- name: solution_filename
-  type: string
-- name: solution_build_configuration
-  type: string
-  default: Release
-- name: build_platform
-  type: string
-  default: 'Any CPU'
-- name: android_manifest_filename
-  type: string
-  default: ''
+
+# build_number - (Optional) The build number to be applied to the application. Defaults to Build.BuildId 
+# built in variable
 - name: build_number
   type: string
   default: '$(Build.BuildId)'
+# full_version_number - (Optional) The full application version number. Defaults to 1.0.XXX where XXX is the 
+# same as the build_number
 - name: full_version_number
   type: string
   default: '1.0.$(Build.BuildId)'
+
+# solution_filename - (Required) The relative path to the solution file that should be built
+- name: solution_filename
+  type: string
+# solution_build_configuration - (Optional) The build configuration within the solution that should be invoked. 
+# Default is Release but can be overwritten if you want to do say a Debug build
+- name: solution_build_configuration
+  type: string
+  default: Release
+# solution_target_platform - (Optional) The target platform that the solution build will use. 
+# Defaults to Any CPU
+- name: solution_target_platform
+  type: string
+  default: 'Any CPU'
+
+# android_manifest_filename - (Optional) The relative path to the AndroidManifest.xml file
+# that defines the application manifest. If not specified, template will search for AndroidManifest.xml file
+- name: android_manifest_filename
+  type: string
+  default: ''
+# secure_file_keystore_filename - (Required) The keystore file used to sign the application. This is the name
+# of the keystore in Secure Files
 - name: secure_file_keystore_filename
   type: string
+# keystore_alias - (Required) The alias of the keystore. 
 - name: keystore_alias
   type: string
+# keystore_password - (Required) The password to access the keystore
 - name: keystore_password
   type: string
-- name: nuget_version
-  type: string
-  default: '4.4.1'
-- name: net_core_version 
-  type: string 
-  default: '3.0.x'
+
+# artifact_name - (Optional) The name of the artifact to copy application to
 - name: artifact_name
   type: string
   default: 'drop'
+# artifact_folder - (Optional) The name of the folder to copy application to in the artifact
 - name: artifact_folder
   type: string
   default: 'Android'
+# application_package - (Optional) The name of the application package to output
 - name: application_package
   type: string
   default: 'SignedAndroid.aab'
+
+# onStart - Steps to be executed before stage starts
 - name: onStart
   type: stepList
   default: []
+# preBuild - Steps to be executed before the build starts
 - name: preBuild
   type: stepList
   default: []
+# postBuild - Steps to be executed after the build has been invoked
 - name: postBuild
   type: stepList
   default: []
+# prePublish - Steps to be executed before application package is published to artifact
 - name: prePublish
   type: stepList
   default: []
+# onEnd - Steps to be executed at the end of the stage
 - name: onEnd
   type: stepList
   default: []
+
+# nuget_version - (Optional) Use to override the NuGet version (defaults to 4.4.1)
+- name: nuget_version
+  type: string
+  default: '4.4.1'
+# net_core_version - (Optional) Use to override the .NET Core version (defaults to 3.0.x)
+- name: net_core_version 
+  type: string 
+  default: '3.0.x'
 
 stages:
 - stage: ${{ parameters.stage_name }}
@@ -134,7 +172,7 @@ stages:
       inputs:
         solution: '${{ parameters.solution_filename }}'
         configuration: '${{ parameters.solution_build_configuration }}'
-        msbuildArgs: '/p:platform="${{ parameters.build_platform }}" 
+        msbuildArgs: '/p:platform="${{ parameters.solution_target_platform }}" 
         /p:AndroidBuildApplicationPackage="true" 
         /p:AndroidPackageFormat="aab"
         /p:AndroidKeyStore="True" 

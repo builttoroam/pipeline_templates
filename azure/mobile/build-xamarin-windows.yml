@@ -1,70 +1,116 @@
 parameters:
+# stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
+# Defaults to 'Build_Windows'
 - name: stage_name
   type: string
-  default: 'Windows'
+  default: 'Build_Windows'
+# depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
+# any other stage
 - name: depends_on
   type: stageList
   default: []
+# build_windows_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
+# cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
+# any stages that depend on this stage will attempt to execute
 - name: build_windows_enabled
   type: string
   default: 'true'
-- name: solution_filename
-  type: string
-- name: solution_build_configuration
-  type: string
-  default: Release
-- name: build_platform
-  type: string
-  default: 'x86'
-- name: uwpBuildPlatform
-  type: string
-  default: 'x86|x64|ARM'
-- name: windows_package_manifest_filename
-  type: string
-  default: ''
-- name:  windows_cert_securefiles_filename
-  type: string
-- name: windows_cert_password
-  type: string
+
+# build_number - (Optional) The build number to be applied to the application. Defaults to Build.BuildId 
+# built in variable
 - name: build_number
   type: string
   default: '$(Build.BuildId)'
+# full_version_number - (Optional) The full application version number. Defaults to 1.0.XXX where XXX is the 
+# same as the build_number
 - name: full_version_number
   type: string
   default: '1.0.$(Build.BuildId)'
-- name: nuget_version
+
+# solution_filename - (Required) The relative path to the solution file that should be built
+- name: solution_filename
   type: string
-  default: '4.4.1'
-- name: net_core_version 
-  type: string 
-  default: '3.0.x'
+# solution_build_configuration - (Optional) The build configuration within the solution that should be invoked. 
+# Default is Release but can be overwritten if you want to do say a Debug build
+- name: solution_build_configuration
+  type: string
+  default: Release
+# solution_target_platform - (Optional) The target platform that the solution build will use. 
+# Defaults to Any CPU
+- name: solution_target_platform
+  type: string
+  default: 'x86'
+# uwpPackagePlatforms - (Optional) The platforms the the application package will include
+# Defaults to 'x86|x64|ARM'
+- name: uwpPackagePlatforms
+  type: string
+  default: 'x86|x64|ARM'
+
+# windows_package_manifest_filename - (Optional) The relative path to the package.appxmanifest file
+# that defines the application manifest. If not specified, template will search for package.appxmanifest file
+- name: windows_package_manifest_filename
+  type: string
+  default: ''
+# windows_cert_securefiles_filename - (Required) The certificate file used to sign the application. This is the name
+# of the certificate in Secure Files
+- name:  windows_cert_securefiles_filename
+  type: string
+# windows_cert_password - (Optional) The password to unlock the certificate so it can be used. This is required
+# if the certificate has a password set
+- name: windows_cert_password
+  type: string
+  default: ''
+
+# artifact_name - (Optional) The name of the artifact to copy application to
 - name: artifact_name
   type: string
   default: 'drop'
+# artifact_folder - (Optional) The name of the folder to copy application to in the artifact
 - name: artifact_folder
   type: string
   default: 'Windows'
+# application_package - (Optional) The name of the application package to output
 - name: application_package
   type: string
   default: 'SignedWindows.appxbundle'
-- name: windows_appxupload_name
+# windows_upload_name - (Optional) The name of the upload package that can be submitted to the Microsoft Store
+- name: windows_upload_name
   type: string
   default: 'Windows.appxupload'
+
+# onStart - Steps to be executed before stage starts
 - name: onStart
   type: stepList
   default: []
+# preBuild - Steps to be executed before the build starts
 - name: preBuild
   type: stepList
   default: []
+# postBuild - Steps to be executed after the build has been invoked
 - name: postBuild
   type: stepList
   default: []
+# prePublish - Steps to be executed before application package is published to artifact
 - name: prePublish
   type: stepList
   default: []
+# onEnd - Steps to be executed at the end of the stage
 - name: onEnd
   type: stepList
   default: []
+
+# nuget_version - (Optional) Use to override the NuGet version (defaults to 4.4.1)
+- name: nuget_version
+  type: string
+  default: '4.4.1'
+# net_core_version - (Optional) Use to override the .NET Core version (defaults to 3.0.x)
+- name: net_core_version 
+  type: string 
+  default: '3.0.x'
+# xamarin_sdk_version - (Optional) Use to override the Xamarin SDK version (defaults to 6.4.0)
+- name: xamarin_sdk_version
+  type: string 
+  default: '6_4_0'
 
 stages:
 - stage: ${{ parameters.stage_name }}
@@ -170,14 +216,14 @@ stages:
       displayName: 'Build solution ${{ parameters.solution_filename }}'
       inputs:
         solution: ${{ parameters.solution_filename }}
-        msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpBuildPlatform }}" 
+        msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpPackagePlatforms }}" 
               /p:DebugSymbols=false 
               /p:DebugType=None 
               /p:AppxPackageDir="$(appxPackageDir)"
               /p:AppxBundle=Always 
               /p:AppxPackageSigningEnabled=true 
               /p:UapAppxPackageBuildMode=StoreUpload 
-              /p:platform="${{ parameters.build_platform }}" 
+              /p:platform="${{ parameters.solution_target_platform }}" 
               /p:PackageCertificateThumbprint="$(cert_thumbprint)" 
               /p:PackageCertificateKeyFile="$(signing_certificate.secureFilePath)" 
               /p:PackageCertificatePassword="${{ parameters.windows_cert_password }}"'
@@ -208,7 +254,7 @@ stages:
         targetType: 'inline'                                                                                                 
         script: |
           Get-ChildItem -Filter "*.*xbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
-          Get-ChildItem -Filter "*.*xupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
+          Get-ChildItem -Filter "*.*xupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_upload_name }}" | Write-Host
 
     # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}

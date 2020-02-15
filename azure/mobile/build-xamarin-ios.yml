@@ -27,7 +27,6 @@ parameters:
   type: string
   default: '1.0.$(Build.BuildId)'
 
-
 # solution_filename - (Required) The relative path to the solution file that should be built
 - name: solution_filename
   type: string

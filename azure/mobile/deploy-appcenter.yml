@@ -1,22 +1,35 @@
 parameters:
+# stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
+# Defaults to 'Deploy_App_Center'
 - name: stage_name
   type: string
-  default: 'DeployAppCenter'
+  default: 'Deploy_App_Center'
+# depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
+# any other stage. However, since this is a deployment stage, you'll probably want to specify a build stage that
+# this stage depends on.
 - name: depends_on
   type: stageList
   default: []
+# deploy_appcenter_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
+# cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
+# any stages that depend on this stage will attempt to execute
 - name: deploy_appcenter_enabled
   type: string
   default: 'true'
 - name: environment_name
   type: string
+
+# artifact_name - (Optional) The name of the artifact to copy application to
 - name: artifact_name
   type: string
   default: 'drop'
+# artifact_folder - (Required) The name of the folder to copy application to in the artifact
 - name: artifact_folder
   type: string
+# application_package - (Required) The name of the application package to output
 - name: application_package
   type: string
+
 - name: appcenter_service_connection
   type: string
 - name: appcenter_organisation
@@ -35,15 +48,20 @@ parameters:
 - name: keystore_password
   type: string
   default: ''
+
+# onStart - Steps to be executed before stage starts
 - name: onStart
   type: stepList
   default: []
+# postArtifactDownload - Steps to be executed after artifacts from previous stages have been downloaded
 - name: postArtifactDownload
   type: stepList
   default: []
+# preAppCenterPublish - Steps to be executed before application package is published to App Center
 - name: preAppCenterPublish
   type: stepList
   default: []
+# onEnd - Steps to be executed at the end of the stage
 - name: onEnd
   type: stepList
   default: []
