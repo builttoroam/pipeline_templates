@@ -128,7 +128,7 @@ stages:
         
             - task: PowerShell@2
               displayName: Use Bundletool to extract and sign APK
-              condition: and( and( succeeded(), eq( variables['deploy_enabled'],'true') ), contains( '${{ parameters.application_package }}','.aab') ) 
+              condition: and( and( succeeded(), eq( variables['deploy_enabled'],'true') ), contains( variables['application_fullpath'],'.aab') ) 
               inputs:
                 targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
                 script: |
