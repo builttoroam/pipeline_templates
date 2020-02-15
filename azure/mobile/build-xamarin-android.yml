@@ -90,6 +90,8 @@ stages:
       inputs:
         secureFile: '${{ parameters.secure_file_keystore_filename }}'
 
+    # onStart steps - performed after any secure files are downloaded but before 
+    # any other build steps are executed
     - ${{ parameters.onStart }}
 
     - task: PowerShell@2
@@ -123,6 +125,7 @@ stages:
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
+    # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
 
     - task: VSBuild@1
@@ -140,6 +143,7 @@ stages:
         /p:AndroidSigningKeyAlias="${{ parameters.keystore_alias }}" 
         /p:AndroidSigningStorePass="${{ parameters.keystore_password }}"' 
 
+    # postBuild steps - performs steps immediately after executing the solution build
     - ${{ parameters.postBuild }}
 
     - task: CopyFiles@2
@@ -158,6 +162,7 @@ stages:
         script: |
           Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
 
+    # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}
 
     - task: PublishPipelineArtifact@1
@@ -167,4 +172,5 @@ stages:
         targetPath: '$(build.artifactStagingDirectory)' 
         artifactName: '${{ parameters.artifact_name }}'
 
+    # onEnd steps - performs steps after publishing artifacts, at the end of the build stage
     - ${{ parameters.onEnd }}

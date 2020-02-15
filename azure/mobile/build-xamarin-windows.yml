@@ -95,6 +95,8 @@ stages:
       inputs:
         secureFile: '${{ parameters.windows_cert_securefiles_filename }}'
 
+    # onStart steps - performed after any secure files are downloaded but before 
+    # any other build steps are executed
     - ${{ parameters.onStart }}
 
     - task: PowerShell@2
@@ -160,6 +162,7 @@ stages:
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
+    # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
 
     - task: VSBuild@1
@@ -180,6 +183,7 @@ stages:
               /p:PackageCertificatePassword="${{ parameters.windows_cert_password }}"'
         configuration: '${{ parameters.solution_build_configuration }}'
 
+    # postBuild steps - performs steps immediately after executing the solution build
     - ${{ parameters.postBuild }}
 
     - task: CopyFiles@2
@@ -206,6 +210,7 @@ stages:
           Get-ChildItem -Filter "*.*xbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
           Get-ChildItem -Filter "*.*xupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_appxupload_name }}" | Write-Host
 
+    # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}
  
     - task: PublishPipelineArtifact@1
@@ -215,6 +220,7 @@ stages:
         targetPath: '$(build.artifactStagingDirectory)' 
         artifactName: '${{ parameters.artifact_name }}'
 
+    # onEnd steps - performs steps after publishing artifacts, at the end of the build stage
     - ${{ parameters.onEnd }}
 
 
