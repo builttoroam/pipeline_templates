@@ -114,6 +114,8 @@ stages:
       value: C:\Microsoft\AndroidNDK64\android-ndk-r16b
     - name: manifestPath
       value: ${{ parameters.android_manifest_filename }}
+    - name: outputSearch
+      value: ''
 
   pool:
     vmImage: 'windows-latest'
@@ -163,6 +165,27 @@ stages:
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
+
+    - task: PowerShell@2
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Determining what output format the build will generate"
+          if( '${{ parameters.application_package }}'.contains(".aab") )
+          { 
+            $search = "**/*-Signed.aab"
+            $format = "aab"
+          }
+          else {
+            $search = "**/*-Signed.apk"
+            $format = "apk"
+          }
+          Write-Host "Search for output using $search"
+          Write-Host "##vso[task.setvariable variable=outputSearch]$search"
+          Write-Host "Package format $format"
+          Write-Host "##vso[task.setvariable variable=packageFormat]$format"
+
     # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
 
@@ -174,7 +197,7 @@ stages:
         configuration: '${{ parameters.solution_build_configuration }}'
         msbuildArgs: '/p:platform="${{ parameters.solution_target_platform }}" 
         /p:AndroidBuildApplicationPackage="true" 
-        /p:AndroidPackageFormat="aab"
+        /p:AndroidPackageFormat="$(packageFormat)"
         /p:AndroidKeyStore="True" 
         /p:AndroidSigningKeyStore="$(signing_keystore.secureFilePath)"
         /p:AndroidSigningKeyPass="${{ parameters.keystore_password }}" 
@@ -188,7 +211,7 @@ stages:
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
       inputs:
-        contents: '**/*-Signed.aab'
+        contents: '$(outputSearch)'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         flattenFolders: true
         overWrite: true
@@ -198,7 +221,12 @@ stages:
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
-          Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
+          if( '${{ parameters.application_package }}'.contains(".aab") ) {
+            Get-ChildItem -Filter "*.aab" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
+          }
+          else{
+            Get-ChildItem -Filter "*.apk" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
+          }
 
     # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}
