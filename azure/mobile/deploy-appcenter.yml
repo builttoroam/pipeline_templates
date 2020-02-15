@@ -72,7 +72,6 @@ stages:
             - task: DownloadSecureFile@1
               displayName: Download keystore from Secure Files (for repackaging AAB to APK)
               condition: ne( '${{ parameters.secure_file_keystore_filename }}','') 
-              displayName: 'Download keystore'
               name: signing_keystore
               inputs:
                 secureFile: '${{ parameters.secure_file_keystore_filename }}'
