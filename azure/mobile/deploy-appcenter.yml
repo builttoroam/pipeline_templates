@@ -3,6 +3,7 @@ parameters:
   type: string
   default: 'DeployAppCenter'
 - name: depends_on
+  type: stageList
   default: []
 - name: deploy_appcenter_enabled
   type: string

@@ -3,6 +3,7 @@ parameters:
   type: string
   default: 'Windows'
 - name: depends_on
+  type: stageList
   default: []
 - name: build_windows_enabled
   type: string

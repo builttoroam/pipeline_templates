@@ -3,6 +3,7 @@ parameters:
   type: string
   default: 'Android'
 - name: depends_on
+  type: stageList
   default: []
 - name: build_android_enabled
   type: string
