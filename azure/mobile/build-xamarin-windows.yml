@@ -76,7 +76,7 @@ parameters:
 # windows_upload_name - (Optional) The name of the upload package that can be submitted to the Microsoft Store
 - name: windows_upload_name
   type: string
-  default: 'Windows.appxupload'
+  default: ''
 
 # onStart - Steps to be executed before stage starts
 - name: onStart
@@ -126,6 +126,8 @@ stages:
       value: '$(System.DefaultWorkingDirectory)\AppxPackages'
     - name: manifestPath
       value: ${{ parameters.windows_package_manifest_filename}}
+    - name: windows_upload_filename
+      value: ${{ parameters. windows_upload_name }}
   
   pool:
     vmImage: 'windows-latest'
@@ -134,9 +136,11 @@ stages:
   - job: BuildWindows
 
     steps:
+    # Download the signing certificate from secure files with the name
+    # specified in the parameter windows_cert_securefiles_filename
     - task: DownloadSecureFile@1
+      displayName: 'Download secure file ${{ parameters.windows_cert_securefiles_filename }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Download secure file'
       name: signing_certificate
       inputs:
         secureFile: '${{ parameters.windows_cert_securefiles_filename }}'
@@ -145,7 +149,11 @@ stages:
     # any other build steps are executed
     - ${{ parameters.onStart }}
 
+    # This task searches for the package.appxmanifest file so that the version information can be updated
+    # The windows_package_manifest_filename property can be used to set this location if the source code includes
+    # multiple windows projects
     - task: PowerShell@2
+      displayName: 'Determine the location of the package.appxmanifest file'
       condition: and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                 
@@ -155,7 +163,25 @@ stages:
           Write-Host "Found at $manifest"
           Write-Host "##vso[task.setvariable variable=manifestPath]$manifest"
 
+    # This task determines the name of the upload file, based on the bundle file name (specified
+    # via the application_package parameter). This can be overridden by specifying the 
+    # windows_upload_name parameter
     - task: PowerShell@2
+      displayName: 'Determine upload file name'
+      condition: and( eq( variables['windows_upload_filename'], ''), eq( variables['build_enabled'],'true') )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Setting upload filename"
+          $uploadFilename = '${{ parameters.application_package }}'.replace('bundle','upload')
+          Write-Host "Upload filename $uploadFilename"
+          Write-Host "##vso[task.setvariable variable=windows_upload_filename]$uploadFilename"
+
+    # This task installs the signing certificate (windows_cert_securefiles_filename parameter that is the name
+    # of the Secure File) so that it can be used for signing. It also extracts the thumbprint
+    # and subject of the certificate
+    - task: PowerShell@2
+      displayName: Extract certificate thumbnail and subject
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
@@ -182,9 +208,10 @@ stages:
 
           Write-Host "Variables exported"
 
+    # This task updates the version number and publisher in the package.manifest file
     - task: MagicChunks@2
+      displayName: 'Updating manifest file with version number and publisher - $(manifestPath)'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Set version number - $(manifestPath)'
       inputs:
         sourcePath: $(manifestPath)
         fileType: Xml
@@ -196,24 +223,27 @@ stages:
             "Package/Identity/@Publisher": "$(cert_subject)"
           }
         
-    - task: NuGetToolInstaller@0
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
+    # Select the NuGet version based on the nuget_version parameter          
+    - task: NuGetToolInstaller@1
       displayName: 'Use NuGet ${{ parameters.nuget_version }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         versionSpec: '${{ parameters.nuget_version }}'
 
+    # NuGet restore for solution
     - task: NuGetCommand@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
     # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
 
+    # Build the solution
     - task: VSBuild@1
+      displayName: 'Building solution ${{ parameters.solution_filename }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-      displayName: 'Build solution ${{ parameters.solution_filename }}'
       inputs:
         solution: ${{ parameters.solution_filename }}
         msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpPackagePlatforms }}" 
@@ -232,7 +262,11 @@ stages:
     # postBuild steps - performs steps immediately after executing the solution build
     - ${{ parameters.postBuild }}
 
+    # Copy bundle files to the correct directory in the staging folder. It uses flattenFolders
+    # so there is a risk that multiple artifacts could overwrite each other if they
+    # have the same filename
     - task: CopyFiles@2
+      displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '$(appxPackageDir)\**\*.*xbundle'
@@ -240,7 +274,11 @@ stages:
         flattenFolders: true
         overWrite: true       
 
+    # Copy upload files to the correct directory in the staging folder. It uses flattenFolders
+    # so there is a risk that multiple artifacts could overwrite each other if they
+    # have the same filename
     - task: CopyFiles@2
+      displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '$(appxPackageDir)\**\*.*xupload' 
@@ -248,13 +286,15 @@ stages:
         flattenFolders: true
         overWrite: true
 
+    # Rename the application package to the name specified in the application_package parameter
     - task: PowerShell@2
+      displayName: 'Rename application package'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
           Get-ChildItem -Filter "*.*xbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
-          Get-ChildItem -Filter "*.*xupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.windows_upload_name }}" | Write-Host
+          Get-ChildItem -Filter "*.*xupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "$(windows_upload_filename)" | Write-Host
 
     # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}

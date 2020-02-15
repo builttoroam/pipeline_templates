@@ -162,7 +162,7 @@ stages:
     # The script needs to do this because the previous task deletes the profile
     # after its done installing it  
     - task: DownloadSecureFile@1
-      displayName: 'Download secure file'
+      displayName: 'Download secure file ${{ parameters.ios_provisioning_profile_securefiles_filename }}'
       condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       name: provision_profile_file
       inputs:
@@ -290,8 +290,8 @@ stages:
 
     # NuGet restore for solution
     - task: NuGetCommand@2
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
+      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         restoreSolution: '${{ parameters.solution_filename }}'
 
