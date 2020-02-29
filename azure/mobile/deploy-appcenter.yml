@@ -75,9 +75,9 @@ parameters:
 # More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
 - name: appcenter_destination_type
   type: string
-  default: 'group'
+  default: 'groups'
   values: 
-  - group
+  - groups
   - store
 # appcenter_distribution_group_ids - (Optional) The id(s) (comma separated list of guids) of the distribution groups to distribute the release to
 # More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
