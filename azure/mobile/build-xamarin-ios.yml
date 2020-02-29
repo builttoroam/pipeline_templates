@@ -7,8 +7,8 @@ parameters:
 # depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
 # any other stage
 - name: depends_on
-  type: stageList
-  default: []
+  type: string
+  default: ''
 # build_ios_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
 # cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
 # any stages that depend on this stage will attempt to execute
