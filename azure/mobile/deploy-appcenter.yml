@@ -51,9 +51,11 @@ parameters:
 # or if it should come from a file (appcenter_release_notes_file parameter). 
 # More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
 - name: appcenter_release_notes_option
-  type: enum
-  values: [input,file]
-  default: input
+  type: string
+  default: 'input'
+  values: 
+  - input
+  - file
 # appcenter_release_notes - (Optional) The release notes to be set in App Center for the release. 
 # More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
 - name: appcenter_release_notes
@@ -67,14 +69,16 @@ parameters:
 # appcenter_is_mandatory_update - (Optional) Whether the App Center release should be marked as a mandatory update
 # More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
 - name: appcenter_is_mandatory_update
-  type: bool
+  type: boolean
   default: false
 # appcenter_destination_type - (Optional) Whether the release is pushed out to a distribution group or a store
 # More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
 - name: appcenter_destination_type
-  type: enum
-  value: [group,store]
-  default: group
+  type: string
+  default: 'group'
+  value: 
+  - group
+  - store
 # appcenter_distribution_group_ids - (Optional) The id(s) (comma separated list of guids) of the distribution groups to distribute the release to
 # More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
 - name: appcenter_distribution_group_ids
@@ -88,7 +92,7 @@ parameters:
 # appcenter_dont_notify_testers - (Optional) Whether testers are notified about an App Center release
 # More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
 - name: appcenter_dont_notify_testers
-  type: bool
+  type: boolean
   default: false
 
 # secure_file_keystore_filename - (Optiona) IMPORTANT: This is required if application package is an AAB. 
@@ -205,8 +209,10 @@ stages:
                 ${{ if contains( parameters.application_package , 'ipa') }}:
                   symbolsOption: iOS
                 releaseNotesOption: ${{ parameters.appcenter_release_notes_option }}
-                releaseNotesInput: ${{ parameters.appcenter_release_notes }}
-                releaseNotesFile: ${{ parameters.appcenter_release_notes_file }}
+                ${{ if eq(parameters.appcenter_release_notes_option, 'input') }}:
+                  releaseNotesInput: ${{ parameters.appcenter_release_notes }}
+                ${{ if eq(parameters.appcenter_release_notes_option, 'file') }}:
+                  releaseNotesFile: ${{ parameters.appcenter_release_notes_file }}
                 isMandatory: ${{ parameters.appcenter_is_mandatory_update }}
                 destinationType: ${{ parameters.appcenter_destination_type }}
                 distributionGroupId: ${{ parameters.appcenter_distribution_group_ids }}
