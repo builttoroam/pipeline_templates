@@ -76,7 +76,7 @@ parameters:
 - name: appcenter_destination_type
   type: string
   default: 'group'
-  value: 
+  values: 
   - group
   - store
 # appcenter_distribution_group_ids - (Optional) The id(s) (comma separated list of guids) of the distribution groups to distribute the release to
