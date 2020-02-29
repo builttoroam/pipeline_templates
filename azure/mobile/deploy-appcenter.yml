@@ -8,8 +8,8 @@ parameters:
 # any other stage. However, since this is a deployment stage, you'll probably want to specify a build stage that
 # this stage depends on.
 - name: depends_on
-  type: stageList
-  default: []
+  type: stage
+  default: ''
 # deploy_appcenter_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
 # cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
 # any stages that depend on this stage will attempt to execute
@@ -84,7 +84,7 @@ parameters:
 
 stages:
 - stage: ${{ parameters.stage_name }}
-  dependsOn: ${{ parameters.depends_on }} 
+  dependsOn: [${{ parameters.depends_on }}] 
   variables:
   - name: deploy_enabled
     value: ${{ parameters.deploy_appcenter_enabled }}
