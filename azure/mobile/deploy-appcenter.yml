@@ -84,7 +84,7 @@ parameters:
 
 stages:
 - stage: ${{ parameters.stage_name }}
-  dependsOn: [${{ parameters.depends_on }}] 
+  dependsOn: ${{ parameters.depends_on }}
   variables:
   - name: deploy_enabled
     value: ${{ parameters.deploy_appcenter_enabled }}
