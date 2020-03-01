@@ -111,19 +111,19 @@ parameters:
   type: string
   default: ''
 
-# onStart - Steps to be executed before stage starts
+# onStart - (Optional) Steps to be executed before stage starts
 - name: onStart
   type: stepList
   default: []
-# postArtifactDownload - Steps to be executed after artifacts from previous stages have been downloaded
+# postArtifactDownload - (Optional) Steps to be executed after artifacts from previous stages have been downloaded
 - name: postArtifactDownload
   type: stepList
   default: []
-# preAppCenterPublish - Steps to be executed before application package is published to App Center
+# preAppCenterPublish - (Optional) Steps to be executed before application package is published to App Center
 - name: preAppCenterPublish
   type: stepList
   default: []
-# onEnd - Steps to be executed at the end of the stage
+# onEnd - (Optional) Steps to be executed at the end of the stage
 - name: onEnd
   type: stepList
   default: []
