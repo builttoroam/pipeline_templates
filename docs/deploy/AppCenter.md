@@ -49,31 +49,35 @@ stages:
 ## Arguments
 
 <table><thead><tr><th>Argument</th><th>Description</th></tr></thead>
-<tr><td>App Center service connection</td><td>(Required) Select the service connection for App Center. Create a new App Center service connection in Azure DevOps project settings.</td></tr>
-<tr><td>App slug</td><td>(Required) The app slug is in the format of <strong>{username}/{app_identifier}</strong>.  To locate <strong>{username}</strong> and <strong>{app_identifier}</strong> for an app, click on its name from <a href="https://appcenter.ms/apps" data-raw-source="https://appcenter.ms/apps">https://appcenter.ms/apps</a>, and the resulting URL is in the format of <a href="https://appcenter.ms/users/{username}/apps/{app_identifier}" data-raw-source="[https://appcenter.ms/users/&lt;b&gt;{username}&lt;/b&gt;/apps/&lt;b&gt;{app_identifier}&lt;/b&gt;](https://appcenter.ms/users/{username}/apps/{app_identifier})">https://appcenter.ms/users/<b>{username}</b>/apps/<b>{app_identifier}</b></a>. If you are using orgs, the app slug is of the format <strong>{orgname}/{app_identifier}</strong>.</td></tr>
-<tr><td>Binary file path</td><td>(Required) Relative path from the repo root to the APK or IPA file you want to publish</td></tr>
-<tr><td>Symbols type</td><td>(Optional) Include symbol files to receive symbolicated stack traces in App Center Diagnostics. Options: <code>Android</code>, <code>Apple</code>.</td></tr>
-<tr><td>Symbols path</td><td>(Optional) Relative path from the repo root to the symbols folder.</td></tr>
-<tr><td>Symbols path (*.pdb)</td><td>(Optional) Relative path from the repo root to PDB symbols files. Path may contain wildcards.</td></tr>
-<tr><td>dSYM path</td><td>(Optional) Relative path from the repo root to dSYM folder. Path may contain wildcards.</td></tr>
-<tr><td>Include all items in parent folder</td><td>(Optional) Upload the selected symbols file or folder and all other items inside the same parent folder. This is required for React Native apps.</td></tr>
-<tr><td>Create release notes</td><td>(Required) Release notes will be attached to the release and shown to testers on the installation page. Options: <code>input</code>, <code>file</code>.</td></tr>
-<tr><td>Release notes</td><td>(Required) Release notes for this version.</td></tr>
-<tr><td>Release notes file</td><td>(Required) Select a UTF-8 encoded text file which contains the Release Notes for this version.</td></tr>
-<tr><td>Require users to update to this release</td><td>(Optional) App Center Distribute SDK required to mandate update. Testers will automatically be prompted to update.</td></tr>
-<tr><td>Release destination</td><td>(Required) Each release will be distributed to either groups or a store. Options: <code>groups</code>, <code>store</code>.</td></tr>
-<tr><td>Destination IDs</td><td>(Optional) IDs of the distribution groups to release to. Leave it empty to use the default group and use commas or semicolons to separate multiple IDs.</td></tr>
-<tr><td>Destination ID</td><td>(Required) ID of the distribution store to deploy to.</td></tr>
-<tr><td>Do not notify testers. Release will still be available to install.</td><td>(Optional) Testers will not receive an email for new releases.</td></tr>
-
-
-<tr>
-<th style="text-align: center" colspan="2"><a href="~/pipelines/process/tasks.md#controloptions" data-raw-source="[Control options](../../process/tasks.md#controloptions)">Control options</a></th>
-</tr>
+<tr><td>artifact_folder</td><td>(Required) The name of the folder to copy application from in the artifact</td></tr>
+<tr><td>application_package</td><td>(Required) The name of the application package to deploy</td></tr> 
+<tr><td>appcenter_service_connection</td><td>(Required) The name of the service connection that connects Azure DevOps to App Center. Go to Service Connections in Azure DevOps to setup the connection and assign permissions for pipelines to access it</td></tr> 
+<tr><td>appcenter_organisation</td><td>(Required) The organisation (or individual) in App Center that the application  is associated with. In AppCenter navigate to the application and extract organisation from URL eg https://appcenter.ms/users/[organisation]/apps/[applicationid] More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devop</td></tr>
+<tr><td>appcenter_applicationid</td><td>(Required) The application id in App Center that identifies  the application. In AppCenter navigate to the application and extract application id from URL eg https://appcenter.ms/users/[organisation]/apps/[applicationid] More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr>
+<tr><td>stage_name</td><td>(Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property)</td></tr> 
+<tr><td>depends_on</td><td>(Optional) The array of stages that this stage depends on. Default is that this stage does not depend on any other stage. However, since this is a deployment stage, you'll probably want to specify a build stage that this stage depends on</td></tr> 
+<tr><td>deploy_appcenter_enabled</td><td>(Optional) Whether this stages should be executed. Note that setting this to false won't completely cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so any stages that depend on this stage will attempt to execute</td></tr> 
+<tr><td>environment_name</td><td>(Optional) The environment to deploy to. Can be used to introduce a manual gate for approval for stage to proceed</td></tr> 
+<tr><td>artifact_name</td><td>(Optional) The name of the artifact to copy application from</td></tr>  
+<tr><td>appcenter_release_notes_option</td><td>(Optional) Whether release notes for App Center should be inputted via the appcenter_release_notes parameter or if it should come from a file (appcenter_release_notes_file parameter).  More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr> 
+<tr><td>appcenter_release_notes</td><td>(Optional) The release notes to be set in App Center for the release. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr> 
+<tr><td>appcenter_release_notes_file</td><td>(Optional) The file to read the release notes from to be set in App Center for the release. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr> 
+<tr><td>appcenter_is_mandatory_update</td><td>(Optional) Whether the App Center release should be marked as a mandatory update. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr>
+<tr><td>appcenter_destination_type</td><td>(Optional) Whether the release is pushed out to a distribution group or a store. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr> 
+<tr><td>appcenter_distribution_group_ids</td><td>(Optional) The id(s) (comma separated list of guids) of the distribution groups to distribute the release to. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr>
+<tr><td>appcenter_destination_store_id</td><td>(Optional) The id of the destination store. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr>
+<tr><td>appcenter_dont_notify_testers</td><td>(Optional) Whether testers are notified about an App Center release. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr> 
+<tr><td>secure_file_keystore_filename</td><td>(Optiona) IMPORTANT: This is required if application package is an AAB. The keystore file used to sign the APK when extracte from an AAB. This is the name of the keystore in Secure Files.</td></tr> 
+<tr><td>keystore_alias</td><td>(Optional) IMPORTANT: This is required if application package is an AAB. The alias of the keystore.</td></tr> 
+<tr><td>keystore_password</td><td>(Optional) IMPORTANT: This is required if application package is an AAB. The password to access the keystore</td></tr> 
+<tr><td>onStart</td><td>(Optional) Steps to be executed before stage starts</td></tr> 
+<tr><td>postArtifactDownload</td><td>(Optional) Steps to be executed after artifacts from previous stages have been downloaded</td></tr> 
+<tr><td>preAppCenterPublish</td><td>(Optional) Steps to be executed before application package is published to App Center</td></tr> 
+<tr><td>onEnd</td><td>(Optional) Steps to be executed at the end of the stage</td></tr>
 
 </table>
 
-## Example
+<!-- ## Example
 
 This example pipeline builds an Android app, runs tests, and publishes the app using App Center Distribute.
 
@@ -123,8 +127,8 @@ steps:
       releaseNotesOption: 'input'
       releaseNotesInput: 'Here are the release notes for this version.'
       destinationType: 'groups'
-```
+``` -->
 
 ## Open source
 
-This task is open source [on GitHub](https://github.com/Microsoft/azure-pipelines-tasks). Feedback and contributions are welcome.
+This template is open source [on GitHub](https://github.com/builttoroam/pipeline_templates). Feedback and contributions are welcome.
