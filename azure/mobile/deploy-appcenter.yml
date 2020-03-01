@@ -8,8 +8,8 @@ parameters:
 # any other stage. However, since this is a deployment stage, you'll probably want to specify a build stage that
 # this stage depends on.
 - name: depends_on
-  type: stageList
-  default: []
+  type: string
+  default: ''
 # deploy_appcenter_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
 # cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
 # any stages that depend on this stage will attempt to execute
@@ -38,17 +38,62 @@ parameters:
 # appcenter_organisation - (Required) The organisation (or individual) in App Center that the application 
 # is associated with. In AppCenter navigate to the application and extract organisation from URL
 # eg https://appcenter.ms/users/[organisation]/apps/[applicationid]
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
 - name: appcenter_organisation
   type: string
 # appcenter_applicationid - (Required) The application id in App Center that identifies 
 # the application. In AppCenter navigate to the application and extract application id from URL
 # eg https://appcenter.ms/users/[organisation]/apps/[applicationid]
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
 - name: appcenter_applicationid
   type: string
+# appcenter_release_notes_option - (Optional) Whether release notes for App Center should be inputted via the appcenter_release_notes parameter
+# or if it should come from a file (appcenter_release_notes_file parameter). 
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_release_notes_option
+  type: string
+  default: 'input'
+  values: 
+  - input
+  - file
 # appcenter_release_notes - (Optional) The release notes to be set in App Center for the release. 
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
 - name: appcenter_release_notes
   type: string
   default: 'Default release notes'
+# appcenter_release_notes_file - (Optional) The file to read the release notes from to be set in App Center for the release. 
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_release_notes_file
+  type: string
+  default: ''
+# appcenter_is_mandatory_update - (Optional) Whether the App Center release should be marked as a mandatory update
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_is_mandatory_update
+  type: boolean
+  default: false
+# appcenter_destination_type - (Optional) Whether the release is pushed out to a distribution group or a store
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_destination_type
+  type: string
+  default: 'groups'
+  values: 
+  - groups
+  - store
+# appcenter_distribution_group_ids - (Optional) The id(s) (comma separated list of guids) of the distribution groups to distribute the release to
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_distribution_group_ids
+  type: string
+  default: ''
+# appcenter_destination_store_id - (Optional) The id of the destination store
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_destination_store_id
+  type: string
+  default: ''
+# appcenter_dont_notify_testers - (Optional) Whether testers are notified about an App Center release
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_dont_notify_testers
+  type: boolean
+  default: false
 
 # secure_file_keystore_filename - (Optiona) IMPORTANT: This is required if application package is an AAB. 
 # The keystore file used to sign the APK when extracte from an AAB. This is the name of the keystore in Secure Files. 
@@ -84,7 +129,7 @@ parameters:
 
 stages:
 - stage: ${{ parameters.stage_name }}
-  dependsOn: ${{ parameters.depends_on }} 
+  dependsOn: ${{ parameters.depends_on }}
   variables:
   - name: deploy_enabled
     value: ${{ parameters.deploy_appcenter_enabled }}
@@ -163,8 +208,17 @@ stages:
                   symbolsOption: Android
                 ${{ if contains( parameters.application_package , 'ipa') }}:
                   symbolsOption: iOS
-                releaseNotesInput: ${{ parameters.appcenter_release_notes }}
-                isSilent: false
+                releaseNotesOption: ${{ parameters.appcenter_release_notes_option }}
+                ${{ if eq(parameters.appcenter_release_notes_option, 'input') }}:
+                  releaseNotesInput: ${{ parameters.appcenter_release_notes }}
+                ${{ if eq(parameters.appcenter_release_notes_option, 'file') }}:
+                  releaseNotesFile: ${{ parameters.appcenter_release_notes_file }}
+                isMandatory: ${{ parameters.appcenter_is_mandatory_update }}
+                destinationType: ${{ parameters.appcenter_destination_type }}
+                distributionGroupId: ${{ parameters.appcenter_distribution_group_ids }}
+                destinationStoreId: ${{ parameters.appcenter_destination_store_id }}
+                isSilent: ${{ parameters.appcenter_dont_notify_testers }}
+
 
             - ${{ parameters.onEnd }}
 
