@@ -16,73 +16,33 @@ Use this template to simplify the distribution of Android, iOS and Windows (UWP)
 stages:
 - template:  azure/mobile/deploy-appcenter.yml@builttoroam_templates
   parameters:
-    # Stage name and dependencies
-    stage_name: 'Deploy_Android'
-    depends_on: 'Build_Android'
-    deploy_appcenter_enabled: $(android_enabled)
-    environment_name: $(appcenter_environment)
-    # Build artifacts
-    artifact_folder: $(artifact_android_folder)
-    application_package: $(android_application_package)
-    # Signing information (for Android repack to APK)
-    secure_file_keystore_filename: '$(android_keystore_filename)'
-    keystore_alias: '$(android_keystore_alias)'
-    keystore_password: '$(android_keystore_password)'
-    # Deployment to AppCenter
-    appcenter_service_connection: $(appcenter_service_connection)
-    appcenter_organisation: $(appcenter_organisation)
-    appcenter_applicationid: $(appcenter_android_appid)
-
-# stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
-# depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
-# any other stage. However, since this is a deployment stage, you'll probably want to specify a build stage that
-# this stage depends on.
-# deploy_appcenter_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
-# cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
-# any stages that depend on this stage will attempt to execute
-- name: environment_name
-# artifact_name - (Optional) The name of the artifact to copy application to
-# artifact_folder - (Required) The name of the folder to copy application to in the artifact
-# application_package - (Required) The name of the application package to output
-# appcenter_service_connection - (Required) The name of the service connection that connects Azure DevOps
-# to App Center. Go to Service Connections in Azure DevOps to setup the connection and assign permissions
-# for pipelines to access it
-# appcenter_organisation - (Required) The organisation (or individual) in App Center that the application 
-# is associated with. In AppCenter navigate to the application and extract organisation from URL
-# eg https://appcenter.ms/users/[organisation]/apps/[applicationid]
-# appcenter_applicationid - (Required) The application id in App Center that identifies 
-# the application. In AppCenter navigate to the application and extract application id from URL
-# eg https://appcenter.ms/users/[organisation]/apps/[applicationid]
-# appcenter_release_notes - (Optional) The release notes to be set in App Center for the release. 
-# secure_file_keystore_filename - (Optiona) IMPORTANT: This is required if application package is an AAB. 
-# The keystore file used to sign the APK when extracte from an AAB. This is the name of the keystore in Secure Files. 
-# keystore_alias - (Optional) IMPORTANT: This is required if application package is an AAB. The alias of the keystore. 
-# keystore_password - (Optional) IMPORTANT: This is required if application package is an AAB. The password to access the keystore
-# onStart - Steps to be executed before stage starts
-# postArtifactDownload - Steps to be executed after artifacts from previous stages have been downloaded
-# preAppCenterPublish - Steps to be executed before application package is published to App Center
-# onEnd - Steps to be executed at the end of the stage
+    artifact_folder: 
+    application_package: 
+    appcenter_service_connection: 
+    appcenter_organisation:
+    appcenter_applicationid:
+    #stage_name: 'Deploy_App_Center' # Optional
+    #depends_on: # Optional 
+    #deploy_appcenter_enabled: true # Optional 
+    #environment_name: 'Default Environment' # Optional
+    #artifact_name: 'drop' # Optional 
+    #appcenter_release_notes: # Optional 
+    #appcenter_release_notes_option: 'input' # Options: input, file
+    #appcenter_release_notes_file: # Required when appcenter_release_notes_option == Input 
+    #appcenter_is_mandatory_update: # Required when appcenter_release_notes_option == File
+    #appcenter_destination_type: 'groups' # Options: groups, store
+    #appcenter_distribution_group_ids: # Optional
+    #appcenter_destination_store_id: # Required when appcenter_destination_type == store. The id of the destination store
+    #appcenter_dont_notify_testers: false # Optional
+    #secure_file_keystore_filename: # Required if the application package is AAB
+    #keystore_alias: # Required if the application package is AAB
+    #keystore_password: # Required if the application package is AAB
+    #onStart: # Optional
+    #postArtifactDownload: # Optional
+    #preAppCenterPublish: # Optional
+    #onEnd: # Optional
 
 
-
-- task: AppCenterDistribute@3
-  inputs:
-    serverEndpoint: 
-    appSlug: 
-    appFile: 
-    #symbolsOption: 'Apple' # Optional. Options: apple, android
-    #symbolsPath: # Optional
-    #symbolsPdbFiles: '**/*.pdb' # Optional
-    #symbolsDsymFiles: # Optional
-    #symbolsIncludeParentDirectory: # Optional
-    #releaseNotesOption: 'input' # Options: input, file
-    #releaseNotesInput: # Required when releaseNotesOption == Input
-    #releaseNotesFile: # Required when releaseNotesOption == File
-    #isMandatory: false # Optional
-    #destinationType: 'groups' # Options: groups, store
-    #distributionGroupId: # Optional
-    #destinationStoreId: # Required when destinationType == store
-    #isSilent: # Optional
 ```
 
 
