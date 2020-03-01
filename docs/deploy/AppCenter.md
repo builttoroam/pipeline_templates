@@ -57,30 +57,11 @@ stages:
 # secure_file_keystore_filename - (Optiona) IMPORTANT: This is required if application package is an AAB. 
 # The keystore file used to sign the APK when extracte from an AAB. This is the name of the keystore in Secure Files. 
 # keystore_alias - (Optional) IMPORTANT: This is required if application package is an AAB. The alias of the keystore. 
-- name: keystore_alias
-  type: string
-  default: ''
 # keystore_password - (Optional) IMPORTANT: This is required if application package is an AAB. The password to access the keystore
-- name: keystore_password
-  type: string
-  default: ''
-
 # onStart - Steps to be executed before stage starts
-- name: onStart
-  type: stepList
-  default: []
 # postArtifactDownload - Steps to be executed after artifacts from previous stages have been downloaded
-- name: postArtifactDownload
-  type: stepList
-  default: []
 # preAppCenterPublish - Steps to be executed before application package is published to App Center
-- name: preAppCenterPublish
-  type: stepList
-  default: []
 # onEnd - Steps to be executed at the end of the stage
-- name: onEnd
-  type: stepList
-  default: []
 
 
 
