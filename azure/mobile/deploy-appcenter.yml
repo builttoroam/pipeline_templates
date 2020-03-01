@@ -21,14 +21,14 @@ parameters:
   type: string
   default: 'Default Environment'
 
-# artifact_name - (Optional) The name of the artifact to copy application to
+# artifact_name - (Optional) The name of the artifact to copy application from
 - name: artifact_name
   type: string
   default: 'drop'
-# artifact_folder - (Required) The name of the folder to copy application to in the artifact
+# artifact_folder - (Required) The name of the folder to copy application from in the artifact
 - name: artifact_folder
   type: string
-# application_package - (Required) The name of the application package to output
+# application_package - (Required) The name of the application package to deploy
 - name: application_package
   type: string
 
