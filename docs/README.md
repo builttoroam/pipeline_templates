@@ -39,12 +39,14 @@ stages:
 
 The templates in this repository are broken down into build and deploy templates as follows:
 
-## Build Templates
+## Build 
 
 [Xamarin Android](./build//XamarinAndroid.md)
 [Xamarin iOS](./build//XamariniOS.md)
 [Xamarin Windows (UWP)](./build//XamarinWindows.md)
 
-## Deploy Templates
+## Deploy
 
 [AppCenter](./deploy//AppCenter.md)
+
+
