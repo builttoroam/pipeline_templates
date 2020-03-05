@@ -137,6 +137,8 @@ stages:
     value: ${{ parameters.deploy_appcenter_enabled }}
   - name: application_fullpath
     value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
+  - name: release_notes_fullpath
+    value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.appcenter_release_notes_file }}'
   
   pool:
     vmImage: 'windows-latest'
@@ -214,7 +216,7 @@ stages:
                 ${{ if eq(parameters.appcenter_release_notes_option, 'input') }}:
                   releaseNotesInput: ${{ parameters.appcenter_release_notes }}
                 ${{ if eq(parameters.appcenter_release_notes_option, 'file') }}:
-                  releaseNotesFile: ${{ parameters.appcenter_release_notes_file }}
+                  releaseNotesFile: $(release_notes_fullpath)
                 isMandatory: ${{ parameters.appcenter_is_mandatory_update }}
                 destinationType: ${{ parameters.appcenter_destination_type }}
                 distributionGroupId: ${{ parameters.appcenter_distribution_group_ids }}
