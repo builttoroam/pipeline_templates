@@ -281,24 +281,11 @@ stages:
       inputs:
         version: '${{ parameters.net_core_version }}'
 
+    # Install and Restore NuGet for the solution
     - template: ../steps/NuGetInstallAndRestore.yml
       parameters:
         nuget_version: '${{ parameters.nuget_version }}'
         solution_filename: '${{ parameters.solution_filename }}'
-
-    # # Select the NuGet version based on the nuget_version parameter          
-    # - task: NuGetToolInstaller@1
-    #   displayName: 'Use NuGet ${{ parameters.nuget_version }}'
-    #   condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-    #   inputs:
-    #     versionSpec: '${{ parameters.nuget_version }}'
-
-    # # NuGet restore for solution
-    # - task: NuGetCommand@2
-    #   displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
-    #   condition: and( succeeded(), eq( variables['build_enabled'],'true') )
-    #   inputs:
-    #     restoreSolution: '${{ parameters.solution_filename }}'
 
     # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
