@@ -55,3 +55,8 @@ The following are all stageList templates
 
 [AppCenter](./deploy//AppCenter.md)
 
+## Components
+
+The following are all stepList templates
+
+[NuGet Install and Restore](./steps//NuGetInstallAndRestore.md)
