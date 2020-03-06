@@ -17,7 +17,7 @@ In order to reference the template, you first need to create a Service Connectio
 
 Next, you need to setup a reference the pipeline_templates repository as a resource. The endpoint parameter needs to match the name of the GitHub connection from the previous step. Give the repository a name, in this case all_templates, which will be used when referencing a template.
 
-```YAML
+```yaml
 resources:
   repositories:
     - repository: all_templates

@@ -10,7 +10,7 @@ Use this template to simplify the distribution of Android, iOS and Windows (UWP)
 
 ## YAML snippet
 
-```YAML
+```yaml
 # App Center Deployment Template
 # Template for distributing Android, iOS and Windows apps to testers via App Center
 stages:
