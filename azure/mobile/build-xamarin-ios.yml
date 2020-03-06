@@ -78,23 +78,23 @@ parameters:
   type: string
   default: 'SignediOS.ipa'
 
-# onStart - Steps to be executed before stage starts
+# onStart - (Optional) Steps to be executed before stage starts
 - name: onStart
   type: stepList
   default: []
-# preBuild - Steps to be executed before the build starts
+# preBuild - (Optional) Steps to be executed before the build starts
 - name: preBuild
   type: stepList
   default: []
-# postBuild - Steps to be executed after the build has been invoked
+# postBuild - (Optional) Steps to be executed after the build has been invoked
 - name: postBuild
   type: stepList
   default: []
-# prePublish - Steps to be executed before application package is published to artifact
+# prePublish - (Optional) Steps to be executed before application package is published to artifact
 - name: prePublish
   type: stepList
   default: []
-# onEnd - Steps to be executed at the end of the stage
+# onEnd - (Optional) Steps to be executed at the end of the stage
 - name: onEnd
   type: stepList
   default: []
