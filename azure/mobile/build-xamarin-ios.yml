@@ -284,7 +284,7 @@ stages:
     - template: ../steps/NuGetInstallAndRestore.yml
       parameters:
         nuget_version: '${{ parameters.nuget_version }}'
-        solutionPath: '${{ parameters.solution_filename }}'
+        solution_filename: '${{ parameters.solution_filename }}'
 
     # # Select the NuGet version based on the nuget_version parameter          
     # - task: NuGetToolInstaller@1
