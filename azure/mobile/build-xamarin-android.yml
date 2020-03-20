@@ -103,10 +103,8 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
-  condition: eq( variables['build_enabled'],'true')
+  condition: eq( ${{ parameters.build_android_enabled }},'true')
   variables: 
-    - name: build_enabled
-      value: ${{ parameters.build_android_enabled }}
     - name: ANDROID_NDK_HOME
       value: C:\Microsoft\AndroidNDK64\android-ndk-r16b
     - name: ANDROID_NDK_PATH
@@ -128,7 +126,6 @@ stages:
     # specified in the parameter secure_file_keystore_filename
     - task: DownloadSecureFile@1
       displayName: 'Download secure file ${{ parameters.secure_file_keystore_filename }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       name: signing_keystore
       inputs:
         secureFile: '${{ parameters.secure_file_keystore_filename }}'
@@ -141,7 +138,6 @@ stages:
     # whether the build output will be apk or aab
     - task: PowerShell@2
       displayName: 'Determine packaging format'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -165,7 +161,7 @@ stages:
     # multiple android projects
     - task: PowerShell@2
       displayName: 'Determine the location of the AndroidManifest.xml file'
-      condition: and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') )
+      condition: and( succeeded(), eq( variables['manifestPath'], '') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -177,7 +173,6 @@ stages:
     # Update the AndroidManifest.xml with the verion information
     - task: android-manifest-version@1
       displayName: 'Setting application version in $(manifestPath)'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         sourcePath: '$(manifestPath)'
         versionCodeOption: 'buildid'
@@ -197,7 +192,6 @@ stages:
     # Build the solution
     - task: VSBuild@1
       displayName: 'Building solution ${{ parameters.solution_filename }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         solution: '${{ parameters.solution_filename }}'
         configuration: '${{ parameters.solution_build_configuration }}'
@@ -218,7 +212,6 @@ stages:
     # have the same filename
     - task: CopyFiles@2
       displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '$(outputSearch)'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
@@ -228,7 +221,6 @@ stages:
     # Rename the application package to the name specified in the application_package parameter
     - task: PowerShell@2
       displayName: 'Rename application package'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -245,7 +237,6 @@ stages:
     # Publish artifacts from this stage
     - task: PublishBuildArtifacts@1
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         pathtoPublish: '$(build.artifactStagingDirectory)' 
         artifactName: '${{ parameters.artifact_name }}' 

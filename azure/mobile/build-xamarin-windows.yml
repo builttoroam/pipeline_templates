@@ -107,10 +107,8 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
-  condition: eq( variables['build_enabled'],'true')
+  condition: eq( ${{ parameters.build_windows_enabled }},'true')
   variables: 
-    - name: build_enabled
-      value: ${{ parameters.build_windows_enabled }}
     - name: cert_thumbprint
       value: ''
     - name: cert_subject
@@ -133,7 +131,6 @@ stages:
     # specified in the parameter windows_cert_securefiles_filename
     - task: DownloadSecureFile@1
       displayName: 'Download secure file ${{ parameters.windows_cert_securefiles_filename }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       name: signing_certificate
       inputs:
         secureFile: '${{ parameters.windows_cert_securefiles_filename }}'
@@ -147,7 +144,7 @@ stages:
     # multiple windows projects
     - task: PowerShell@2
       displayName: 'Determine the location of the package.appxmanifest file'
-      condition: and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') )
+      condition: and( succeeded(), eq( variables['manifestPath'], '') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -161,7 +158,7 @@ stages:
     # windows_upload_name parameter
     - task: PowerShell@2
       displayName: 'Determine upload file name'
-      condition: and( eq( variables['windows_upload_filename'], ''), eq( variables['build_enabled'],'true') )
+      condition: and( succeeded(), eq( variables['windows_upload_filename'], '') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -175,7 +172,6 @@ stages:
     # and subject of the certificate
     - task: PowerShell@2
       displayName: Extract certificate thumbnail and subject
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         script: |
@@ -204,7 +200,6 @@ stages:
     # This task updates the version number and publisher in the package.manifest file
     - task: MagicChunks@2
       displayName: 'Updating manifest file with version number and publisher - $(manifestPath)'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         sourcePath: $(manifestPath)
         fileType: Xml
@@ -228,7 +223,6 @@ stages:
     # Build the solution
     - task: VSBuild@1
       displayName: 'Building solution ${{ parameters.solution_filename }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         solution: ${{ parameters.solution_filename }}
         msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpPackagePlatforms }}" 
@@ -252,7 +246,6 @@ stages:
     # have the same filename
     - task: CopyFiles@2
       displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '$(appxPackageDir)\**\*.*xbundle'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
@@ -264,7 +257,6 @@ stages:
     # have the same filename
     - task: CopyFiles@2
       displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '$(appxPackageDir)\**\*.*xupload' 
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
@@ -274,7 +266,6 @@ stages:
     # Rename the application package to the name specified in the application_package parameter
     - task: PowerShell@2
       displayName: 'Rename application package'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -286,7 +277,6 @@ stages:
  
     # Publish artifacts from this stage
     - task: PublishBuildArtifacts@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
         pathtoPublish: '$(build.artifactStagingDirectory)' 
