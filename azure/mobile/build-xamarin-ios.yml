@@ -117,10 +117,8 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
-  condition: eq( variables['build_enabled'],'true')
+  condition: eq( ${{ parameters.build_ios_enabled }},'true')
   variables: 
-    - name: build_enabled
-      value: ${{ parameters.build_ios_enabled }}
     - name: manifestPath
       value: ${{ parameters.ios_plist_filename }}
     - name: signing_identity
@@ -141,7 +139,6 @@ stages:
     # with the name specified in parameter ios_cert_securefiles_filename
     - task: InstallAppleCertificate@2
       displayName: 'Install Signing Certificate'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         certSecureFile: '${{ parameters.ios_cert_securefiles_filename }}'
         certPwd: '${{ parameters.ios_cert_password }}'
@@ -152,7 +149,6 @@ stages:
     # with the name specified in the parameter ios_provisioning_profile_securefiles_filename
     - task: InstallAppleProvisioningProfile@1
       displayName: 'Install Provisioning Profile'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         provisioningProfileLocation: 'secureFiles'
         provProfileSecureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
@@ -164,7 +160,6 @@ stages:
     # after its done installing it  
     - task: DownloadSecureFile@1
       displayName: 'Download secure file ${{ parameters.ios_provisioning_profile_securefiles_filename }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       name: provision_profile_file
       inputs:
         secureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
@@ -179,7 +174,7 @@ stages:
     # and searching for the correct key-value pair
     - task: PowerShell@2
       displayName: 'Extract bundle id from provisioning profile'
-      condition: and( succeeded(), and( eq( variables['bundle_id'], ''), eq( variables['build_enabled'],'true') ) )
+      condition: and( succeeded(), eq( variables['bundle_id'], '') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -213,7 +208,7 @@ stages:
     # property otherwise this script will always pick the first Info.plist it finds
     - task: PowerShell@2
       displayName: 'Find the Info.plist file'
-      condition: and( succeeded(), and( eq( variables['manifestPath'], ''), eq( variables['build_enabled'],'true') ) )
+      condition: and( succeeded(), eq( variables['manifestPath'], '') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -225,7 +220,6 @@ stages:
     # Update the Info.plist with the verion information
     - task: ios-bundle-version@1
       displayName: 'Setting application version in ${{ parameters.ios_plist_filename }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         sourcePath: '$(manifestPath)'
         versionCodeOption: 'buildid'
@@ -236,7 +230,7 @@ stages:
     # Update the Info.plist with the correct bundle id
     - task: ios-bundle-identifier@1
       displayName: 'Setting application bundle id ${{ parameters.ios_plist_filename }}'
-      condition: and( succeeded(), and( ne( variables['bundle_id'], ''), eq( variables['build_enabled'],'true') ) )
+      condition: and( succeeded(), ne( variables['bundle_id'], '') )
       inputs:
         sourcePath: '$(manifestPath)'
         bundleIdentifier: '$(bundle_id)'
@@ -247,7 +241,7 @@ stages:
     # variable is set to the signing identity found in the certificate file
     - task: PowerShell@2
       displayName: 'Extract signing identity'
-      condition: and( succeeded(), and( eq( variables['signing_identity'], ''), eq( variables['build_enabled'],'true') ) )
+      condition: and( succeeded(), eq( variables['signing_identity'], '') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -261,7 +255,7 @@ stages:
     # variable is set to the provisioning profile id found in the provisioning profile file
     - task: PowerShell@2
       displayName: 'Extract provisioning profile id'
-      condition: and( succeeded(), and( eq( variables['prov_profile'], ''), eq( variables['build_enabled'],'true') ) )
+      condition: and( succeeded(), eq( variables['prov_profile'], '') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -273,12 +267,10 @@ stages:
     # Select the Xamarin SDK version based on the xamarin_sdk_version parameter          
     - script: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh '${{ parameters.xamarin_sdk_version }}'
       displayName: 'Select the Xamarin SDK version'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
 
     # Select the .Net Core version based on the net_core_version parameter          
     - task: UseDotNet@2
       displayName: 'Use .Net Core sdk ${{ parameters.net_core_version }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         version: '${{ parameters.net_core_version }}'
 
@@ -294,7 +286,6 @@ stages:
     # Build the solution
     - task: XamariniOS@2
       displayName: 'Building solution ${{ parameters.solution_filename }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         solutionFile: '${{ parameters.solution_filename }}'
         configuration: '${{ parameters.solution_build_configuration }}'
@@ -311,7 +302,6 @@ stages:
     # have the same filename
     - task: CopyFiles@2
       displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         contents: '**/*.ipa'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
@@ -321,7 +311,6 @@ stages:
     # Rename the application package to the name specified in the application_package parameter
     - task: PowerShell@2
       displayName: 'Rename application package'
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       inputs:
         targetType: 'inline'                                                                                                 
         script: |
@@ -332,7 +321,6 @@ stages:
 
     # Publish artifacts from this stage
     - task: PublishBuildArtifacts@1
-      condition: and( succeeded(), eq( variables['build_enabled'],'true') )
       displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
       inputs:
         pathtoPublish: '$(build.artifactStagingDirectory)' 
