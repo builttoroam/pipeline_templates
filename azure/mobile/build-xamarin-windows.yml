@@ -107,6 +107,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
+  condition: eq( variables['build_enabled'],'true')
   variables: 
     - name: build_enabled
       value: ${{ parameters.build_windows_enabled }}

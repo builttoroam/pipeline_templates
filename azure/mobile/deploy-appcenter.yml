@@ -132,6 +132,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }}
+  condition: eq( variables['deploy_enabled'],'true')
   variables:
   - name: deploy_enabled
     value: ${{ parameters.deploy_appcenter_enabled }}
