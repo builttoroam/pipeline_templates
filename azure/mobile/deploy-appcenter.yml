@@ -2,7 +2,7 @@ parameters:
 # stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
 # Defaults to 'Deploy_App_Center'
 - name: stage_name
-  type: boolean
+  type: string
   default: 'Deploy_App_Center'
 # depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
 # any other stage. However, since this is a deployment stage, you'll probably want to specify a build stage that
@@ -14,8 +14,8 @@ parameters:
 # cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
 # any stages that depend on this stage will attempt to execute
 - name: deploy_appcenter_enabled
-  type: string
-  default: 'true'
+  type: boolean
+  default: true
 # environment_name - (Optional) The environment to deploy to. Can be used to introduce a manual gate for approval for stage to proceed
 - name: environment_name
   type: string
