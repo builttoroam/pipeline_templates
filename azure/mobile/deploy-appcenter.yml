@@ -2,7 +2,7 @@ parameters:
 # stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
 # Defaults to 'Deploy_App_Center'
 - name: stage_name
-  type: string
+  type: boolean
   default: 'Deploy_App_Center'
 # depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
 # any other stage. However, since this is a deployment stage, you'll probably want to specify a build stage that
@@ -132,7 +132,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }}
-  condition: eq( ${{ parameters.deploy_appcenter_enabled }} ,'true')
+  condition: ${{ parameters.deploy_appcenter_enabled }} 
   variables:
   - name: application_fullpath
     value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
