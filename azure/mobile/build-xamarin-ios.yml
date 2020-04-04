@@ -13,8 +13,8 @@ parameters:
 # cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
 # any stages that depend on this stage will attempt to execute
 - name: build_ios_enabled
-  type: string
-  default: 'true'
+  type: boolean
+  default: true
 
 # build_number - (Optional) The build number to be applied to the application. Defaults to Build.BuildId 
 # built in variable
@@ -117,7 +117,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
-  condition: eq( ${{ parameters.build_ios_enabled }},'true')
+  condition: ${{ parameters.build_ios_enabled }}
   variables: 
     - name: manifestPath
       value: ${{ parameters.ios_plist_filename }}

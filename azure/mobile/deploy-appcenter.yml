@@ -14,8 +14,8 @@ parameters:
 # cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
 # any stages that depend on this stage will attempt to execute
 - name: deploy_appcenter_enabled
-  type: string
-  default: 'true'
+  type: boolean
+  default: true
 # environment_name - (Optional) The environment to deploy to. Can be used to introduce a manual gate for approval for stage to proceed
 - name: environment_name
   type: string
@@ -132,7 +132,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }}
-  condition: eq( ${{ parameters.deploy_appcenter_enabled }} ,'true')
+  condition: ${{ parameters.deploy_appcenter_enabled }} 
   variables:
   - name: application_fullpath
     value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
