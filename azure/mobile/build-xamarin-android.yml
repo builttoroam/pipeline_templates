@@ -2,7 +2,7 @@ parameters:
 # stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
 # Defaults to 'Build_Android'
 - name: stage_name
-  type: string
+  type: boolean
   default: 'Build_Android'
 # depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
 # any other stage
