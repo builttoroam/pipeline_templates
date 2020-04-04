@@ -13,7 +13,7 @@ parameters:
 # cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
 # any stages that depend on this stage will attempt to execute
 - name: build_windows_enabled
-  type: booelan
+  type: boolean
   default: true
 
 # build_number - (Optional) The build number to be applied to the application. Defaults to Build.BuildId 
