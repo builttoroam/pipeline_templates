@@ -25,6 +25,7 @@ stages:
             apktool_version: $(ApkToolVersion.VersionNumber)
 
     - job: Test_ApkTool_Cache
+      dependsOn: Cache_ApkTool
       steps:
         - task: PowerShell@2
           name: ApkToolVersion
