@@ -24,11 +24,11 @@ steps:
   - template: download-url-to-file.yml
     condition: ne(variables.APKTOOL_CACHE_RESTORED, 'true')
     parameters:
-      source_url: '{{parameters.apktool_url}}'
+      source_url: '${{ parameters.apktool_url }}'
       target_path_including_filename: '$(Pipeline.Workspace)/apktool/apktool.jar' 
 
   - template: download-url-to-file.yml
     condition: ne(variables.APKTOOL_CACHE_RESTORED, 'true')
     parameters:
-      source_url: '{{parameters.apktool_wrapper_url}}'
+      source_url: '${{ parameters.apktool_wrapper_url }}'
       target_path_including_filename: '$(Pipeline.Workspace)/apktool/apktool.bat' 
