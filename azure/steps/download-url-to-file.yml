@@ -6,11 +6,11 @@ parameters:
 - name: target_path_including_filename
   type: string
 # file_path_variable - (Optional)
-  name: file_path_variable
+- name: file_path_variable
   type: string
   default: ''
 # name - (Optional)
-  name: name
+- name: name
   type: string
   default: 'download'
 
