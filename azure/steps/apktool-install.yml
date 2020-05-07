@@ -26,13 +26,13 @@ steps:
 - script: echo 'Apktool not currently cached'
   condition: ne(variables.APKTOOL_CACHE_RESTORED, 'true')
 
-- $[ if ne(variables.APKTOOL_CACHE_RESTORED, 'true') ]:
+- $( if ne(variables.APKTOOL_CACHE_RESTORED, 'true') ):
   - template: download-url-to-file.yml
     parameters:
       source_url: '${{ parameters.apktool_url }}'
       target_path_including_filename: '$(Pipeline.Workspace)/apktool/apktool.jar' 
 
-- $[ if ne(variables.APKTOOL_CACHE_RESTORED, 'true') ]:
+- $( if ne(variables.APKTOOL_CACHE_RESTORED, 'true') ):
   - template: download-url-to-file.yml
     parameters:
       source_url: '${{ parameters.apktool_wrapper_url }}'
