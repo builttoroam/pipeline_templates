@@ -19,11 +19,11 @@ steps:
 
   - template: /azure/steps/apktool-install.yml
     parameters:
-      version: $(ApkToolVersion.VersionNumber)
+      apktool_version: $(ApkToolVersion.VersionNumber)
 
   - template: /azure/steps/apktool-install.yml
     parameters:
-      version: $(ApkToolVersion.VersionNumber)
+      apktool_version: $(ApkToolVersion.VersionNumber)
 
   - template: /azure/steps/download-url-to-file.yml
     parameters:
