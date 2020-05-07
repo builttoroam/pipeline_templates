@@ -12,11 +12,12 @@ parameters:
 # name - (Optional)
 - name: name
   type: string
-  default: 'download'
+  default: ''
 
 steps:
   - task: PowerShell@2
-    name: ${{ parameters.name }}
+    ${{ if ne(parameters.name, '') }}:
+      name: ${{ parameters.name }}
     displayName: 'Download url [${{ parameters.source_url }}] to file [${{ parameters.target_path_including_filename }}]'
     inputs:
       targetType: 'inline'
