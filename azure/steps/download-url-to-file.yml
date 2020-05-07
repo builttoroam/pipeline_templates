@@ -22,7 +22,7 @@ steps:
       targetType: 'inline'
       workingDirectory: $(Pipeline.Workspace)
       script: |
-          $file_path = ${{ parameters.target_path_including_filename }};
+          $file_path = '${{ parameters.target_path_including_filename }}'
           Write-Host "Download file from ${{ parameters.source_url }} to $file_path"
           $contents = Invoke-WebRequest '${{ parameters.source_url }}' -UseBasicParsing -OutFile $file_path
           Write-Host "Download complete to $file_path"
