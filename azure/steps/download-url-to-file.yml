@@ -29,6 +29,13 @@ steps:
       workingDirectory: $(Pipeline.Workspace)
       script: |
           $file_path = '${{ parameters.target_path_including_filename }}'
+          Write-Host "Destination file $file_path"
+          $file_dir = Split-Path -Path $file_path
+          Write-Host "Destination directory $file_dir"
+          If (!( Test-Path $file_dir )){
+            Write-Host "Destination directory doesn't exist, so creating it"
+            New-Item -Path $file_dir -ItemType Directory  
+          }
           Write-Host "Download file from ${{ parameters.source_url }} to $file_path"
           $contents = Invoke-WebRequest '${{ parameters.source_url }}' -UseBasicParsing -OutFile $file_path
           Write-Host "Download complete to $file_path"
