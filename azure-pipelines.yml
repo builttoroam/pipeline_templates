@@ -10,7 +10,7 @@ steps:
       name: 'downloadfile'
       source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
       target_path_including_filename: '$(Pipeline.Workspace)/apk-tool1.bat'
-      file_path_variable: 'download_path1'
+      file_path_variable: 'download_path'
 
   - script: echo $(downloadfile.download_path)
 
