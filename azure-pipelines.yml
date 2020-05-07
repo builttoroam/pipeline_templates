@@ -4,73 +4,87 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
-steps:
-  - task: PowerShell@2
-    name: ApkToolVersion
-    displayName: 'Generate version number based on current datetime'
-    inputs:
-      targetType: 'inline'
-      workingDirectory: $(Pipeline.Workspace)
-      script: |
-          $current = Get-Date -Format "yyyyMMddHHmm"
-          echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
+stages:
+  - stage: Cache_ApkTool
+    pool:
+      vmImage: 'windows-latest'
+    jobs:
+    - job: Cache_ApkTool
+      steps:
+        - task: PowerShell@2
+          name: ApkToolVersion
+          displayName: 'Generate version number based on current datetime'
+          inputs:
+            targetType: 'inline'
+            workingDirectory: $(Pipeline.Workspace)
+            script: |
+                $current = Get-Date -Format "yyyyMMddHH"
+                echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
+        - template: /azure/steps/apktool-install.yml
+          parameters:
+            apktool_version: $(ApkToolVersion.VersionNumber)
 
+    - job: Test_ApkTool_Cache
+      steps:
+        - task: PowerShell@2
+          name: ApkToolVersion
+          displayName: 'Generate version number based on current datetime'
+          inputs:
+            targetType: 'inline'
+            workingDirectory: $(Pipeline.Workspace)
+            script: |
+                $current = Get-Date -Format "yyyyMMddHH"
+                echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
+        - template: /azure/steps/apktool-install.yml
+          parameters:
+            apktool_version: $(ApkToolVersion.VersionNumber)
 
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            name: 'downloadfile'
+            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            target_path_including_filename: '$(Pipeline.Workspace)/apk-tool1.bat'
+            file_path_variable: 'download_path'
 
-  - template: /azure/steps/apktool-install.yml
-    parameters:
-      apktool_version: $(ApkToolVersion.VersionNumber)
+        - script: echo $(downloadfile.download_path)
 
-  - template: /azure/steps/apktool-install.yml
-    parameters:
-      apktool_version: $(ApkToolVersion.VersionNumber)
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            target_path_including_filename: '$(Pipeline.Workspace)/apk-tool2.bat'
 
-  - template: /azure/steps/download-url-to-file.yml
-    parameters:
-      name: 'downloadfile'
-      source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
-      target_path_including_filename: '$(Pipeline.Workspace)/apk-tool1.bat'
-      file_path_variable: 'download_path'
+        - task: PowerShell@2
+          displayName: 'Test file downloaded correctly'
+          inputs:
+            targetType: 'inline'
+            workingDirectory: $(Pipeline.Workspace)
+            script: |
+                $fileToCheck = '$(Pipeline.Workspace)/apk-tool2.bat'
+                if (Test-Path $fileToCheck -PathType leaf)
+                {
+                  Write-Host "File exists"
+                }
+                else{
+                  throw "file doesn't exist"
+                }
 
-  - script: echo $(downloadfile.download_path)
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            target_path_including_filename: '$(Pipeline.Workspace)/apk-tool3.bat'
 
-  - template: /azure/steps/download-url-to-file.yml
-    parameters:
-      source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
-      target_path_including_filename: '$(Pipeline.Workspace)/apk-tool2.bat'
-
-  - task: PowerShell@2
-    displayName: 'Test file downloaded correctly'
-    inputs:
-      targetType: 'inline'
-      workingDirectory: $(Pipeline.Workspace)
-      script: |
-          $fileToCheck = '$(Pipeline.Workspace)/apk-tool2.bat'
-          if (Test-Path $fileToCheck -PathType leaf)
-          {
-            Write-Host "File exists"
-          }
-          else{
-            throw "file doesn't exist"
-          }
-
-  - template: /azure/steps/download-url-to-file.yml
-    parameters:
-      source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
-      target_path_including_filename: '$(Pipeline.Workspace)/apk-tool3.bat'
-
-  - task: PowerShell@2
-    displayName: 'Test file downloaded correctly'
-    inputs:
-      targetType: 'inline'
-      workingDirectory: $(Pipeline.Workspace)
-      script: |
-          $fileToCheck = '$(Pipeline.Workspace)/apk-tool3.bat'
-          if (Test-Path $fileToCheck -PathType leaf)
-          {
-            Write-Host "File exists"
-          }
-          else{
-            throw "file doesn't exist"
-          }
+        - task: PowerShell@2
+          displayName: 'Test file downloaded correctly'
+          inputs:
+            targetType: 'inline'
+            workingDirectory: $(Pipeline.Workspace)
+            script: |
+                $fileToCheck = '$(Pipeline.Workspace)/apk-tool3.bat'
+                if (Test-Path $fileToCheck -PathType leaf)
+                {
+                  Write-Host "File exists"
+                }
+                else{
+                  throw "file doesn't exist"
+                }
 
