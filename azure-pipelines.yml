@@ -25,7 +25,7 @@ steps:
       targetType: 'inline'
       workingDirectory: $(Pipeline.Workspace)
       script: |
-          $$fileToCheck = '$(Pipeline.Workspace)/apk-tool2.bat'
+          $fileToCheck = '$(Pipeline.Workspace)/apk-tool2.bat'
           if (Test-Path $fileToCheck -PathType leaf)
           {
             Write-Host "File exists"
@@ -45,7 +45,7 @@ steps:
       targetType: 'inline'
       workingDirectory: $(Pipeline.Workspace)
       script: |
-          $$fileToCheck = '$(Pipeline.Workspace)/apk-tool3.bat'
+          $fileToCheck = '$(Pipeline.Workspace)/apk-tool3.bat'
           if (Test-Path $fileToCheck -PathType leaf)
           {
             Write-Host "File exists"
