@@ -1,0 +1,34 @@
+parameters:
+# apktool_url - (Optional) Override the download url for the ApkTool for Windows
+- name: apktool_url
+  type: string
+  default: https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.4.1.jar
+# apktool_wrapper_url - (Optional) Override the download url for the wrapper batch file for invoking ApkTool
+- name: apktool_wrapper_url
+  type: string
+  default: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+# apktool_version - (Optional) Override the apktool version number - used to cache apktool
+- name: apktool_version
+  type: string
+  default: '2.4.1'
+
+steps:
+  - task: Cache@2
+    inputs:
+      key: apktool | {{parameters.apktool_version}}
+      restoreKeys: apktool
+      path: $(Pipeline.Workspace)/apktool
+      cacheHitVar: APKTOOL_CACHE_RESTORED
+
+  # Install and Restore NuGet for the solution
+  - template: download-url-to-file.yml
+    condition: ne(variables.APKTOOL_CACHE_RESTORED, 'true')
+    parameters:
+      source_url: '{{parameters.apktool_url}}'
+      target_path_including_filename: '$(Pipeline.Workspace)/apktool/apktool.jar' 
+
+  - template: download-url-to-file.yml
+    condition: ne(variables.APKTOOL_CACHE_RESTORED, 'true')
+    parameters:
+      source_url: '{{parameters.apktool_wrapper_url}}'
+      target_path_including_filename: '$(Pipeline.Workspace)/apktool/apktool.bat' 

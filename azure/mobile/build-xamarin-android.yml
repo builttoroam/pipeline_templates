@@ -181,7 +181,7 @@ stages:
         printFile: true
 
     # Install and Restore NuGet for the solution
-    - template: ../steps/NuGetInstallAndRestore.yml
+    - template: ../steps/nuget-install-and-restore.yml
       parameters:
         nuget_version: '${{ parameters.nuget_version }}'
         solution_filename: '${{ parameters.solution_filename }}' 

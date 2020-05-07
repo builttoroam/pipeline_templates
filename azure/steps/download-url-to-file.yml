@@ -1,0 +1,18 @@
+parameters:
+# source_url - Required - The path to download
+- name: source_url
+  type: string
+# target_path_including_filename - Required - The full path, including filename, to download the url to
+- name: target_path_including_filename
+  type: string
+
+steps:
+  - task: PowerShell@2
+    displayName: 'Download url [{{parameters.source_url}}] to file [{{parameters.target_path_including_filename}}]'
+    inputs:
+      targetType: 'inline'
+      workingDirectory: $(Pipeline.Workspace)
+      script: |
+          Write-Host "Download file from {{parameters.source_url}}"
+          $contents = Invoke-WebRequest '{{parameters.source_url}}' -UseBasicParsing -OutFile '{{parameters.target_path_including_filename}}'
+          Write-Host "Download complete"
