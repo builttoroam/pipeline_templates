@@ -5,6 +5,26 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
+  - task: PowerShell@2
+    name: ApkToolVersion
+    displayName: 'Generate version number based on current datetime'
+    inputs:
+      targetType: 'inline'
+      workingDirectory: $(Pipeline.Workspace)
+      script: |
+          $current = Get-Date -Format "yyyyMMddHHmm"
+          echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
+
+
+
+  - template: /azure/steps/apktool-install.yml
+    parameters:
+      version: $(ApkToolVersion.VersionNumber)
+
+  - template: /azure/steps/apktool-install.yml
+    parameters:
+      version: $(ApkToolVersion.VersionNumber)
+
   - template: /azure/steps/download-url-to-file.yml
     parameters:
       name: 'downloadfile'

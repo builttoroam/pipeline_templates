@@ -20,7 +20,12 @@ steps:
       path: $(Pipeline.Workspace)/apktool
       cacheHitVar: APKTOOL_CACHE_RESTORED
 
-  # Install and Restore NuGet for the solution
+  - script: echo 'Apktool found in cache'
+    condition: eq(variables.APKTOOL_CACHE_RESTORED, 'true')
+
+  - script: echo 'Apktool not currently cached'
+    condition: ne(variables.APKTOOL_CACHE_RESTORED, 'true')
+
   - template: download-url-to-file.yml
     condition: ne(variables.APKTOOL_CACHE_RESTORED, 'true')
     parameters:
