@@ -1,4 +1,8 @@
 parameters:
+# is_enabled - (Optional) Whether these steps will be executed
+- name: is_enabled
+  type: boolean
+  default: true
 # source_url - Required - The path to download
 - name: source_url
   type: string
@@ -16,6 +20,7 @@ parameters:
 
 steps:
   - task: PowerShell@2
+    condition: ${{ parameters.is_enabled }}
     ${{ if ne(parameters.name, '') }}:
       name: ${{ parameters.name }}
     displayName: 'Download url [${{ parameters.source_url }}] to file [${{ parameters.target_path_including_filename }}]'
