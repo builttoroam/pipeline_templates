@@ -32,8 +32,7 @@ steps:
           Write-Host "Target path $file_path"
 
           # Check to see if the target path is an absolute or relative path
-          $isAbsolute = $false
-          # Split-Path -Path $file_path -IsAbsolute
+          $isAbsolute = Split-Path -Path $file_path -IsAbsolute
           Write-Host "Is supplied path absolute - $isAbsolute"
           
           # If not absolute, then need to combine the path with the workspace folder
@@ -44,10 +43,10 @@ steps:
 
           $file_dir = Split-Path -Path $file_path
           Write-Host "Destination directory $file_dir"
-          # If (!( Test-Path $file_dir )){
+          If (!( Test-Path $file_dir )){
             Write-Host "Destination directory doesn't exist, so creating it"
             New-Item -Path $file_dir -ItemType Directory  
-          # }
+          }
 
           $file_exists = $false 
           # Test-Path $file_path
