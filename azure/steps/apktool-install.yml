@@ -13,7 +13,7 @@ parameters:
   default: '2.4.1'
 
 steps:
-- template: downoad_and_cache.yml
+- template: download_and_cache.yml
   parameters:
     source_url: '${{ parameters.apktool_wrapper_url }}'
     target_file_name: 'apktool.bat'
@@ -21,7 +21,7 @@ steps:
     folder_to_cache: 'apktool'
     version: '${{ parameters.apktool_version }}'
 
-- template: downoad_and_cache.yml
+- template: download_and_cache.yml
   parameters:
     source_url: '${{ parameters.apktool_url }}'
     target_file_name: 'apktool.jar'
