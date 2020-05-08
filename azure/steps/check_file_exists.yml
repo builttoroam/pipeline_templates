@@ -12,7 +12,7 @@ parameters:
   default: ''
 # throw_on_missing - (Optional) - Throw exception if file is missing
 - name: throw_on_missing
-  type: bool
+  type: boolean
   default: true
 
 
