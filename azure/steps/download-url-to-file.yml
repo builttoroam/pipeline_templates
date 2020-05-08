@@ -1,45 +1,70 @@
 parameters:
-# is_enabled - (Optional) Whether these steps will be executed
-- name: is_enabled
-  type: string
-  default: 'true'
 # source_url - Required - The path to download
 - name: source_url
   type: string
-# target_path_including_filename - Required - The full path, including filename, to download the url to
-- name: target_path_including_filename
+# target_path - Required - Filename and either relative or absolute path
+- name: target_path
   type: string
 # file_path_variable - (Optional)
 - name: file_path_variable
   type: string
-  default: ''
-# name - (Optional)
+  default: 'downloaded_file_path'
+# name - (Optional) - Specify a name if you need to extract output variable values
 - name: name
   type: string
   default: ''
+# overwrite_existing - (Optional) - Default is to only download file if it doesn't exist
+- name: overwrite_existing
+  type: bool
+  default: false
+
 
 steps:
   - task: PowerShell@2
-    condition: ${{ parameters.is_enabled }}
     ${{ if ne(parameters.name, '') }}:
       name: ${{ parameters.name }}
-    displayName: 'Download url [${{ parameters.source_url }}] to file [${{ parameters.target_path_including_filename }}]'
+    displayName: 'Download url [${{ parameters.source_url }}] to file [${{ parameters.target_path }}]'
     inputs:
       targetType: 'inline'
       workingDirectory: $(Pipeline.Workspace)
       script: |
-          $file_path = '${{ parameters.target_path_including_filename }}'
-          Write-Host "Destination file $file_path"
+          $file_path = '${{ parameters.target_path }}'
+          Write-Host "Target path $file_path"
+
+          // Check to see if the target path is an absolute or relative path
+          $isAbsolute = Split-Path -Path $file_path -IsAbsolute
+          Write-Host "Is supplied path absolute - $isAbsolute"
+          
+          // If not absolute, then need to combine the path with the workspace folder
+          If (!isAbsolute){
+            $file_path = Join-Path $(Pipeline.Workspace) $file_path
+            Write-Host "Absolute path is $file_path"
+          }
+
           $file_dir = Split-Path -Path $file_path
           Write-Host "Destination directory $file_dir"
           If (!( Test-Path $file_dir )){
             Write-Host "Destination directory doesn't exist, so creating it"
             New-Item -Path $file_dir -ItemType Directory  
           }
-          Write-Host "Download file from ${{ parameters.source_url }} to $file_path"
-          $contents = Invoke-WebRequest '${{ parameters.source_url }}' -UseBasicParsing -OutFile $file_path
-          Write-Host "Download complete to $file_path"
-          If ("${{ parameters.file_path_variable }}" -ne "") {
-            echo "##vso[task.setvariable variable=${{ parameters.file_path_variable }};isOutput=true]$file_path"
-            Write-Host "Output variable set"
+
+          $file_exists = Test-Path $file_path
+          Write-Host "File exists $file_exists"
+
+          $isDownloaded=false;
+          If ( ${{ parameters.overwrite_existing }} -Or !( $file_exists ))
+          {
+            Write-Host "Download file from ${{ parameters.source_url }} to $file_path"
+            $contents = Invoke-WebRequest '${{ parameters.source_url }}' -UseBasicParsing -OutFile $file_path
+            Write-Host "Download complete to $file_path"
+            $isDownloaded=true;
           }
+          else{
+            Write-Host "File not downloaded"
+          }
+          echo "##vso[task.setvariable variable=downloaded;isOutput=true]$isDownloaded"
+          Write-Host "Output variable 'downloaded' set to $isDownloaded"
+
+          echo "##vso[task.setvariable variable=${{ parameters.downloaded_file_path }};isOutput=true]$file_path"
+          Write-Host "Output variable '${{ parameters.downloaded_file_path }}' set"
+          

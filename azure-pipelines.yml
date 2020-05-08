@@ -37,7 +37,7 @@ stages:
           parameters:
             name: 'downloadfile'
             source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
-            target_path_including_filename: '$(Pipeline.Workspace)/apk-tool1.bat'
+            target_path: '$(Pipeline.Workspace)/apk-tool1.bat'
             file_path_variable: 'download_path'
 
         - script: echo $(downloadfile.download_path)
@@ -45,40 +45,20 @@ stages:
         - template: /azure/steps/download-url-to-file.yml
           parameters:
             source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
-            target_path_including_filename: '$(Pipeline.Workspace)/apk-tool2.bat'
+            target_path: '$(Pipeline.Workspace)/apk-tool2.bat'
 
-        - task: PowerShell@2
-          displayName: 'Test file downloaded correctly'
-          inputs:
-            targetType: 'inline'
-            workingDirectory: $(Pipeline.Workspace)
-            script: |
-                $fileToCheck = '$(Pipeline.Workspace)/apk-tool2.bat'
-                if (Test-Path $fileToCheck -PathType leaf)
-                {
-                  Write-Host "File exists"
-                }
-                else{
-                  throw "file doesn't exist"
-                }
+
+        - template: /azure/steps/check_file_exists.yml
+          parameters:
+            path_to_check: '$(Pipeline.Workspace)/apk-tool2.bat'
 
         - template: /azure/steps/download-url-to-file.yml
           parameters:
             source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
-            target_path_including_filename: '$(Pipeline.Workspace)/apk-tool3.bat'
+            target_path: '$(Pipeline.Workspace)/apk-tool3.bat'
 
-        - task: PowerShell@2
-          displayName: 'Test file downloaded correctly'
-          inputs:
-            targetType: 'inline'
-            workingDirectory: $(Pipeline.Workspace)
-            script: |
-                $fileToCheck = '$(Pipeline.Workspace)/apk-tool3.bat'
-                if (Test-Path $fileToCheck -PathType leaf)
-                {
-                  Write-Host "File exists"
-                }
-                else{
-                  throw "file doesn't exist"
-                }
+        - template: /azure/steps/check_file_exists.yml
+          parameters:
+            path_to_check: '$(Pipeline.Workspace)/apk-tool3.bat'
+
 
