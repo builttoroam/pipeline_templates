@@ -63,9 +63,9 @@ steps:
           else{
             Write-Host "File not downloaded"
           }
-          echo "##vso[task.setvariable variable=downloaded;isOutput=true]$isDownloaded"
-          Write-Host "Output variable 'downloaded' set to $isDownloaded"
+          # echo "##vso[task.setvariable variable=downloaded;isOutput=true]$isDownloaded"
+          # Write-Host "Output variable 'downloaded' set to $isDownloaded"
 
-          echo "##vso[task.setvariable variable=${{ parameters.file_path_variable }};isOutput=true]$file_path"
-          Write-Host "Output variable '${{ parameters.file_path_variable }}' set to $file_path"
+          # echo "##vso[task.setvariable variable=${{ parameters.file_path_variable }};isOutput=true]'$file_path'"
+          # Write-Host "Output variable '${{ parameters.file_path_variable }}' set to $file_path"
           
