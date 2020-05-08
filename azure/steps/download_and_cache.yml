@@ -1,0 +1,40 @@
+parameters:
+# source_url - Required - The path to download
+- name: source_url
+  type: string
+# target_file_name - Required - Filename to download to
+- name: target_file_name
+  type: string
+# folder_to_cache - Required - the folder to cache
+- name: folder_to_cache
+  type: string
+# cache_name - Required - the name of the cache (key and restore key)
+- name: cache_name
+  type: string
+# version - (Optional) - version key for invalidating cache
+- name: version
+  type: string
+  default: ''
+# cache_hit_variable - (Optional) - version key for invalidating cache
+- name: cache_hit_variable
+  type: string
+  default: 'cache_hit'  
+
+steps:
+- task: Cache@2
+  inputs:
+    key: ${{ parameters.cache_name }} | ${{ parameters.version }}
+    restoreKeys: ${{ parameters.cache_name }} | ${{ parameters.version }}
+    path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
+    cacheHitVar: ${{ parameters.cache_hit_variable }} 
+
+- script: echo 'Cached'
+  condition: eq(variables[parameters.cache_hit_variable], 'true')
+
+- script: echo 'Not cached'
+  condition: ne(variables[parameters.cache_hit_variable], 'true')
+
+- template: download-url-to-file.yml
+  parameters:
+    source_url: '${{ parameters.source_url }}'
+    target_path: '$(Pipeline.Workspace)/${{ parameters.folder_to_cache }}/${{ parameters.target_file_name }}' 

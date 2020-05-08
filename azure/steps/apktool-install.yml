@@ -13,26 +13,42 @@ parameters:
   default: '2.4.1'
 
 steps:
-- task: Cache@2
-  inputs:
-    key: apktool | ${{ parameters.apktool_version }}
-    restoreKeys: apktool | ${{ parameters.apktool_version }}
-    path: $(Pipeline.Workspace)/apktool
-    cacheHitVar: APKTOOL_CACHE_RESTORED
-
-- script: echo 'Apktool found in cache'
-  condition: eq(variables.APKTOOL_CACHE_RESTORED, 'true')
-
-- script: echo 'Apktool not currently cached'
-  condition: ne(variables.APKTOOL_CACHE_RESTORED, 'true')
-
-- template: download-url-to-file.yml
+- template: downoad_and_cache.yml
   parameters:
     source_url: '${{ parameters.apktool_wrapper_url }}'
-    target_path: 'apktool/apktool.bat' 
+    target_file_name: 'apktool.bat'
+    cache_name: 'apktool'
+    folder_to_cache: 'apktool'
+    version: '${{ parameters.apktool_version }}'
 
-- template: download-url-to-file.yml
+- template: downoad_and_cache.yml
   parameters:
     source_url: '${{ parameters.apktool_url }}'
-    target_path: 'apktool/apktool.jar' 
+    target_file_name: 'apktool.jar'
+    cache_name: 'apktool'
+    folder_to_cache: 'apktool'
+    version: '${{ parameters.apktool_version }}'
+
+# - task: Cache@2
+#   inputs:
+#     key: apktool | ${{ parameters.apktool_version }}
+#     restoreKeys: apktool | ${{ parameters.apktool_version }}
+#     path: $(Pipeline.Workspace)/apktool
+#     cacheHitVar: APKTOOL_CACHE_RESTORED
+
+# - script: echo 'Apktool found in cache'
+#   condition: eq(variables.APKTOOL_CACHE_RESTORED, 'true')
+
+# - script: echo 'Apktool not currently cached'
+#   condition: ne(variables.APKTOOL_CACHE_RESTORED, 'true')
+
+# - template: download-url-to-file.yml
+#   parameters:
+#     source_url: '${{ parameters.apktool_wrapper_url }}'
+#     target_path: 'apktool/apktool.bat' 
+
+# - template: download-url-to-file.yml
+#   parameters:
+#     source_url: '${{ parameters.apktool_url }}'
+#     target_path: 'apktool/apktool.jar' 
 

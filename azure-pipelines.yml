@@ -70,6 +70,7 @@ stages:
             script: |
                 $current = Get-Date -Format "yyyyMMddHHmm"
                 echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
+                
         - template: /azure/steps/apktool-install.yml
           parameters:
             apktool_version: $(ApkToolVersion.VersionNumber)
@@ -82,33 +83,4 @@ stages:
         - template: /azure/steps/apktool-install.yml
           parameters:
             apktool_version: $(VersionNumber)
-
-        - template: /azure/steps/download-url-to-file.yml
-          parameters:
-            name: 'downloadfile'
-            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
-            target_path: '$(Pipeline.Workspace)/apk-tool1.bat'
-            file_path_variable: 'download_path'
-
-        - script: echo $(downloadfile.download_path)
-
-        - template: /azure/steps/download-url-to-file.yml
-          parameters:
-            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
-            target_path: '$(Pipeline.Workspace)/apk-tool2.bat'
-
-
-        - template: /azure/steps/check_file_exists.yml
-          parameters:
-            path_to_check: '$(Pipeline.Workspace)/apk-tool2.bat'
-
-        - template: /azure/steps/download-url-to-file.yml
-          parameters:
-            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
-            target_path: '$(Pipeline.Workspace)/apk-tool3.bat'
-
-        - template: /azure/steps/check_file_exists.yml
-          parameters:
-            path_to_check: '$(Pipeline.Workspace)/apk-tool3.bat'
-
 
