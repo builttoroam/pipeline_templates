@@ -14,7 +14,7 @@ Use this template to install a specific version of NuGet and restore packages fo
 # NuGet Install and Solution Restore Template
 # Template for installing NuGet and restoring packages for a Visual Studio solution
 stages:
-- template:  azure/steps/NuGetInstallAndRestore.yml@builttoroam_templates
+- template:  azure/steps/nuget-install-and-restore.yml@builttoroam_templates
   parameters:
     solution_filename:
     #nuget_version: # Optional

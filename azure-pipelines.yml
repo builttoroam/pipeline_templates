@@ -1,0 +1,86 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+stages:
+  - stage: Cache_ApkTool
+    pool:
+      vmImage: 'windows-latest'
+
+    jobs:
+    - job: Test_Download_Url_To_File
+      steps:
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            name: 'downloadfile'
+            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            target_path: '$(Pipeline.Workspace)/apk-tool1.bat'
+            file_path_variable: 'download_path'
+
+        - script: echo 'Downloaded $(downloadfile.downloaded) - $(downloadfile.download_path)'
+
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            name: 'downloadfile2'
+            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            target_path: '$(Pipeline.Workspace)/apk-tool1.bat'
+            file_path_variable: 'download_path'
+
+        - script: echo 'Downloaded $(downloadfile2.downloaded) - $(downloadfile2.download_path)'
+
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            name: 'downloadfile3'
+            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            target_path: '$(Pipeline.Workspace)/apk-tool1.bat'
+            file_path_variable: 'download_path'
+            overwrite_existing: true
+
+        - script: echo 'Downloaded $(downloadfile3.downloaded) - $(downloadfile3.download_path)'
+
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            target_path: '$(Pipeline.Workspace)/apk-tool2.bat'
+
+
+        - template: /azure/steps/check-file-exists.yml
+          parameters:
+            path_to_check: '$(Pipeline.Workspace)/apk-tool2.bat'
+
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            target_path: '$(Pipeline.Workspace)/apk-tool3.bat'
+
+        - template: /azure/steps/check-file-exists.yml
+          parameters:
+            path_to_check: '$(Pipeline.Workspace)/apk-tool3.bat'
+
+    - job: Cache_ApkTool
+      steps:
+        - task: PowerShell@2
+          name: ApkToolVersion
+          displayName: 'Generate version number based on current datetime'
+          inputs:
+            targetType: 'inline'
+            workingDirectory: $(Pipeline.Workspace)
+            script: |
+                $current = Get-Date -Format "yyyyMMddHHmm"
+                echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
+
+        - template: /azure/steps/apktool-install.yml
+          parameters:
+            apktool_version: $(ApkToolVersion.VersionNumber)
+
+    - job: Test_ApkTool_Cache
+      dependsOn: Cache_ApkTool
+      variables:
+        VersionNumber: $[ dependencies.Cache_ApkTool.outputs['ApkToolVersion.VersionNumber'] ]
+      steps:
+        - template: /azure/steps/apktool-install.yml
+          parameters:
+            apktool_version: $(VersionNumber)
+

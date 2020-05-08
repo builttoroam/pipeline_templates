@@ -59,4 +59,4 @@ The following are all stageList templates
 
 The following are all stepList templates
 
-[NuGet Install and Restore](./steps//NuGetInstallAndRestore.md)
+[NuGet Install and Restore](./steps//nuget-install-and-restore.md)
