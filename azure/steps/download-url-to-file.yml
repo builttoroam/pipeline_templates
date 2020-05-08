@@ -32,7 +32,8 @@ steps:
           Write-Host "Target path $file_path"
 
           # Check to see if the target path is an absolute or relative path
-          $isAbsolute = Split-Path -Path $file_path -IsAbsolute
+          $isAbsolute = $false
+          #Split-Path -Path $file_path -IsAbsolute
           Write-Host "Is supplied path absolute - $isAbsolute"
           
           # If not absolute, then need to combine the path with the workspace folder
