@@ -28,10 +28,11 @@ steps:
 
 - template: download-url-to-file.yml
   parameters:
-    source_url: '${{ parameters.apktool_url }}'
-    target_path: 'apktool/apktool.jar' 
+    source_url: '${{ parameters.apktool_wrapper_url }}'
+    target_path: 'apktool/apktool.bat' 
 
 - template: download-url-to-file.yml
   parameters:
-    source_url: '${{ parameters.apktool_wrapper_url }}'
-    target_path: 'apktool/apktool.bat' 
+    source_url: '${{ parameters.apktool_url }}'
+    target_path: 'apktool/apktool.jar' 
+
