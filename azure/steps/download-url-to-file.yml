@@ -43,12 +43,13 @@ steps:
 
           $file_dir = Split-Path -Path $file_path
           Write-Host "Destination directory $file_dir"
-          If (!( Test-Path $file_dir )){
+          # If (!( Test-Path $file_dir )){
             Write-Host "Destination directory doesn't exist, so creating it"
             New-Item -Path $file_dir -ItemType Directory  
-          }
+          # }
 
-          $file_exists = Test-Path $file_path
+          $file_exists = $false 
+          # Test-Path $file_path
           Write-Host "File exists $file_exists"
 
           $isDownloaded = $false
@@ -58,7 +59,6 @@ steps:
             $contents = Invoke-WebRequest '${{ parameters.source_url }}' -UseBasicParsing -OutFile $file_path
             Write-Host "Download complete to $file_path"
             $isDownloaded = $true
-            $file_exists = Test-Path $file_path
           }
           else{
             Write-Host "File not downloaded"
