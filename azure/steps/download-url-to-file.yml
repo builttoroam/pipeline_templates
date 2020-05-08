@@ -58,6 +58,7 @@ steps:
             $contents = Invoke-WebRequest '${{ parameters.source_url }}' -UseBasicParsing -OutFile $file_path
             Write-Host "Download complete to $file_path"
             $isDownloaded = $true
+            $file_exists = Test-Path $file_path
           }
           else{
             Write-Host "File not downloaded"
