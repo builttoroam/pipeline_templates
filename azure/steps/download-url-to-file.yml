@@ -36,7 +36,7 @@ steps:
           Write-Host "Is supplied path absolute - $isAbsolute"
           
           # If not absolute, then need to combine the path with the workspace folder
-          If (!isAbsolute){
+          If (!($isAbsolute)){
             $file_path = Join-Path $(Pipeline.Workspace) $file_path
             Write-Host "Absolute path is $file_path"
           }
