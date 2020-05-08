@@ -29,10 +29,10 @@ steps:
     cacheHitVar: ${{ parameters.cache_hit_variable }} 
 
 - script: echo 'Cached'
-  condition: eq(variables[${{ parameters.cache_hit_variable }}], 'true')
+  condition: eq(variables['${{ parameters.cache_hit_variable }}'], 'true')
 
 - script: echo 'Not cached'
-  condition: ne(variables[${{ parameters.cache_hit_variable }}], 'true')
+  condition: ne(variables['${{ parameters.cache_hit_variable }}'], 'true')
 
 - template: download-url-to-file.yml
   parameters:
