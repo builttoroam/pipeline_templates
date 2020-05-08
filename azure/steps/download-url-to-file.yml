@@ -68,4 +68,6 @@ steps:
 
           echo "##vso[task.setvariable variable=${{ parameters.file_path_variable }};isOutput=true]'$file_path'"
           Write-Host "Output variable '${{ parameters.file_path_variable }}' set to $file_path"
+
+          exit 0
           
