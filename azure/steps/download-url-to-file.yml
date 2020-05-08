@@ -48,24 +48,24 @@ steps:
             New-Item -Path $file_dir -ItemType Directory  
           }
 
-          $file_exists = $false 
-          # Test-Path $file_path
+          $file_exists = Test-Path $file_path
           Write-Host "File exists $file_exists"
 
           # $isDownloaded = $false
-          # If ( (${{ parameters.overwrite_existing }}) -Or !( $file_exists ))
-          # {
+          If ( -Not $file_exists)
+            #(${{ parameters.overwrite_existing }}) -Or !( $file_exists ))
+          {
             Write-Host "Download file from ${{ parameters.source_url }} to $file_path"
             $contents = Invoke-WebRequest '${{ parameters.source_url }}' -UseBasicParsing -OutFile $file_path
             Write-Host "Download complete to $file_path"
           #   $isDownloaded = $true
-          # }
-          # else{
-          #   Write-Host "File not downloaded"
-          # }
+          }
+          else{
+            Write-Host "File not downloaded"
+          }
           # echo "##vso[task.setvariable variable=downloaded;isOutput=true]$isDownloaded"
           # Write-Host "Output variable 'downloaded' set to $isDownloaded"
 
-          # echo "##vso[task.setvariable variable=${{ parameters.file_path_variable }};isOutput=true]'$file_path'"
-          # Write-Host "Output variable '${{ parameters.file_path_variable }}' set to $file_path"
+          echo "##vso[task.setvariable variable=${{ parameters.file_path_variable }};isOutput=true]'$file_path'"
+          Write-Host "Output variable '${{ parameters.file_path_variable }}' set to $file_path"
           
