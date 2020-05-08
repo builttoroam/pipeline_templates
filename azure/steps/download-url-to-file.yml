@@ -31,11 +31,11 @@ steps:
           $file_path = '${{ parameters.target_path }}'
           Write-Host "Target path $file_path"
 
-          // Check to see if the target path is an absolute or relative path
+          # Check to see if the target path is an absolute or relative path
           $isAbsolute = Split-Path -Path $file_path -IsAbsolute
           Write-Host "Is supplied path absolute - $isAbsolute"
           
-          // If not absolute, then need to combine the path with the workspace folder
+          # If not absolute, then need to combine the path with the workspace folder
           If (!isAbsolute){
             $file_path = Join-Path $(Pipeline.Workspace) $file_path
             Write-Host "Absolute path is $file_path"
