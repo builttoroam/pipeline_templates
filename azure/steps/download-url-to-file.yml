@@ -33,7 +33,7 @@ steps:
 
           # Check to see if the target path is an absolute or relative path
           $isAbsolute = $false
-          #Split-Path -Path $file_path -IsAbsolute
+          # Split-Path -Path $file_path -IsAbsolute
           Write-Host "Is supplied path absolute - $isAbsolute"
           
           # If not absolute, then need to combine the path with the workspace folder
@@ -53,17 +53,17 @@ steps:
           # Test-Path $file_path
           Write-Host "File exists $file_exists"
 
-          $isDownloaded = $false
-          If ( (${{ parameters.overwrite_existing }}) -Or !( $file_exists ))
-          {
+          # $isDownloaded = $false
+          # If ( (${{ parameters.overwrite_existing }}) -Or !( $file_exists ))
+          # {
             Write-Host "Download file from ${{ parameters.source_url }} to $file_path"
             $contents = Invoke-WebRequest '${{ parameters.source_url }}' -UseBasicParsing -OutFile $file_path
             Write-Host "Download complete to $file_path"
-            $isDownloaded = $true
-          }
-          else{
-            Write-Host "File not downloaded"
-          }
+          #   $isDownloaded = $true
+          # }
+          # else{
+          #   Write-Host "File not downloaded"
+          # }
           # echo "##vso[task.setvariable variable=downloaded;isOutput=true]$isDownloaded"
           # Write-Host "Output variable 'downloaded' set to $isDownloaded"
 
