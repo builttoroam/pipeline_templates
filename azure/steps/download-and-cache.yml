@@ -34,7 +34,7 @@ steps:
   inputs:
     ${{ if ne(parameters.version, '') }}:
       key: ${{ parameters.cache_name }} | ${{ parameters.version }}
-    ${{ if ee(parameters.version, '') }}:
+    ${{ if eq(parameters.version, '') }}:
       key: ${{ parameters.cache_name }} 
     ${{ if ne(parameters.version, '') }}:
       restoreKeys: ${{ parameters.cache_name }} | ${{ parameters.version }}
