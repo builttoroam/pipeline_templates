@@ -32,8 +32,14 @@ parameters:
 steps:
 - task: Cache@2
   inputs:
-    key: ${{ parameters.cache_name }} | ${{ parameters.version }}
-    restoreKeys: ${{ parameters.cache_name }} | ${{ parameters.version }}
+    ${{ if ne(parameters.version, '') }}:
+      key: ${{ parameters.cache_name }} | ${{ parameters.version }}
+    ${{ else }}:
+      key: ${{ parameters.cache_name }} 
+    ${{ if ne(parameters.version, '') }}:
+      restoreKeys: ${{ parameters.cache_name }} | ${{ parameters.version }}
+    ${{ else }}:
+      restoreKeys: ${{ parameters.cache_name }} 
     path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
     cacheHitVar: ${{ parameters.cache_hit_variable }} 
 
@@ -123,12 +129,14 @@ steps:
         $cachetimestampfile = '$(${{ parameters.name }}DownloadCheck.cache_timestamp_file)'
         Set-Content -Path $cachetimestampfile -Value $cached
         Write-Host "Cache timestamp file written $cachetimestampfile"
-        
         $downloaded = Get-Date $cached -Format "yyyyMMddHHmmss"
         echo "##vso[task.setvariable variable=downloaded_timestamp;isOutput=true]$downloaded"
 
 - task: Cache@2
   condition: eq( variables['${{ parameters.name }}DownloadCheck.should_download'] , 'True') 
   inputs:
-    key: ${{ parameters.cache_name }} | ${{ parameters.version }} | $( ${{ parameters.name }}Timestamp.downloaded_timestamp )
+    ${{ if ne(parameters.version, '') }}:
+      key: ${{ parameters.cache_name }} | ${{ parameters.version }} | $( ${{ parameters.name }}Timestamp.downloaded_timestamp )
+    ${{ else }}:
+      key: ${{ parameters.cache_name }} | $( ${{ parameters.name }}Timestamp.downloaded_timestamp )
     path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
