@@ -15,8 +15,8 @@ parameters:
   default: ''
 # overwrite_existing - (Optional) - Default is to only download file if it doesn't exist
 - name: overwrite_existing
-  type: boolean
-  default: false
+  type: string
+  default: 'False'
 
 
 steps:
