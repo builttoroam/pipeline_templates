@@ -18,6 +18,7 @@ stages:
         - template: /azure/steps/multi-download-and-cache.yml
           parameters:
             downloads: 
+              items:
               - name: test
                 url: $(download_url)
               - name: test2
