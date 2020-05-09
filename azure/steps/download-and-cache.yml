@@ -138,5 +138,5 @@ steps:
     ${{ if ne(parameters.version, '') }}:
       key: ${{ parameters.cache_name }} | ${{ parameters.version }} | $(variables['${{ parameters.name }}Timestamp.downloaded_timestamp'])
     ${{ if eq(parameters.version, '') }}:
-      key: ${{ parameters.cache_name }} | $( ${{ parameters.name }}Timestamp.downloaded_timestamp )
+      key: ${{ parameters.cache_name }} | $(variables['${{ parameters.name }}Timestamp.downloaded_timestamp'])
     path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
