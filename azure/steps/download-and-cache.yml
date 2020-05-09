@@ -93,7 +93,7 @@ steps:
   parameters:
     source_url: '${{ parameters.source_url }}'
     target_path: '$(Pipeline.Workspace)/${{ parameters.folder_to_cache }}/${{ parameters.target_file_name }}' 
-    overwrite_existing: $(should_download)
+    overwrite_existing: $(variables.should_download)
 
 - task: PowerShell@2
   condition: eq( variables.should_download,'True' )
