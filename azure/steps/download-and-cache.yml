@@ -96,7 +96,6 @@ steps:
         }
 
 - task: PowerShell@2
-  condition: eq( $(variables.should_download), 'True')
   displayName: 'Echo'
   inputs:
     targetType: 'inline'
@@ -112,7 +111,7 @@ steps:
     overwrite_existing: $(${{ parameters.name }}DownloadCheck.should_download)
 
 - task: PowerShell@2
-  condition: eq( variables.should_download,'True' )
+  # condition: eq( variables.should_download,'True' )
   displayName: 'Write out the cache timestamp file'
   inputs:
     targetType: 'inline'
@@ -125,7 +124,7 @@ steps:
         Write-Host "Cache timestamp file written $cachetimestampfile"
 
 - task: Cache@2
-  condition: eq( variables.should_download , 'True')
+  # condition: eq( variables.should_download , 'True')
   inputs:
     key: ${{ parameters.cache_name }} | ${{ parameters.version }} | $(cache_timestamp_file)
     path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
