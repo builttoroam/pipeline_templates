@@ -23,6 +23,11 @@ parameters:
 - name: cache_timeout
   type: string
   default: ''
+# name - (Optional) - Specify a name if you need to extract output variable values or want to use multiple times
+- name: name
+  type: string
+  default: ''
+
 
 steps:
 - task: Cache@2
@@ -40,7 +45,7 @@ steps:
 
 - task: PowerShell@2
   displayName: 'Determine if the download should proceed'
-  name: 'DownloadCheck'
+  name: '${{ parameters.name }}DownloadCheck'
   inputs:
     targetType: 'inline'
     workingDirectory: $(Pipeline.Workspace)
@@ -91,20 +96,20 @@ steps:
         }
 
 - task: PowerShell@2
-  condition: eq( variables.should_download,'True' )
+  condition: eq( $(${{ parameters.name }}DownloadCheck.should_download), 'True')
   displayName: 'Echo'
   inputs:
     targetType: 'inline'
     workingDirectory: $(Pipeline.Workspace)
     script: |
-        Write-Host "Should download $(should_download)"
+        Write-Host "Should download $(${{ parameters.name }}DownloadCheck.should_download)"
 
 
 - template: download-url-to-file.yml
   parameters:
     source_url: '${{ parameters.source_url }}'
     target_path: '$(Pipeline.Workspace)/${{ parameters.folder_to_cache }}/${{ parameters.target_file_name }}' 
-    overwrite_existing: $(DownloadCheck.should_download)
+    overwrite_existing: $(${{ parameters.name }}DownloadCheck.should_download)
 
 - task: PowerShell@2
   condition: eq( variables.should_download,'True' )

@@ -17,6 +17,7 @@ stages:
       steps:
         - template: /azure/steps/download-and-cache.yml
           parameters:
+            name: cache1
             source_url: $(download_url)
             target_file_name: 'apk.bat'
             folder_to_cache: 'apk_cached'
@@ -28,6 +29,7 @@ stages:
       steps:
         - template: /azure/steps/download-and-cache.yml
           parameters:
+            name: cache2
             source_url: $(download_url)
             target_file_name: 'apk.bat'
             folder_to_cache: 'apk_cached'

@@ -15,6 +15,7 @@ parameters:
 steps:
 - template: download-and-cache.yml
   parameters:
+    name: 'apktoolbat'
     source_url: '${{ parameters.apktool_wrapper_url }}'
     target_file_name: 'apktool.bat'
     cache_name: 'apktool'
@@ -23,6 +24,7 @@ steps:
 
 - template: download-and-cache.yml
   parameters:
+    name: 'apktooljar'
     source_url: '${{ parameters.apktool_url }}'
     target_file_name: 'apktool.jar'
     cache_name: 'apktool'
