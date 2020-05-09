@@ -62,7 +62,7 @@ steps:
 
         If ( '$(${{ parameters.cache_hit_variable }})' -eq 'true')
         {
-          If ( ${{ parameters.cache_timeout }} -ne '')
+          If ( '${{ parameters.cache_timeout }}' -ne '')
           {
             $file_exists = Test-Path $cachetimestampfile
             Write-Host "Cache timestamp file exists $file_exists"
