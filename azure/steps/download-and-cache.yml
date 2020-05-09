@@ -96,7 +96,7 @@ steps:
         }
 
 - task: PowerShell@2
-  condition: eq( $(${{ parameters.name }}DownloadCheck.should_download), 'True')
+  condition: eq( $(variables.should_download), 'True')
   displayName: 'Echo'
   inputs:
     targetType: 'inline'
