@@ -17,6 +17,9 @@ stages:
       steps:
         - template: /azure/steps/multi-download-and-cache.yml
           parameters:
+            name: cachemulti
+            folder_to_cache: 'multicache'
+            cache_name: 'multi'
             downloads:  
               - name: test
                 source_url: $(download_url)
