@@ -13,9 +13,9 @@ parameters:
   default: '2.4.1'
 
 steps:
-- template: mutli-download-and-cache.yml
+- template: multi-download-and-cache.yml
   parameters:
-    name: 'apktoolbat'
+    name: 'apktoolcache'
     cache_name: 'apktool'
     folder_to_cache: 'apktool'
     version: '${{ parameters.apktool_version }}'
