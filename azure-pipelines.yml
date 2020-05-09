@@ -36,8 +36,21 @@ stages:
             cache_name: 'apktool'
             cache_timeout: '0.00:00:01.00'
 
-    - job: Test_Download_Url_To_File
+    - job: Test_Download_And_Cache3
       dependsOn: Test_Download_And_Cache2
+      steps:
+        - template: /azure/steps/download-and-cache.yml
+          parameters:
+            name: cache2
+            source_url: $(download_url)
+            target_file_name: 'apk.bat'
+            folder_to_cache: 'apk_cached'
+            cache_name: 'apktool'
+            cache_timeout: '0.01:00:01.00'
+
+
+    - job: Test_Download_Url_To_File
+      dependsOn: Test_Download_And_Cache3
       steps:
         - template: /azure/steps/download-url-to-file.yml
           parameters:

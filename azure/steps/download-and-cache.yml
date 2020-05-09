@@ -74,7 +74,7 @@ steps:
             }
             else
             {
-              $expiry = ${{ parameters.cache_timeout }} -as [TimeSpan]
+              $expiry = '${{ parameters.cache_timeout }}'' -as [TimeSpan]
               $lastcached = (Get-Content -Path $cachetimestampfile) -as [DateTime]
               $cache_expiry = $lastcached.Add($expiry)
               If ( $cache_expiry -lt (Get-Date) )
