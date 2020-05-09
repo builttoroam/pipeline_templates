@@ -4,4 +4,4 @@ parameters:
   type: object
 
 steps:
-- script: echo '${{ parameters.downloads }}'
+- script: echo '${{ parameters.downloads.length }}'
