@@ -13,23 +13,28 @@ parameters:
   default: '2.4.1'
 
 steps:
-- template: download-and-cache.yml
+- template: mutli-download-and-cache.yml
   parameters:
     name: 'apktoolbat'
-    source_url: '${{ parameters.apktool_wrapper_url }}'
-    target_file_name: 'apktool.bat'
     cache_name: 'apktool'
     folder_to_cache: 'apktool'
     version: '${{ parameters.apktool_version }}'
+    downloads:  
+      - name:  'apktoolbat'
+        source_url:  ${{ parameters.apktool_wrapper_url }}
+        target_file_name:  'apktool.bat'
+      - name:  'apktooljar'
+        source_url:  ${{ parameters.apktool_url }}
+        target_file_name:  'apktool.jar'
 
-- template: download-and-cache.yml
-  parameters:
-    name: 'apktooljar'
-    source_url: '${{ parameters.apktool_url }}'
-    target_file_name: 'apktool.jar'
-    cache_name: 'apktool'
-    folder_to_cache: 'apktool'
-    version: '${{ parameters.apktool_version }}'
+# - template: download-and-cache.yml
+#   parameters:
+#     name: 'apktooljar'
+#     source_url: '${{ parameters.apktool_url }}'
+#     target_file_name: 'apktool.jar'
+#     cache_name: 'apktool'
+#     folder_to_cache: 'apktool'
+#     version: '${{ parameters.apktool_version }}'
 
 # - task: Cache@2
 #   inputs:
