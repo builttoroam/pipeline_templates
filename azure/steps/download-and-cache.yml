@@ -119,11 +119,12 @@ steps:
     workingDirectory: $(Pipeline.Workspace)
     script: |
         $cached = Get-Date
-        Write-Host "File cached at $cached"
+        Write-Host "File cached at $cached" 
         $cachetimestampfile = '$(${{ parameters.name }}DownloadCheck.cache_timestamp_file)'
         Set-Content -Path $cachetimestampfile -Value $cached
         Write-Host "Cache timestamp file written $cachetimestampfile"
-        $downloaded = $cached -Format "yyyyMMddHHmmss"
+        
+        $downloaded = Get-Date $cached -Format "yyyyMMddHHmmss"
         echo "##vso[task.setvariable variable=downloaded_timestamp;isOutput=true]$downloaded"
 
 - task: Cache@2
