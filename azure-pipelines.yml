@@ -24,6 +24,7 @@ stages:
             cache_timeout: '0.00:00:01.00'
 
     - job: Test_Download_And_Cache2
+      dependsOn: Test_Download_And_Cache
       steps:
         - template: /azure/steps/download-and-cache.yml
           parameters:
