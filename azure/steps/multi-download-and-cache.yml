@@ -127,12 +127,12 @@ steps:
           $downloaded = Get-Date $cached -Format "yyyyMMddHHmmss"
           echo "##vso[task.setvariable variable=downloaded_timestamp;isOutput=true]$downloaded"
 
-- task: Cache@2
-  condition: eq( variables['${{ parameters.name }}${{ download.name }}DownloadCheck.should_download'] , 'True') 
-  inputs:
-    ${{ if ne(parameters.version, '') }}:
-      key: ${{ parameters.cache_name }} | ${{ parameters.version }} | "$(${{ parameters.name }}${{ download.name }}Timestamp.downloaded_timestamp)"
-    ${{ if eq(parameters.version, '') }}:
-      key: ${{ parameters.cache_name }} | "$(${{ parameters.name }}${{ download.name }}Timestamp.downloaded_timestamp)"
-    path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
+  - task: Cache@2
+    condition: eq( variables['${{ parameters.name }}${{ download.name }}DownloadCheck.should_download'] , 'True') 
+    inputs:
+      ${{ if ne(parameters.version, '') }}:
+        key: ${{ parameters.cache_name }} | ${{ parameters.version }} | "$(${{ parameters.name }}${{ download.name }}Timestamp.downloaded_timestamp)"
+      ${{ if eq(parameters.version, '') }}:
+        key: ${{ parameters.cache_name }} | "$(${{ parameters.name }}${{ download.name }}Timestamp.downloaded_timestamp)"
+      path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
 
