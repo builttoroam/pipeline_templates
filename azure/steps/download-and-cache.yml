@@ -119,12 +119,12 @@ steps:
     script: |
         $cached = Get-Date
         Write-Host "File cached at $cached"
-        $cachetimestampfile = '$(cache_timestamp_file)'
+        $cachetimestampfile = '$(${{ parameters.name }}DownloadCheck.cache_timestamp_file)'
         Set-Content -Path $cachetimestampfile -Value $cached
         Write-Host "Cache timestamp file written $cachetimestampfile"
 
 - task: Cache@2
   # condition: eq( variables.should_download , 'True')
   inputs:
-    key: ${{ parameters.cache_name }} | ${{ parameters.version }} | $(cache_timestamp_file)
+    key: ${{ parameters.cache_name }} | ${{ parameters.version }} | $(${{ parameters.name }}DownloadCheck.cache_timestamp_file)
     path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
