@@ -1,0 +1,7 @@
+parameters:
+# source_url - Required - The path to download
+- name: downloads
+  type: object
+
+steps:
+- script: echo '${{ parameters.downloads }}'

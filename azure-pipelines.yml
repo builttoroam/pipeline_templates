@@ -13,6 +13,18 @@ stages:
       vmImage: 'windows-latest'
 
     jobs:
+    - job: Multi_Download
+      steps:
+        - template: /azure/steps/multi-download-and-cache.yml
+          parameters:
+            downloads: 
+              - name: test
+                url: $(download_url)
+              - name: test2
+                url: $(download_url)
+              - name: test3
+                url: $(download_url)
+
     - job: Test_Download_And_Cache
       steps:
         - template: /azure/steps/download-and-cache.yml
