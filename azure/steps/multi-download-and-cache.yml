@@ -4,5 +4,5 @@ parameters:
   type: object
 
 steps:
-- ${{ each download in parameters.myArray}}:
+- ${{ each download in parameters.downloads }}:
   - script: echo '${{ download.name }}'
