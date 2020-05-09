@@ -34,11 +34,11 @@ steps:
   inputs:
     ${{ if ne(parameters.version, '') }}:
       key: ${{ parameters.cache_name }} | ${{ parameters.version }}
-    ${{ else }}:
+    ${{ if ee(parameters.version, '') }}:
       key: ${{ parameters.cache_name }} 
     ${{ if ne(parameters.version, '') }}:
       restoreKeys: ${{ parameters.cache_name }} | ${{ parameters.version }}
-    ${{ else }}:
+    ${{ if eq(parameters.version, '') }}:
       restoreKeys: ${{ parameters.cache_name }} 
     path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
     cacheHitVar: ${{ parameters.cache_hit_variable }} 
@@ -137,6 +137,6 @@ steps:
   inputs:
     ${{ if ne(parameters.version, '') }}:
       key: ${{ parameters.cache_name }} | ${{ parameters.version }} | $( ${{ parameters.name }}Timestamp.downloaded_timestamp )
-    ${{ else }}:
+    ${{ if eq(parameters.version, '') }}:
       key: ${{ parameters.cache_name }} | $( ${{ parameters.name }}Timestamp.downloaded_timestamp )
     path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
