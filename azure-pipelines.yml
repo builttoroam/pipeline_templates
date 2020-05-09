@@ -19,11 +19,14 @@ stages:
           parameters:
             downloads:  
               - name: test
-                url: $(download_url)
+                source_url: $(download_url)
+                target_file_name: download1
               - name: test2
-                url: $(download_url)
+                source_url: $(download_url)
+                target_file_name: download2
               - name: test3
-                url: $(download_url)
+                source_url: $(download_url)
+                target_file_name: download3
 
     - job: Test_Download_And_Cache
       steps:
