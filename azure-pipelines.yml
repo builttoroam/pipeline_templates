@@ -35,6 +35,7 @@ stages:
             cache_timeout: '0.00:00:01.00'
 
     - job: Test_Download_Url_To_File
+      dependsOn: Test_Download_And_Cache2
       steps:
         - template: /azure/steps/download-url-to-file.yml
           parameters:
@@ -84,6 +85,7 @@ stages:
             path_to_check: '$(Pipeline.Workspace)/apk-tool3.bat'
 
     - job: Cache_ApkTool
+      dependsOn: Test_Download_Url_To_File
       steps:
         - task: PowerShell@2
           name: ApkToolVersion
