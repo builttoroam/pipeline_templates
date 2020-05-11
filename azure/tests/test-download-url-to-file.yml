@@ -23,7 +23,7 @@ stages:
     jobs:
     - job: Download_Url_To_File
       steps:
-        # Download file to path without extra folder
+        # Test 1: Simple download
         - template: /azure/steps/download-url-to-file.yml
           parameters:
             name: FullPathFileDownload
@@ -40,3 +40,49 @@ stages:
             variable_to_check: 'FullPathFileDownload.downloaded_file_path'
             expected_value: '$(full_download_path)'
 
+        - template: /azure/steps/checks/check-file-exists.yml
+          parameters:
+            path_to_check: $(full_download_path)
+
+        # Test 2: Repeat download (no overwrite)
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            name: FullPathFileDownloadAgainNoOverwrite
+            source_url: $(small_download_url)
+            target_path: $(full_download_path)
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'FullPathFileDownloadAgainNoOverwrite.downloaded'
+            expected_value: 'false'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'FullPathFileDownloadAgainNoOverwrite.downloaded_file_path'
+            expected_value: '$(full_download_path)'
+
+        - template: /azure/steps/checks/check-file-exists.yml
+          parameters:
+            path_to_check: $(full_download_path)
+
+        # Test 3: Repeat download (with overwrite)
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            name: FullPathFileDownloadAgainWithOverwrite
+            source_url: $(small_download_url)
+            target_path: $(full_download_path)
+            overwrite_existing: true
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'FullPathFileDownloadAgainWithOverwrite.downloaded'
+            expected_value: 'true'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'FullPathFileDownloadAgainWithOverwrite.downloaded_file_path'
+            expected_value: '$(full_download_path)'
+
+        - template: /azure/steps/checks/check-file-exists.yml
+          parameters:
+            path_to_check: $(full_download_path)
