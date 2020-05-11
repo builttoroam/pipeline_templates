@@ -48,10 +48,10 @@ steps:
       targetType: 'inline'
       workingDirectory: $(Pipeline.Workspace)
       script: |
-          $file_path = '$(${{ parameters.name }}CheckFileExists.file_download_path)''
+          $file_path = '$(${{ parameters.name }}CheckFileExists.file_download_path)'
           Write-Host "Destination file $file_path"
 
-          $file_exists = '$(${{ parameters.name }}CheckFileExists.file_download_exists)''
+          $file_exists = '$(${{ parameters.name }}CheckFileExists.file_download_exists)'
           Write-Host "File exists $file_exists"
 
           $isDownloaded = $false
