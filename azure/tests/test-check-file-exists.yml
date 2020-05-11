@@ -12,7 +12,8 @@ pool:
 
 variables:
   - template: test-variables.yml
-  - full_download_path: '$(Pipeline.Workspace)/simpledata.dat'
+  - name: full_download_path
+    value: '$(Pipeline.Workspace)/simpledata.dat'
 
 stages:
   - stage: Test_Check_File_Exists
