@@ -24,16 +24,24 @@ parameters:
 - name: name
   type: string
   default: ''
-# preDownload - (Optional) Steps to be executed before stage starts
+# onStart - (Optional) Steps to be executed before cache is retrieved
+- name: onStart
+  type: stepList
+  default: []
+# postCacheRestore - (Optional) Steps to be executed after the cache has been restored but before downloads start
+- name: postCacheRestore
+  type: stepList
+  default: []
+# preDownload - (Optional) Steps to be executed before each download starts - Can reference download info using ${{ download.[name,source_url,target_file_name] }}
 - name: preDownload
   type: stepList
   default: []
-# preDownload - (Optional) Steps to be executed before download starts. Can reference download info using ${{ download.[name,source_url,target_file_name] }}
-- name: preDownload
-  type: stepList
-  default: []
-# postDownload - (Optional) Steps to be executed after download completed. Can reference download info using ${{ download.[name,source_url,target_file_name] }}
+# postDownload - (Optional) Steps to be executed after each download completes. Can reference download info using ${{ download.[name,source_url,target_file_name] }}
 - name: postDownload
+  type: stepList
+  default: []
+# onEnd - (Optional) Steps to be executed after all downloads have completed but before cache is saved
+- name: onEnd
   type: stepList
   default: []
 
@@ -41,6 +49,8 @@ parameters:
 
 
 steps:
+- ${{ parameters.onStart }}
+
 - task: Cache@2
   inputs:
     ${{ if ne(parameters.version, '') }}:
@@ -59,6 +69,8 @@ steps:
 
 - script: echo 'Not cached'
   condition: ne(variables['${{ parameters.cache_hit_variable }}'], 'true')
+
+- ${{ parameters.postCacheRestore }}
 
 - ${{ each download in parameters.downloads }}:
   - ${{ parameters.preDownload }}
@@ -147,5 +159,7 @@ steps:
       path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
 
   - ${{ parameters.postDownload }}
+
+- ${{ parameters.onEnd }}
 
 
