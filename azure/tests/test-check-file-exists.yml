@@ -11,6 +11,7 @@ pool:
 
 variables:
   - template: test-variables.yml
+  - full_download_path: '$(Pipeline.Workspace)/simpledata.dat'
 
 stages:
   - stage: Test_Check_File_Exists
@@ -24,11 +25,11 @@ stages:
           parameters:
             name: FileDownload
             source_url: $(small_download_url)
-            target_path: '$(Pipeline.Workspace)/simpledata.dat'
+            target_path: $(full_download_path)
 
         - template: /azure/steps/checks/check-file-exists.yml
           parameters:
-            path_to_check: '$(Pipeline.Workspace)/simpledata.bat'
+            path_to_check: $(full_download_path)'
 
 
 
