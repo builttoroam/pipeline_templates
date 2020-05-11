@@ -80,7 +80,7 @@ steps:
           Write-Host "File exists $file_exists"
 
           $isDownloaded = $false
-          If ( (-not $file_exists) -or ('${{ parameters.overwrite_existing }}' eq 'True') )
+          If ( (-not $file_exists) -or ('${{ parameters.overwrite_existing }}' -eq 'True') )
           {
             Write-Host "Download file from ${{ parameters.source_url }} to $file_path"
             $contents = Invoke-WebRequest '${{ parameters.source_url }}' -UseBasicParsing -OutFile $file_path
