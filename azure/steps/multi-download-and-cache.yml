@@ -24,11 +24,19 @@ parameters:
 - name: name
   type: string
   default: ''
+# preDownload - (Optional) Steps to be executed before stage starts
+- name: preDownload
+  type: stepList
+  default: []
+# preDownload - (Optional) Steps to be executed before download starts. Can reference download info using ${{ download.[name,source_url,target_file_name] }}
+- name: preDownload
+  type: stepList
+  default: []
+# postDownload - (Optional) Steps to be executed after download completed. Can reference download info using ${{ download.[name,source_url,target_file_name] }}
+- name: preDownload
+  type: stepList
+  default: []
 
-
-# steps:
-# - ${{ each download in parameters.downloads }}:
-#   - script: echo '${{ download.name }}'
 
 
 
@@ -53,6 +61,8 @@ steps:
   condition: ne(variables['${{ parameters.cache_hit_variable }}'], 'true')
 
 - ${{ each download in parameters.downloads }}:
+  - ${{ parameters.preDownload }}
+
   - task: PowerShell@2
     displayName: 'Determine if the download should proceed'
     name: '${{ parameters.name }}${{ download.name }}DownloadCheck'
@@ -135,4 +145,7 @@ steps:
       ${{ if eq(parameters.version, '') }}:
         key: ${{ parameters.cache_name }} | "$(${{ parameters.name }}${{ download.name }}Timestamp.downloaded_timestamp)"
       path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}
+
+  - ${{ parameters.postDownload }}
+
 

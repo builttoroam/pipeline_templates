@@ -1,0 +1,10 @@
+variables:
+  - name: small_download_url
+    value: 'http://ovh.net/files/1Mio.dat'
+  - name: medium_download_url
+    value: 'http://ovh.net/files/10Mio.dat'
+  - name: large_download_url
+    value: 'http://ovh.net/files/100Mio.dat'
+
+
+
