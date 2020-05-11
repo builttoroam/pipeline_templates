@@ -32,7 +32,7 @@ stages:
           parameters:
             name: VariableFailCheck
             variable_to_check: 'test_variable_1'
-            expected_value: 'expected_value_abc'
+            expected_value: 'expected_value_abcdef'
             check_variable: 'fail_var'
             throw_on_fail: false
 
