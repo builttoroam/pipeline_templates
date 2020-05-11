@@ -37,6 +37,7 @@ stages:
     jobs:
     - job: Check_File_Exists
       steps:
+        # Download file to path without extra folder
         - template: /azure/steps/download-url-to-file.yml
           parameters:
             name: FullPathFileDownload
@@ -76,7 +77,7 @@ stages:
             variable_to_check: 'check_full_path_incorrect.file_path'
             expected_value: '$(full_download_path_incorrect)'
 
-        # Test 3: File name only
+        # Test 3: File name only (no folder)
         - template: /azure/steps/checks/check-file-exists.yml
           parameters:
             name: check_file_name_only
@@ -94,7 +95,7 @@ stages:
             variable_to_check: 'check_file_name_only.file_path_custom'
             expected_value: '$(full_download_path)'
 
-        # Test 4: File name only incorrect
+        # Test 4: File name only incorrect (no folder)
         - template: /azure/steps/checks/check-file-exists.yml
           parameters:
             name: check_file_name_only_incorrect
@@ -113,17 +114,84 @@ stages:
             variable_to_check: 'check_file_name_only_incorrect.file_path_custom'
             expected_value: '$(full_download_path_incorrect)'
 
+
+
+        # Download file to path with extra folder
         - template: /azure/steps/download-url-to-file.yml
           parameters:
             name: FileNameOnlyFileDownload
             source_url: $(small_download_url)
             target_path: $(full_download_path_with_folder)
 
+
+        # Test 5: Full path (with folder)
         - template: /azure/steps/checks/check-file-exists.yml
           parameters:
+            name: check_full_path_with_folder
             path_to_check: $(full_download_path_with_folder)
 
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_full_path_with_folder.file_exists'
+            expected_value: 'true'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_full_path_with_folder.file_path'
+            expected_value: '$(full_download_path_with_folder)'
+
+
+        # Test 6: Full incorrect path (with folder)
         - template: /azure/steps/checks/check-file-exists.yml
           parameters:
-            path_to_check: $(file_name_only_path_with_folder)
+            name: check_full_path_with_folder_incorrect
+            path_to_check: $(full_download_path_incorrect)
+            throw_on_fail: false
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_full_path_with_folder_incorrect.file_exists'
+            expected_value: 'false'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_full_path_with_folder_incorrect.file_path'
+            expected_value: '$(full_download_path_incorrect)'
+
+        # Test 7: File name only (with folder)
+        - template: /azure/steps/checks/check-file-exists.yml
+          parameters:
+            name: check_file_name_only_with_folder
+            path_to_check: $(file_name_only_path)
+            exists_variable: file_exists_custom
+            full_path_variable: file_path_custom
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_file_name_only_with_folder.file_exists_custom'
+            expected_value: 'true'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_file_name_only_with_folder.file_path_custom'
+            expected_value: '$(full_download_path)'
+
+        # Test 8: File name only incorrect (with folder)
+        - template: /azure/steps/checks/check-file-exists.yml
+          parameters:
+            name: check_file_name_only_with_folder_incorrect
+            path_to_check: $(file_name_only_path_incorrect)
+            exists_variable: file_exists_custom
+            full_path_variable: file_path_custom
+            throw_on_fail: false
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_file_name_only_with_folder_incorrect.file_exists_custom'
+            expected_value: 'false'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_file_name_only_with_folder_incorrect.file_path_custom'
+            expected_value: '$(full_download_path_incorrect)'
 
