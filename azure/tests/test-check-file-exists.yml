@@ -4,7 +4,8 @@ trigger:
     - '*'  # must quote since "*" is a YAML reserved character; we want a string
   paths:
     include:
-    - azure/checks/check-file-exists.yml
+    - azure/steps/checks/check-file-exists.yml
+    - azure/tests/test-check-file-exists.yml
 
 pool:
   vmImage: 'windows-latest'
