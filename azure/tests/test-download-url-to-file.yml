@@ -1,0 +1,42 @@
+trigger:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - azure/steps/download-url-to-file.yml
+    - azure/tests/test-download-url-to-file.yml
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  - template: test-variables.yml
+  - name: full_download_path
+    value: '$(Pipeline.Workspace)\simpledata.dat'
+
+stages:
+  - stage: Test_Download_Url_To_File
+    pool:
+      vmImage: 'windows-latest'
+
+    jobs:
+    - job: Download_Url_To_File
+      steps:
+        # Download file to path without extra folder
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            name: FullPathFileDownload
+            source_url: $(small_download_url)
+            target_path: $(full_download_path)
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'FullPathFileDownload.downloaded'
+            expected_value: 'true'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'FullPathFileDownload.downloaded_file_path'
+            expected_value: '$(full_download_path)'
+

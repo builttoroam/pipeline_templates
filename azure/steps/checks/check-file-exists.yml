@@ -2,8 +2,12 @@ parameters:
 # path_to_check - Required - The file path (absolute or relative) to check
 - name: path_to_check
   type: string
-# exists_variable - (Optional)
-- name: file_exists_variable
+# full_path_variable - (Optional) - The name of the variable that is created to store the full path of the file
+- name: full_path_variable
+  type: string
+  default: 'file_path'
+# exists_variable - (Optional) - The name of the variable that is created to store whether the file exists or not
+- name: exists_variable
   type: string
   default: 'file_exists'
 # name - (Optional) - Specify a name if you need to extract output variable values
@@ -38,11 +42,14 @@ steps:
             Write-Host "Absolute path is $file_path"
           }
 
+          echo "##vso[task.setvariable variable=${{ parameters.full_path_variable }};isOutput=true]$file_path"
+          Write-Host "Output variable '${{ parameters.full_path_variable }}' set to $file_path"
+
           $file_exists = Test-Path $file_path
           Write-Host "File exists $file_exists"
 
-          echo "##vso[task.setvariable variable=${{ parameters.file_exists_variable }};isOutput=true]$file_exists"
-          Write-Host "Output variable '${{ parameters.file_exists_variable }}' set to $file_exists"
+          echo "##vso[task.setvariable variable=${{ parameters.exists_variable }};isOutput=true]$file_exists"
+          Write-Host "Output variable '${{ parameters.exists_variable }}' set to $file_exists"
 
           If ( (-Not $file_exists) -and ('${{ parameters.throw_on_fail }}' -eq 'True')){
             throw "File doesn't exist"
