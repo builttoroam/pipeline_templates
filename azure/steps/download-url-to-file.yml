@@ -51,8 +51,15 @@ steps:
           $file_path = '$(${{ parameters.name }}CheckFileExists.file_download_path)'
           Write-Host "Destination file $file_path"
 
+          $file_dir = Split-Path -Path $file_path
+          Write-Host "Destination directory $file_dir"
+          If (!( Test-Path $file_dir )){
+            Write-Host "Destination directory doesn't exist, so creating it"
+            New-Item -Path $file_dir -ItemType Directory  
+          }
+
           $file_exists = '$(${{ parameters.name }}CheckFileExists.file_download_exists)'
-          Write-Host "File exists $file_exists" 
+          Write-Host "File exists $file_exists"
 
           $isDownloaded = $false
           If ( ($file_exists -eq 'False') -or ('${{ parameters.overwrite_existing }}' -eq 'True') )
