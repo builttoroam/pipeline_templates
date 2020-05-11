@@ -20,6 +20,14 @@ variables:
     value: 'simpledata.dat'
   - name: file_name_only_path_with_folder
     value: 'foldername/simpledata.dat'
+  - name: full_download_path_incorrect
+    value: '$(Pipeline.Workspace)/simpledata.dat.bad'
+  - name: full_download_path_with_folder_incorrect
+    value: '$(Pipeline.Workspace)/foldername/simpledata.dat.bad'
+  - name: file_name_only_path_incorrect
+    value: 'simpledata.dat.bad'
+  - name: file_name_only_path_with_folder_incorrect
+    value: 'foldername/simpledata.dat.bad'
 
 stages:
   - stage: Test_Check_File_Exists
@@ -37,11 +45,37 @@ stages:
 
         - template: /azure/steps/checks/check-file-exists.yml
           parameters:
+            name: check_1
             path_to_check: $(full_download_path)
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_1.file_exists'
+            expected_value: 'true'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_1.file_path'
+            expected_value: '$(full_download_path)'
+
 
         - template: /azure/steps/checks/check-file-exists.yml
           parameters:
+            name: check_2
             path_to_check: $(file_name_only_path)
+            exists_variable: file_exists_custom
+            full_path_variable: file_path_custom
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_2.file_exists_custom'
+            expected_value: 'true'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            variable_to_check: 'check_2.file_path_custom'
+            expected_value: '$(full_download_path)'
+
 
         - template: /azure/steps/download-url-to-file.yml
           parameters:
