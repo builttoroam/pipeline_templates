@@ -52,7 +52,7 @@ steps:
           Write-Host "Destination file $file_path"
 
           $file_exists = '$(${{ parameters.name }}CheckFileExists.file_download_exists)'
-          Write-Host "File exists $file_exists"
+          Write-Host "File exists $file_exists" 
 
           $isDownloaded = $false
           If ( ($file_exists -eq 'False') -or ('${{ parameters.overwrite_existing }}' -eq 'True') )
