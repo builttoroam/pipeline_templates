@@ -12,8 +12,8 @@ pool:
 
 variables:
   - template: test-variables.yml
-  - name: test_variable_1
-    value: 'expected_value_abc'
+  - name: full_download_path
+    value: '$(Pipeline.Workspace)\simpledata.dat'
 
 stages:
   - stage: Test_Download_Url_To_File
