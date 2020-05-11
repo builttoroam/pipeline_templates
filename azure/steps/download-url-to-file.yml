@@ -6,6 +6,10 @@ parameters:
 - name: target_path
   type: string
   default: ''
+# is_downloaded_variable - (Optional)
+- name: is_downloaded_variable
+  type: string
+  default: 'downloaded'
 # file_path_variable - (Optional)
 - name: file_path_variable
   type: string
@@ -21,6 +25,21 @@ parameters:
 
 
 steps:
+  - template: /azure/steps/checks/check-filename-for-download.yml
+    parameters:
+      name: ${{ parameters.name }}CheckDownloadFileName
+      source_url: ${{ parameters.source_url }}
+      target_path: ${{ parameters.target_path }}
+      file_path_variable: 'download_path'
+
+  - template: /azure/steps/checks/check-file-exists.yml
+    parameters:
+      name: ${{ parameters.name }}CheckFileExists
+      path_to_check: $(${{ parameters.name }}CheckDownloadFileName.download_path)
+      throw_on_fail: false
+      exists_variable: 'file_download_exists'
+      full_path_variable: 'file_download_path'
+
   - task: PowerShell@2
     ${{ if ne(parameters.name, '') }}:
       name: ${{ parameters.name }}
@@ -29,54 +48,60 @@ steps:
       targetType: 'inline'
       workingDirectory: $(Pipeline.Workspace)
       script: |
-          $file_path = '${{ parameters.target_path }}'
-          Write-Host "Target path $file_path"
+          # $file_path = '${{ parameters.target_path }}'
+          # Write-Host "Target path $file_path"
 
-          $path_includes_filename = $true
-          If ( $file_path -ne '')
-          {
-            $path_includes_filename = (Split-Path -Path $file_path -Leaf).Contains('.')
-          }
+          # $path_includes_filename = $true
+          # If ( $file_path -ne '')
+          # {
+          #   $path_includes_filename = (Split-Path -Path $file_path -Leaf).Contains('.')
+          # }
 
-          If ( (-Not $path_includes_filename) -or ($file_path -eq ''))
-          {
-            $url = '${{ parameters.source_url }}' -as [System.Uri]
-            $filename = $url.Segments[$urlobj.Segments.length-1]
-            If ( $filename.Contains('.') )
-            {
-              If ( $file_path -eq '')
-              {
-                $file_path = $filename
-              }
-              else
-              {
-                $file_path = Join-Path $file_path $filename
-              }
-            }
-            else
-            {
-              throw 'target_path not specified or no filename provide and unable to retrieve filename from source_url'
-            }
-          }
+          # If ( (-Not $path_includes_filename) -or ($file_path -eq ''))
+          # {
+          #   $url = '${{ parameters.source_url }}' -as [System.Uri]
+          #   $filename = $url.Segments[$urlobj.Segments.length-1]
+          #   If ( $filename.Contains('.') )
+          #   {
+          #     If ( $file_path -eq '')
+          #     {
+          #       $file_path = $filename
+          #     }
+          #     else
+          #     {
+          #       $file_path = Join-Path $file_path $filename
+          #     }
+          #   }
+          #   else
+          #   {
+          #     throw 'target_path not specified or no filename provide and unable to retrieve filename from source_url'
+          #   }
+          # }
 
-          # Check to see if the target path is an absolute or relative path
-          $isAbsolute = Split-Path -Path $file_path -IsAbsolute
-          Write-Host "Is supplied path absolute - $isAbsolute"
+          # # Check to see if the target path is an absolute or relative path
+          # $isAbsolute = Split-Path -Path $file_path -IsAbsolute
+          # Write-Host "Is supplied path absolute - $isAbsolute"
           
-          # If not absolute, then need to combine the path with the workspace folder
-          If (!($isAbsolute)){
-            $file_path = Join-Path $(Pipeline.Workspace) $file_path
-            Write-Host "Absolute path is $file_path"
-          }
+          # # If not absolute, then need to combine the path with the workspace folder
+          # If (!($isAbsolute)){
+          #   $file_path = Join-Path $(Pipeline.Workspace) $file_path
+          #   Write-Host "Absolute path is $file_path"
+          # }
 
-          $file_dir = Split-Path -Path $file_path
-          Write-Host "Destination directory $file_dir"
-          If (!( Test-Path $file_dir )){
-            Write-Host "Destination directory doesn't exist, so creating it"
-            New-Item -Path $file_dir -ItemType Directory  
-          }
+          # $file_dir = Split-Path -Path $file_path
+          # Write-Host "Destination directory $file_dir"
+          # If (!( Test-Path $file_dir )){
+          #   Write-Host "Destination directory doesn't exist, so creating it"
+          #   New-Item -Path $file_dir -ItemType Directory  
+          # }
 
-          $file_exists = Test-Path $file_path
+          # $file_exists = Test-Path $file_path
+          # Write-Host "File exists $file_exists"
+
+          $file_path = $(${{ parameters.name }}CheckFileExists.file_download_path)
+          Write-Host "Destination file $file_path"
+
+          $file_exists = $(${{ parameters.name }}CheckFileExists.file_download_exists)
           Write-Host "File exists $file_exists"
 
           $isDownloaded = $false
@@ -91,11 +116,8 @@ steps:
             Write-Host "File not downloaded"
           }
 
-          echo "##vso[task.setvariable variable=downloaded;isOutput=true]$isDownloaded"
-          Write-Host "Output variable 'downloaded' set to $isDownloaded"
+          echo "##vso[task.setvariable variable=${{ parameters.is_downloaded_variable }};isOutput=true]$isDownloaded"
+          Write-Host "Output variable '${{ parameters.is_downloaded_variable }}' set to $isDownloaded"
 
           echo "##vso[task.setvariable variable=${{ parameters.file_path_variable }};isOutput=true]$file_path"
-          Write-Host "Output variable '${{ parameters.file_path_variable }}' set to $file_path"
-
-          exit 0
-          
+          Write-Host "Output variable '${{ parameters.file_path_variable }}' set to $file_path"          
