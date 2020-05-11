@@ -16,12 +16,12 @@ variables:
     value: 'expected_value_abc'
 
 stages:
-  - stage: Test_Check_File_Exists
+  - stage: Test_Check_Variable_Exists
     pool:
       vmImage: 'windows-latest'
 
     jobs:
-    - job: File_Download
+    - job: Check_Variable_Exists
       steps:
         - template: ../steps/checks/check-variable-value.yml
           parameters:

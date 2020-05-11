@@ -27,7 +27,7 @@ stages:
       vmImage: 'windows-latest'
 
     jobs:
-    - job: File_Download
+    - job: Check_File_Exists
       steps:
         - template: /azure/steps/download-url-to-file.yml
           parameters:
