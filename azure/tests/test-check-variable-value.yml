@@ -1,0 +1,45 @@
+trigger:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - azure/checks/check-variable-value.yml
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  - template: test-variables.yml
+  - name: test_variable_1
+    value: 'expected_value_abc'
+
+stages:
+  - stage: Test_Check_File_Exists
+    pool:
+      vmImage: 'windows-latest'
+
+    jobs:
+    - job: File_Download
+      steps:
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            name: VariableCheck
+            variable_to_check: 'test_variable_1'
+            expected_value: 'expected_value_abc'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            name: VariableFailCheck
+            variable_to_check: 'test_variable_1'
+            expected_value: 'expected_value_abcdef'
+            check_variable: 'fail_var'
+            throw_on_fail: false
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            name: VariableFailCheckConfirm
+            variable_to_check: 'VariableFailCheck.fail_var'
+            expected_value: 'false'
+
+

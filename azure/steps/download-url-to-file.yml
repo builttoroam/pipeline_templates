@@ -2,9 +2,10 @@ parameters:
 # source_url - Required - The path to download
 - name: source_url
   type: string
-# target_path - Required - Filename and either relative or absolute path
+# target_path - (Optional) - Filename and either relative or absolute path
 - name: target_path
   type: string
+  default: ''
 # file_path_variable - (Optional)
 - name: file_path_variable
   type: string
@@ -15,8 +16,8 @@ parameters:
   default: ''
 # overwrite_existing - (Optional) - Default is to only download file if it doesn't exist
 - name: overwrite_existing
-  type: boolean
-  default: false
+  type: string
+  default: 'False'
 
 
 steps:
@@ -30,6 +31,33 @@ steps:
       script: |
           $file_path = '${{ parameters.target_path }}'
           Write-Host "Target path $file_path"
+
+          $path_includes_filename = $true
+          If ( $file_path -ne '')
+          {
+            $path_includes_filename = (Split-Path -Path $file_path -Leaf).Contains('.')
+          }
+
+          If ( (-Not $path_includes_filename) -or ($file_path -eq ''))
+          {
+            $url = '${{ parameters.source_url }}' -as [System.Uri]
+            $filename = $url.Segments[$urlobj.Segments.length-1]
+            If ( $filename.Contains('.') )
+            {
+              If ( $file_path -eq '')
+              {
+                $file_path = $filename
+              }
+              else
+              {
+                $file_path = Join-Path $file_path $filename
+              }
+            }
+            else
+            {
+              throw 'target_path not specified or no filename provide and unable to retrieve filename from source_url'
+            }
+          }
 
           # Check to see if the target path is an absolute or relative path
           $isAbsolute = Split-Path -Path $file_path -IsAbsolute

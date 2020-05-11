@@ -4,18 +4,77 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
+variables:
+  download_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+
 stages:
   - stage: Cache_ApkTool
     pool:
       vmImage: 'windows-latest'
 
     jobs:
+    - job: Multi_Download
+      steps:
+        - template: /azure/steps/multi-download-and-cache.yml
+          parameters:
+            name: cachemulti
+            folder_to_cache: 'multicache'
+            cache_name: 'multi'
+            downloads:  
+              - name: test
+                source_url: $(download_url)
+                target_file_name: download1
+              - name: test2
+                source_url: $(download_url)
+                target_file_name: download2
+              - name: test3
+                source_url: $(download_url)
+                target_file_name: download3
+
+    - job: Test_Download_And_Cache
+      dependsOn: Multi_Download
+      steps:
+        - template: /azure/steps/download-and-cache.yml
+          parameters:
+            name: cache1
+            source_url: $(download_url)
+            target_file_name: 'apk.bat'
+            folder_to_cache: 'apk_cached'
+            cache_name: 'apktool'
+            cache_timeout: '0.00:00:01.00'
+
+    - job: Test_Download_And_Cache2
+      dependsOn: Test_Download_And_Cache
+      steps:
+        - template: /azure/steps/download-and-cache.yml
+          parameters:
+            name: cache2
+            source_url: $(download_url)
+            target_file_name: 'apk.bat'
+            folder_to_cache: 'apk_cached'
+            cache_name: 'apktool'
+            cache_timeout: '0.00:00:01.00'
+
+    - job: Test_Download_And_Cache3
+      dependsOn: Test_Download_And_Cache2
+      steps:
+        - template: /azure/steps/download-and-cache.yml
+          parameters:
+            name: cache2
+            source_url: $(download_url)
+            target_file_name: 'apk.bat'
+            folder_to_cache: 'apk_cached'
+            cache_name: 'apktool'
+            cache_timeout: '0.01:00:01.00'
+
+
     - job: Test_Download_Url_To_File
+      dependsOn: Test_Download_And_Cache3
       steps:
         - template: /azure/steps/download-url-to-file.yml
           parameters:
             name: 'downloadfile'
-            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            source_url: $(download_url)
             target_path: '$(Pipeline.Workspace)/apk-tool1.bat'
             file_path_variable: 'download_path'
 
@@ -24,7 +83,7 @@ stages:
         - template: /azure/steps/download-url-to-file.yml
           parameters:
             name: 'downloadfile2'
-            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            source_url: $(download_url)
             target_path: '$(Pipeline.Workspace)/apk-tool1.bat'
             file_path_variable: 'download_path'
 
@@ -33,7 +92,7 @@ stages:
         - template: /azure/steps/download-url-to-file.yml
           parameters:
             name: 'downloadfile3'
-            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            source_url: $(download_url)
             target_path: '$(Pipeline.Workspace)/apk-tool1.bat'
             file_path_variable: 'download_path'
             overwrite_existing: true
@@ -42,24 +101,25 @@ stages:
 
         - template: /azure/steps/download-url-to-file.yml
           parameters:
-            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            source_url: $(download_url)
             target_path: '$(Pipeline.Workspace)/apk-tool2.bat'
 
 
-        - template: /azure/steps/check-file-exists.yml
+        - template: /azure/steps/checks/check-file-exists.yml
           parameters:
             path_to_check: '$(Pipeline.Workspace)/apk-tool2.bat'
 
         - template: /azure/steps/download-url-to-file.yml
           parameters:
-            source_url: 'https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat'
+            source_url: $(download_url)
             target_path: '$(Pipeline.Workspace)/apk-tool3.bat'
 
-        - template: /azure/steps/check-file-exists.yml
+        - template: /azure/steps/checks/check-file-exists.yml
           parameters:
             path_to_check: '$(Pipeline.Workspace)/apk-tool3.bat'
 
     - job: Cache_ApkTool
+      dependsOn: Test_Download_Url_To_File
       steps:
         - task: PowerShell@2
           name: ApkToolVersion

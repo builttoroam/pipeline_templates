@@ -1,0 +1,47 @@
+parameters:
+# variable_to_check - Required - The variable to check
+- name: variable_to_check
+  type: string
+# expected_value - Required - The expected value of the variable
+- name: expected_value
+  type: string
+# check_variable - (Optional)
+- name: check_variable
+  type: string
+  default: 'check'
+# name - (Optional) - Specify a name if you need to extract output variable values
+- name: name
+  type: string
+  default: ''
+# throw_on_fail - (Optional) - Throw exception if check fails
+- name: throw_on_fail
+  type: boolean
+  default: true
+
+
+steps:
+  - task: PowerShell@2
+    ${{ if ne(parameters.name, '') }}:
+      name: ${{ parameters.name }}
+    displayName: 'Check to see if file [${{ parameters.variable_to_check }}] matches [${{ parameters.expected_value }}]'
+    inputs:
+      targetType: 'inline'
+      workingDirectory: $(Pipeline.Workspace)
+      script: |
+          $variable_value = '$(${{ parameters.variable_to_check }})'
+          Write-Host "Variable value is $variable_value"
+
+          $expected_value = '${{ parameters.expected_value }}'
+          Write-Host "Expected value is $expected_value"
+
+          $values_equal = $variable_value -eq $expected_value
+          Write-Host "Values are equal $values_equal"
+
+          echo "##vso[task.setvariable variable=${{ parameters.check_variable }};isOutput=true]$values_equal"
+          Write-Host "Output variable '${{ parameters.check_variable }}' set to $values_equal"
+
+          If ( (-Not $values_equal) -and ( '${{ parameters.throw_on_fail }}' -eq 'True' )){
+            throw "Variable isn't set correctly"
+          }
+
+          

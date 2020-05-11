@@ -1,0 +1,34 @@
+trigger:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - azure/checks/check-file-exists.yml
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  - template: test-variables.yml
+
+stages:
+  - stage: Test_Check_File_Exists
+    pool:
+      vmImage: 'windows-latest'
+
+    jobs:
+    - job: File_Download
+      steps:
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            name: FileDownload
+            source_url: $(small_download_url)
+            target_path: '$(Pipeline.Workspace)/simpledata.dat'
+
+        - template: /azure/steps/checks/check-file-exists.yml
+          parameters:
+            path_to_check: '$(Pipeline.Workspace)/simpledata.bat'
+
+
+
