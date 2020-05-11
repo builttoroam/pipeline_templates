@@ -33,7 +33,7 @@ parameters:
   type: stepList
   default: []
 # postDownload - (Optional) Steps to be executed after download completed. Can reference download info using ${{ download.[name,source_url,target_file_name] }}
-- name: preDownload
+- name: postDownload
   type: stepList
   default: []
 
