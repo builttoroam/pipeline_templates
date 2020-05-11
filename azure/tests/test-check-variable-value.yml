@@ -4,7 +4,8 @@ trigger:
     - '*'  # must quote since "*" is a YAML reserved character; we want a string
   paths:
     include:
-    - azure/checks/check-variable-value.yml
+    - azure/steps/checks/check-variable-value.yml
+    - azure/tests/test-check-variable-value.yml
 
 pool:
   vmImage: 'windows-latest'
