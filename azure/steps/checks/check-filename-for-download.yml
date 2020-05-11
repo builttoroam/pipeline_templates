@@ -1,0 +1,78 @@
+parameters:
+# source_url - Required - The path to download
+- name: source_url
+  type: string
+# target_path - (Optional) - Filename and either relative or absolute path
+- name: target_path
+  type: string
+  default: ''
+# file_path_variable - (Optional)
+- name: file_path_variable
+  type: string
+  default: 'file_path'
+# is_valid_path_variable - (Optional)
+- name: is_valid_path_variable
+  type: string
+  default: 'is_valid_path'
+# name - (Optional) - Specify a name if you need to extract output variable values
+- name: name
+  type: string
+  default: ''
+# throw_on_fail - (Optional) - Throw exception if file is missing
+- name: throw_on_fail
+  type: boolean
+  default: true
+
+
+steps:
+  - task: PowerShell@2
+    ${{ if ne(parameters.name, '') }}:
+      name: ${{ parameters.name }}
+    displayName: 'Download url [${{ parameters.source_url }}] to file [${{ parameters.target_path }}]'
+    inputs:
+      targetType: 'inline'
+      workingDirectory: $(Pipeline.Workspace)
+      script: |
+          $file_path = '${{ parameters.target_path }}'
+          Write-Host "Initial path $file_path"
+
+          $path_includes_filename = $true
+          If ( $file_path -ne '')
+          {
+            $path_includes_filename = (Split-Path -Path $file_path -Leaf).Contains('.')
+          }
+
+          If ( (-Not $path_includes_filename) -or ($file_path -eq ''))
+          {
+            $url = '${{ parameters.source_url }}' -as [System.Uri]
+            $filename = $url.Segments[$urlobj.Segments.length-1]
+            If ( $filename.Contains('.') )
+            {
+              If ( $file_path -eq '')
+              {
+                $file_path = $filename
+              }
+              else
+              {
+                $file_path = Join-Path $file_path $filename
+              }
+              $path_includes_filename = $true
+            }
+            else
+            {
+              $path_includes_filename = $false
+              If ('${{ parameters.throw_on_fail }}' -eq 'True'){
+                throw 'target_path not specified or no filename provide and unable to retrieve filename from source_url'
+              }
+            }
+          }
+
+
+          echo "##vso[task.setvariable variable=${{ parameters.is_valid_path_variable }};isOutput=true]$path_includes_filename"
+          Write-Host "Output variable '${{ parameters.is_valid_path_variable }}' set to $path_includes_filename"
+
+          echo "##vso[task.setvariable variable=${{ parameters.file_path_variable }};isOutput=true]$file_path"
+          Write-Host "Output variable '${{ parameters.file_path_variable }}' set to $file_path"
+
+
+          
