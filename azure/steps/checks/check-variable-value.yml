@@ -40,7 +40,7 @@ steps:
           echo "##vso[task.setvariable variable=${{ parameters.check_variable }};isOutput=true]$values_equal"
           Write-Host "Output variable '${{ parameters.check_variable }}' set to $values_equal"
 
-          If ( ${{ parameters.throw_on_fail }} -eq 'True'){
+          If ( '${{ parameters.throw_on_fail }}' -eq 'True'){
             throw "Variable isn't set correctly"
           }
 
