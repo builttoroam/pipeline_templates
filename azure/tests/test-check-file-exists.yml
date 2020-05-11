@@ -31,7 +31,7 @@ stages:
 
         - template: /azure/steps/checks/check-file-exists.yml
           parameters:
-            path_to_check: $(full_download_path)'
+            path_to_check: $(full_download_path)
 
 
 

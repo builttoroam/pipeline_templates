@@ -26,7 +26,7 @@ steps:
       workingDirectory: $(Pipeline.Workspace)
       script: |
           $file_path = '${{ parameters.path_to_check }}'
-          Write-Host "Path to check $path_to_check"
+          Write-Host "Path to check $file_path"
 
           # Check to see if the target path is an absolute or relative path
           $isAbsolute = Split-Path -Path $file_path -IsAbsolute
