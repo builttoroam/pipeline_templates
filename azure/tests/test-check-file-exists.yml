@@ -14,6 +14,12 @@ variables:
   - template: test-variables.yml
   - name: full_download_path
     value: '$(Pipeline.Workspace)/simpledata.dat'
+  - name: full_download_path_with_folder
+    value: '$(Pipeline.Workspace)/foldername/simpledata.dat'
+  - name: file_name_only_path
+    value: 'simpledata.dat'
+  - name: file_name_only_path_with_folder
+    value: 'foldername/simpledata.dat'
 
 stages:
   - stage: Test_Check_File_Exists
@@ -33,5 +39,21 @@ stages:
           parameters:
             path_to_check: $(full_download_path)
 
+        - template: /azure/steps/checks/check-file-exists.yml
+          parameters:
+            path_to_check: $(file_name_only_path)
 
+        - template: /azure/steps/download-url-to-file.yml
+          parameters:
+            name: FileDownload
+            source_url: $(small_download_url)
+            target_path: $(full_download_path_with_folder)
+
+        - template: /azure/steps/checks/check-file-exists.yml
+          parameters:
+            path_to_check: $(full_download_path_with_folder)
+
+        - template: /azure/steps/checks/check-file-exists.yml
+          parameters:
+            path_to_check: $(file_name_only_path_with_folder)
 
