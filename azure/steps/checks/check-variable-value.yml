@@ -28,10 +28,10 @@ steps:
       targetType: 'inline'
       workingDirectory: $(Pipeline.Workspace)
       script: |
-          $variable_value = $(${{ parameters.variable_to_check }})'
+          $variable_value = '$(${{ parameters.variable_to_check }})'
           Write-Host "Variable value is $variable_value"
 
-          $expected_value = '$(${{ parameters.expected_value }})'
+          $expected_value = '${{ parameters.expected_value }}'
           Write-Host "Expected value is $expected_value"
 
           $values_equal = $variable_value -eq $expected_value
