@@ -31,7 +31,7 @@ stages:
       steps:
         - template: /azure/steps/download-url-to-file.yml
           parameters:
-            name: FileDownload
+            name: FullPathFileDownload
             source_url: $(small_download_url)
             target_path: $(full_download_path)
 
@@ -45,7 +45,7 @@ stages:
 
         - template: /azure/steps/download-url-to-file.yml
           parameters:
-            name: FileDownload
+            name: FileNameOnlyFileDownload
             source_url: $(small_download_url)
             target_path: $(full_download_path_with_folder)
 
