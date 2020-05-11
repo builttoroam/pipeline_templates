@@ -1,5 +1,10 @@
 trigger:
-- master
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - azure/checks/check-variable-value.yml
 
 pool:
   vmImage: 'windows-latest'
