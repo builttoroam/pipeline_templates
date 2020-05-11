@@ -48,64 +48,14 @@ steps:
       targetType: 'inline'
       workingDirectory: $(Pipeline.Workspace)
       script: |
-          # $file_path = '${{ parameters.target_path }}'
-          # Write-Host "Target path $file_path"
-
-          # $path_includes_filename = $true
-          # If ( $file_path -ne '')
-          # {
-          #   $path_includes_filename = (Split-Path -Path $file_path -Leaf).Contains('.')
-          # }
-
-          # If ( (-Not $path_includes_filename) -or ($file_path -eq ''))
-          # {
-          #   $url = '${{ parameters.source_url }}' -as [System.Uri]
-          #   $filename = $url.Segments[$urlobj.Segments.length-1]
-          #   If ( $filename.Contains('.') )
-          #   {
-          #     If ( $file_path -eq '')
-          #     {
-          #       $file_path = $filename
-          #     }
-          #     else
-          #     {
-          #       $file_path = Join-Path $file_path $filename
-          #     }
-          #   }
-          #   else
-          #   {
-          #     throw 'target_path not specified or no filename provide and unable to retrieve filename from source_url'
-          #   }
-          # }
-
-          # # Check to see if the target path is an absolute or relative path
-          # $isAbsolute = Split-Path -Path $file_path -IsAbsolute
-          # Write-Host "Is supplied path absolute - $isAbsolute"
-          
-          # # If not absolute, then need to combine the path with the workspace folder
-          # If (!($isAbsolute)){
-          #   $file_path = Join-Path $(Pipeline.Workspace) $file_path
-          #   Write-Host "Absolute path is $file_path"
-          # }
-
-          # $file_dir = Split-Path -Path $file_path
-          # Write-Host "Destination directory $file_dir"
-          # If (!( Test-Path $file_dir )){
-          #   Write-Host "Destination directory doesn't exist, so creating it"
-          #   New-Item -Path $file_dir -ItemType Directory  
-          # }
-
-          # $file_exists = Test-Path $file_path
-          # Write-Host "File exists $file_exists"
-
-          $file_path = $(${{ parameters.name }}CheckFileExists.file_download_path)
+          $file_path = '$(${{ parameters.name }}CheckFileExists.file_download_path)''
           Write-Host "Destination file $file_path"
 
-          $file_exists = $(${{ parameters.name }}CheckFileExists.file_download_exists)
+          $file_exists = '$(${{ parameters.name }}CheckFileExists.file_download_exists)''
           Write-Host "File exists $file_exists"
 
           $isDownloaded = $false
-          If ( (-not $file_exists) -or ('${{ parameters.overwrite_existing }}' -eq 'True') )
+          If ( ($file_exists -eq 'False') -or ('${{ parameters.overwrite_existing }}' -eq 'True') )
           {
             Write-Host "Download file from ${{ parameters.source_url }} to $file_path"
             $contents = Invoke-WebRequest '${{ parameters.source_url }}' -UseBasicParsing -OutFile $file_path
