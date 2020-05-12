@@ -10,7 +10,7 @@ parameters:
 # apktool_version - (Optional) Override the apktool version number - used to cache apktool
 - name: apktool_version
   type: string
-  default: '2.4.1'
+  default: '2_4_1'
 # name - (Optional) - Specify a name if you need to extract output variable values or want to use multiple times
 - name: name
   type: string
