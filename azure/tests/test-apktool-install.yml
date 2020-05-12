@@ -25,7 +25,7 @@ stages:
     jobs:
     - job: ApkTool_Install
       steps:
-        - template: ../steps/apktool_install.yml
+        - template: ../steps/apktool-install.yml
           parameters:
             name: ApkTool
 
