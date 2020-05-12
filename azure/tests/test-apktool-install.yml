@@ -32,7 +32,7 @@ stages:
         - template: ../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck
-            variable_to_check: 'ApkTool.apktool_bat_variable'
+            variable_to_check: 'ApkTool.apktool_bat'
             expected_value: '$(Pipeline.Workspace)\apktool\apktool.bat'
 
 
