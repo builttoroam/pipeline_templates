@@ -19,15 +19,15 @@ parameters:
 steps:
 - template: multi-download-and-cache.yml
   parameters:
-    name: ${{ parameters.name }}'apktoolcache'
+    name: '${{ parameters.name }}apktoolcache'
     cache_name: 'apktool'
     folder_to_cache: 'apktool'
     version: '${{ parameters.apktool_version }}'
     downloads:  
-      - name:  ${{ parameters.name }}'apktoolbat'
+      - name:  '${{ parameters.name }}apktoolbat'
         source_url:  ${{ parameters.apktool_wrapper_url }}
         target_file_name:  'apktool.bat'
-      - name:  ${{ parameters.name }}'apktooljar'
+      - name:  '${{ parameters.name }}apktooljar'
         source_url:  ${{ parameters.apktool_url }}
         target_file_name:  'apktool.jar'
 

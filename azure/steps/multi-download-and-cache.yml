@@ -129,6 +129,7 @@ steps:
 
   - template: download-url-to-file.yml
     parameters:
+      name: '${{ parameters.name }}${{ download.name }}DownloadItem'
       source_url: '${{ download.source_url }}'
       target_path: '$(Pipeline.Workspace)/${{ parameters.folder_to_cache }}/${{ download.target_file_name }}' 
       overwrite_existing: $(${{ parameters.name }}${{ download.name }}DownloadCheck.should_download)
