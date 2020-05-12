@@ -34,7 +34,7 @@ stages:
         - template: ../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck
-            variable_to_check: 'Output.$(test_variable_1_name)'
+            variable_to_check: 'Output.variable1'
             expected_value: '$(test_variable_1_value)'
 
 
