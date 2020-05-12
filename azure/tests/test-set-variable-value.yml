@@ -28,7 +28,7 @@ stages:
         - template: ../steps/set-variable-value.yml
           parameters:
             name: Output
-            variable_name: '${test_variable_1_name}'
+            variable_name: '$(test_variable_1_name)'
             new_value: '$(test_variable_1_value)'
 
         - template: ../steps/checks/check-variable-value.yml

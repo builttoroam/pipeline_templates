@@ -25,5 +25,5 @@ steps:
           $variable_name = '${{ parameters.variable_name }}'
           Write-Host "Variable to set $variable_name"
 
-          echo "##vso[task.setvariable variable=${{ parameters.variable_name }};isOutput=true]$variable_value"
-          Write-Host "Output variable '${{ parameters.variable_name }}' set to $variable_value"
+          echo "##vso[task.setvariable variable=$variable_name;isOutput=true]$variable_value"
+          Write-Host "Output variable '$variable_name' set to $variable_value"
