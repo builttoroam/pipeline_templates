@@ -43,14 +43,16 @@ steps:
     inputs:
       targetType: 'inline'
       workingDirectory: $(Pipeline.Workspace)
+      env:
+        VARIABLES_TO_SET: ${{ join(';', parameters.variables_to_set) }}
       script: |
-          # $variable_value = '${{ parameters.new_value }}'
-          # Write-Host "Variable value is $variable_value"
-
-          # $variable_name = '${{ parameters.variable_name }}'
-          # Write-Host "Variable to set $variable_name"
-
-          ${{ each var_to_set in parameters.variables_to_set }}:  
-            $variable_value = '${{ var_to_set.new_value }}'
-            echo "##vso[task.setvariable variable=${{ var_to_set.variable_name }};isOutput=true]$variable_value"
-            Write-Host "Output variable '${{var_to_set.variable_name}}' set to $variable_value"
+          $params = $env:VARIABLES_TO_SET -split ";"
+            foreach($param in $params) {
+              $splits = $param.Split(":")
+              if ([string]::IsNullOrEmpty($splits[1])) {
+                  $variable_name = $splits[0]
+                  $variable_value = $splits[1]
+                  echo "##vso[task.setvariable variable=$variable_name;isOutput=true]$variable_value"
+                  Write-Host "Output variable '$variable_name' set to $variable_value"
+              }
+            }
