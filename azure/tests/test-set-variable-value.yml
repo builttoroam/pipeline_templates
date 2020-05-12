@@ -25,7 +25,7 @@ stages:
     jobs:
     - job: Set_Variable_Value
       steps:
-        - template: ../steps/checks/set-variable-value.yml
+        - template: ../steps/set-variable-value.yml
           parameters:
             name: Output
             variable_name: '${test_variable_1_name}'
