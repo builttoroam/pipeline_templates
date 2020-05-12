@@ -1,0 +1,40 @@
+trigger:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - azure/steps/set-variable-value.yml
+    - azure/tests/test-set-variable-value.yml
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  - template: test-variables.yml
+  - name: test_variable_1_name
+    value: 'variable1'
+  - name: test_variable_1_value
+    value: 'output value'
+
+stages:
+  - stage: Test_Set_Variable_Value
+    pool:
+      vmImage: 'windows-latest'
+
+    jobs:
+    - job: Set_Variable_Value
+      steps:
+        - template: ../steps/checks/set-variable-value.yml
+          parameters:
+            name: Output
+            variable_name: '${test_variable_1_name}'
+            new_value: '$(test_variable_1_value)'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            name: OutputCheck
+            variable_to_check: 'Output.test_variable_1_name'
+            expected_value: '$(test_variable_1_value)'
+
+

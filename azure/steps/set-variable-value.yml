@@ -1,0 +1,29 @@
+parameters:
+# new_value - Required - The new value of the variable
+- name: new_value
+  type: string
+# variable_name - Required - The name of the variable to set
+- name: variable_name
+  type: string
+# name - (Optional) - Specify a name if you need to extract output variable values
+- name: name
+  type: string
+  default: ''
+
+steps:
+  - task: PowerShell@2
+    ${{ if ne(parameters.name, '') }}:
+      name: ${{ parameters.name }}
+    displayName: 'Set variable [${{ parameters.variable_name }}] to value [${{ parameters.new_value }}]'
+    inputs:
+      targetType: 'inline'
+      workingDirectory: $(Pipeline.Workspace)
+      script: |
+          $variable_value = '$(${{ parameters.new_value }})'
+          Write-Host "Variable value is $variable_value"
+
+          $variable_name = '${{ parameters.variable_name }}'
+          Write-Host "Variable to set $variable_name"
+
+          echo "##vso[task.setvariable variable=${{ parameters.variable_name }};isOutput=true]$variable_value"
+          Write-Host "Output variable '${{ parameters.variable_name }}' set to $variable_value"
