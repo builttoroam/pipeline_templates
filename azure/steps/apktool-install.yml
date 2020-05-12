@@ -34,10 +34,10 @@ steps:
     downloads:  
       - name:  '${{ parameters.name }}apktoolbat'
         source_url:  ${{ parameters.apktool_wrapper_url }}
-        target_file_name:  'apktool\apktool.bat'
+        target_file_name:  'apktool.bat'
       - name:  '${{ parameters.name }}apktooljar'
         source_url:  ${{ parameters.apktool_url }}
-        target_file_name:  'apktool\apktool.jar'
+        target_file_name:  'apktool.jar'
 
 - template: set-variable-value.yml
   parameters:
