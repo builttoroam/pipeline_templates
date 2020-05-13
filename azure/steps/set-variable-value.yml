@@ -9,7 +9,8 @@ parameters:
   default: ''
 # variables_to_set - Required - Array {variable_name, new_value}
 - name: variables_to_set
-  default: []
+  type: string
+  default: ''
 # name - (Optional) - Specify a name if you need to extract output variable values
 - name: name
   type: string
@@ -42,10 +43,9 @@ steps:
     inputs:
       targetType: 'inline'
       workingDirectory: $(Pipeline.Workspace)
-      env:
-        VARIABLES_TO_SET: ${{ join(';', parameters.variables_to_set) }}
       script: |
-          $params = $env:VARIABLES_TO_SET -split ";"
+          $allVars = ${{ parameters.variables_to_set }}
+          $params = allVars -split ";"
             foreach($param in $params) {
               $splits = $param.Split("|")
               if ([string]::IsNullOrEmpty($splits[1])) {
