@@ -30,6 +30,10 @@ stages:
             name: Output
             variable_name: '$(test_variable_1_name)'
             new_value: '$(test_variable_1_value)'
+            variables_to_set: [
+              'var1|value1',
+              'var2|value2'
+            ]
 
         - template: ../steps/checks/check-variable-value.yml
           parameters:

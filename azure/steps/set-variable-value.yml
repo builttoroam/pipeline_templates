@@ -8,7 +8,9 @@ parameters:
   type: string
   default: ''
 # variables_to_set - Required - Array {variable_name, new_value}
-- variables_to_set: []
+- name: variables_to_set
+  type: object
+  default: []
 # name - (Optional) - Specify a name if you need to extract output variable values
 - name: name
   type: string
