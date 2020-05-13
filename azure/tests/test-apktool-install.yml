@@ -55,7 +55,7 @@ stages:
         - template: ../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_Download
-            variable_to_check: 'ApkToolapktoolcacheapktoolbatDownloadItem.downloaded'
+            variable_to_check: 'ApkToolapktoolcacheApkToolapktoolbatDownloadItem.downloaded'
             expected_value: 'true'
 
 
@@ -69,5 +69,5 @@ stages:
         - template: ../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_Cache_Download
-            variable_to_check: 'ApkToolCacheCheckapktoolcacheapktoolbatDownloadItem.downloaded'
+            variable_to_check: 'ApkToolCacheCheckapktoolcacheApkToolCacheCheckapktoolbatDownloadItem.downloaded'
             expected_value: 'false'

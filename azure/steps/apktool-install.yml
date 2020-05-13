@@ -40,13 +40,6 @@ steps:
         source_url:  ${{ parameters.apktool_url }}
         target_file_name:  'apktool.jar'
 
-# - template: set-variable-value.yml
-#   parameters:
-#     ${{ if ne(parameters.name, '') }}:
-#       name: ${{ parameters.name }}
-#     variable_name: '${{ parameters.apktool_bat_variable }}'
-#     new_value: '$(${{ parameters.name }}apktoolcache${{ parameters.name }}apktoolbatDownloadItem.downloaded_file_path)'
-
 - template: set-variable-value.yml
   parameters:
     ${{ if ne(parameters.name, '') }}:
