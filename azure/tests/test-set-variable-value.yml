@@ -38,22 +38,19 @@ stages:
             variable_to_check: 'Output.variable1'
             expected_value: '$(test_variable_1_value)'
 
-        # - template: ../steps/set-variable-value.yml
-        #   parameters:
-        #     name: MultiOutput
-        #     variables_to_set: [
-        #       'var1|value1',
-        #       'var2|value2'
-        #     ]
+        - template: ../steps/set-variable-value.yml
+          parameters:
+            name: MultiOutput
+            variables_to_set: 'var1|value1;var2|value2'
 
-        # - template: ../steps/checks/check-variable-value.yml
-        #   parameters:
-        #     name: MultiOutputCheck1
-        #     variable_to_check: 'MultiOutput.var1'
-        #     expected_value: 'value1'
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            name: MultiOutputCheck1
+            variable_to_check: 'MultiOutput.var1'
+            expected_value: 'value1'
 
-        # - template: ../steps/checks/check-variable-value.yml
-        #   parameters:
-        #     name: MultiOutputCheck2
-        #     variable_to_check: 'MultiOutput.var2'
-        #     expected_value: 'value2'
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            name: MultiOutputCheck2
+            variable_to_check: 'MultiOutput.var2'
+            expected_value: 'value2'
