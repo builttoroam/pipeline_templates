@@ -46,12 +46,13 @@ steps:
       script: |
           $allVars = '${{ parameters.variables_to_set }}'
           $params = $allVars -split ";"
-            foreach($param in $params) {
-              $splits = $param.Split("|")
-              if ([string]::IsNullOrEmpty($splits[1])) {
-                  $variable_name = $splits[0]
-                  $variable_value = $splits[1]
-                  echo "##vso[task.setvariable variable=$variable_name;isOutput=true]$variable_value"
-                  Write-Host "Output variable '$variable_name' set to $variable_value"
-              }
-            }
+          foreach($param in $params) 
+          {
+            $splits = $param.Split("|")
+            $variable_name = $splits[0]
+            Write-Host "Variable name: $variable_name"
+            $variable_value = $splits[1]
+            Write-Host "Variable value: $variable_value"
+            echo "##vso[task.setvariable variable=$variable_name;isOutput=true]$variable_value"
+            Write-Host "Output variable '$variable_name' set to $variable_value"
+          }
