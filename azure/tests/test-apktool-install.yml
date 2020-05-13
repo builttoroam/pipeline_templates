@@ -25,9 +25,20 @@ stages:
     jobs:
     - job: ApkTool_Install
       steps:
+        - task: PowerShell@2
+          name: ApkToolVersion
+          displayName: 'Generate version number based on current datetime'
+          inputs:
+            targetType: 'inline'
+            workingDirectory: $(Pipeline.Workspace)
+            script: |
+                $current = Get-Date -Format "yyyyMMddHHmm"
+                echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
+
         - template: ../steps/apktool-install.yml
           parameters:
             name: ApkTool
+            apktool_version: $(ApkToolVersion.VersionNumber)
 
         - template: ../steps/checks/check-variable-value.yml
           parameters:
@@ -41,3 +52,21 @@ stages:
             variable_to_check: 'ApkTool.apktool_jar'
             expected_value: '$(Pipeline.Workspace)\apktool\apktool.jar'
 
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            name: OutputCheck_Download
+            variable_to_check: 'ApkToolapktoolcacheapktoolbatDownloadItem.is_downloaded_variable'
+            expected_value: 'true'
+
+
+    - job: ApkTool_Install_Check_Cache
+      steps:
+        - template: ../steps/apktool-install.yml
+          parameters:
+            name: ApkToolCacheCheck
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            name: OutputCheck_Cache_Download
+            variable_to_check: 'ApkToolCacheCheckapktoolcacheapktoolbatDownloadItem.is_downloaded_variable'
+            expected_value: 'false'

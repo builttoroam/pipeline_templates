@@ -10,7 +10,7 @@ parameters:
 # apktool_version - (Optional) Override the apktool version number - used to cache apktool
 - name: apktool_version
   type: string
-  default: '2_4_1'
+  default: ''
 # name - (Optional) - Specify a name if you need to extract output variable values or want to use multiple times
 - name: name
   type: string
@@ -30,7 +30,8 @@ steps:
     name: '${{ parameters.name }}apktoolcache'
     cache_name: 'apktool'
     folder_to_cache: 'apktool'
-    version: '${{ parameters.apktool_version }}'
+    ${{ if ne(parameters.apktool_version, '') }}:
+      version: '${{ parameters.apktool_version }}'
     downloads:  
       - name:  '${{ parameters.name }}apktoolbat'
         source_url:  ${{ parameters.apktool_wrapper_url }}
