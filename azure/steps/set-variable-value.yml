@@ -45,7 +45,7 @@ steps:
       workingDirectory: $(Pipeline.Workspace)
       script: |
           $allVars = '${{ parameters.variables_to_set }}'
-          $params = allVars -split ";"
+          $params = $allVars -split ";"
             foreach($param in $params) {
               $splits = $param.Split("|")
               if ([string]::IsNullOrEmpty($splits[1])) {
