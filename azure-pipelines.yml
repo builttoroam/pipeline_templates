@@ -101,6 +101,7 @@ stages:
 
         - template: /azure/steps/download-url-to-file.yml
           parameters:
+            name: 'downloadtofile1'
             source_url: $(download_url)
             target_path: '$(Pipeline.Workspace)/apk-tool2.bat'
 
@@ -111,6 +112,7 @@ stages:
 
         - template: /azure/steps/download-url-to-file.yml
           parameters:
+            name: 'downloadtofile2'
             source_url: $(download_url)
             target_path: '$(Pipeline.Workspace)/apk-tool3.bat'
 
@@ -133,6 +135,7 @@ stages:
 
         - template: /azure/steps/apktool-install.yml
           parameters:
+            name: 'apktoolinstall1'
             apktool_version: $(ApkToolVersion.VersionNumber)
 
     - job: Test_ApkTool_Cache
@@ -142,5 +145,6 @@ stages:
       steps:
         - template: /azure/steps/apktool-install.yml
           parameters:
+            name: 'apktoolinstall2'
             apktool_version: $(VersionNumber)
 

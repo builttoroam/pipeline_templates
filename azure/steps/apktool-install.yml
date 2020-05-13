@@ -10,52 +10,39 @@ parameters:
 # apktool_version - (Optional) Override the apktool version number - used to cache apktool
 - name: apktool_version
   type: string
-  default: '2.4.1'
+  default: ''
+# name - (Optional) - Specify a name if you need to extract output variable values or want to use multiple times
+- name: name
+  type: string
+  default: ''
+# apktool_bat_variable - (Optional) - The variable to use for the apktool.bat path after download
+- name: apktool_bat_variable
+  type: string
+  default: 'apktool_bat'
+# apktool_jar_variable - (Optional) - The variable to use for the apktool.jar path after download
+- name: apktool_jar_variable
+  type: string
+  default: 'apktool_jar'
 
 steps:
 - template: multi-download-and-cache.yml
   parameters:
-    name: 'apktoolcache'
+    name: '${{ parameters.name }}apktoolcache'
     cache_name: 'apktool'
     folder_to_cache: 'apktool'
-    version: '${{ parameters.apktool_version }}'
+    ${{ if ne(parameters.apktool_version, '') }}:
+      version: '${{ parameters.apktool_version }}'
     downloads:  
-      - name:  'apktoolbat'
+      - name:  '${{ parameters.name }}apktoolbat'
         source_url:  ${{ parameters.apktool_wrapper_url }}
         target_file_name:  'apktool.bat'
-      - name:  'apktooljar'
+      - name:  '${{ parameters.name }}apktooljar'
         source_url:  ${{ parameters.apktool_url }}
         target_file_name:  'apktool.jar'
 
-# - template: download-and-cache.yml
-#   parameters:
-#     name: 'apktooljar'
-#     source_url: '${{ parameters.apktool_url }}'
-#     target_file_name: 'apktool.jar'
-#     cache_name: 'apktool'
-#     folder_to_cache: 'apktool'
-#     version: '${{ parameters.apktool_version }}'
-
-# - task: Cache@2
-#   inputs:
-#     key: apktool | ${{ parameters.apktool_version }}
-#     restoreKeys: apktool | ${{ parameters.apktool_version }}
-#     path: $(Pipeline.Workspace)/apktool
-#     cacheHitVar: APKTOOL_CACHE_RESTORED
-
-# - script: echo 'Apktool found in cache'
-#   condition: eq(variables.APKTOOL_CACHE_RESTORED, 'true')
-
-# - script: echo 'Apktool not currently cached'
-#   condition: ne(variables.APKTOOL_CACHE_RESTORED, 'true')
-
-# - template: download-url-to-file.yml
-#   parameters:
-#     source_url: '${{ parameters.apktool_wrapper_url }}'
-#     target_path: 'apktool/apktool.bat' 
-
-# - template: download-url-to-file.yml
-#   parameters:
-#     source_url: '${{ parameters.apktool_url }}'
-#     target_path: 'apktool/apktool.jar' 
+- template: set-variable-value.yml
+  parameters:
+    ${{ if ne(parameters.name, '') }}:
+      name: ${{ parameters.name }}
+    variables_to_set: '${{ parameters.apktool_bat_variable }}|$(${{ parameters.name }}apktoolcache${{ parameters.name }}apktoolbatDownloadItem.downloaded_file_path);${{ parameters.apktool_jar_variable }}|$(${{ parameters.name }}apktoolcache${{ parameters.name }}apktooljarDownloadItem.downloaded_file_path)'
 

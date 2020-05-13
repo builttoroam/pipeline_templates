@@ -65,10 +65,10 @@ steps:
     cacheHitVar: ${{ parameters.cache_hit_variable }} 
 
 - script: echo 'Cached'
-  condition: eq(variables['${{ parameters.cache_hit_variable }}'], 'true')
+  condition: ne(variables['${{ parameters.cache_hit_variable }}'], 'false')
 
 - script: echo 'Not cached'
-  condition: ne(variables['${{ parameters.cache_hit_variable }}'], 'true')
+  condition: eq(variables['${{ parameters.cache_hit_variable }}'], 'false')
 
 - ${{ parameters.postCacheRestore }}
 
@@ -86,7 +86,7 @@ steps:
           Write-Host "Defining cache timestamp file $cachetimestampfile"
           echo "##vso[task.setvariable variable=cache_timestamp_file;isOutput=true]$cachetimestampfile"
 
-          If ( '$(${{ parameters.cache_hit_variable }})' -eq 'true')
+          If ( '$(${{ parameters.cache_hit_variable }})' -ne 'false')
           {
             If ( '${{ parameters.cache_timeout }}' -ne '')
             {
@@ -129,8 +129,9 @@ steps:
 
   - template: download-url-to-file.yml
     parameters:
+      name: '${{ parameters.name }}${{ download.name }}DownloadItem'
       source_url: '${{ download.source_url }}'
-      target_path: '$(Pipeline.Workspace)/${{ parameters.folder_to_cache }}/${{ download.target_file_name }}' 
+      target_path: '$(Pipeline.Workspace)\${{ parameters.folder_to_cache }}\${{ download.target_file_name }}' 
       overwrite_existing: $(${{ parameters.name }}${{ download.name }}DownloadCheck.should_download)
 
   - task: PowerShell@2
