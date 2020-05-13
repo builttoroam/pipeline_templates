@@ -1,4 +1,6 @@
 variables:
+  - name: system.debug
+    value: true
   - name: small_download_url
     value: 'http://ovh.net/files/1Mio.dat'
   - name: medium_download_url
