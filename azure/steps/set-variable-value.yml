@@ -48,7 +48,7 @@ steps:
       script: |
           $params = $env:VARIABLES_TO_SET -split ";"
             foreach($param in $params) {
-              $splits = $param.Split(":")
+              $splits = $param.Split("|")
               if ([string]::IsNullOrEmpty($splits[1])) {
                   $variable_name = $splits[0]
                   $variable_value = $splits[1]

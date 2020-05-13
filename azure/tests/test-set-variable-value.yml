@@ -41,10 +41,8 @@ stages:
           parameters:
             name: MultiOutput
             variables_to_set:
-            - variable_name: 'var1'
-              new_value: 'value1'
-            - variable_name: 'var2'
-              new_value: 'value2'
+            - 'var1|value1'
+            - 'var2|value2'
 
         - template: ../steps/checks/check-variable-value.yml
           parameters:
