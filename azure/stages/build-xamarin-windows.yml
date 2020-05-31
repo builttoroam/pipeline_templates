@@ -99,10 +99,10 @@ parameters:
   type: stepList
   default: []
 
-# nuget_version - (Optional) Use to override the NuGet version (defaults to 4.4.1)
+# nuget_version - (Optional) Use to override the NuGet version (defaults to 5.6.0)
 - name: nuget_version
   type: string
-  default: '4.4.1'
+  default: '5.6.0'
 
 stages:
 - stage: ${{ parameters.stage_name }}
