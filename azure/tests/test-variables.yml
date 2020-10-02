@@ -9,6 +9,8 @@ variables:
     value: 'http://ovh.net/files/100Mio.dat'
   - name: empty_bicep_filepath
     value: 'azure/tests/data/empty.bicep'
+  - name: empty_bicep_generated_arm_filepath
+    value: 'azure/tests/data/empty.json'
 
 
 

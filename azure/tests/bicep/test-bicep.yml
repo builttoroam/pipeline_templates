@@ -20,33 +20,40 @@ stages:
     jobs:
     - job: Bicep
       steps:
+        # Test simple scenario where we just pass in the path to the .bicep file 
         - template: ../../steps/bicep/bicep.yml
           parameters:
             name: Bicep
             bicep_file_path: '$(System.DefaultWorkingDirectory)/$(empty_bicep_filepath)'
+            arm_path_variable: ArmFilePath
 
-    #     - template: ../../steps/checks/check-variable-value.yml
-    #       parameters:
-    #         name: OutputCheck_bat
-    #         variable_to_check: 'Bicep.bicep_exe'
-    #         expected_value: '$(Pipeline.Workspace)\bicep\bicep.exe'
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            name: Bicep_Arm_FilePath_Variable_Check
+            variable_to_check: 'Bicep.ArmFilePath'
+            expected_value: '$(System.DefaultWorkingDirectory)/$(empty_bicep_generated_arm_filepath)'
 
-    #     - template: ../../steps/checks/check-variable-value.yml
-    #       parameters:
-    #         name: OutputCheck_Download
-    #         variable_to_check: 'BicepbicepcacheBicepbicepexeDownloadItem.downloaded'
-    #         expected_value: 'true'
+        - template: /azure/steps/checks/check-file-exists.yml
+          parameters:
+            name: Bicep_Arm_FilePath_Exits_Check
+            path_to_check: $(Bicep.ArmFilePath)
+            throw_on_fail: true
 
+        - template: ../../steps/bicep/bicep-install.yml
+          parameters:
+            name: BicepInstall
+            bicep_version: $(BicepVersion.VersionNumber)
+            bicep_path_variable: Bicep_Exe_Custom_Path
 
-    # - job: Bicep_Install_Check_Cache
-    #   dependsOn: Bicep_Install
-    #   steps:
-    #     - template: ../../steps/bicep/bicep-install.yml
-    #       parameters:
-    #         name: BicepCacheCheck
+        - template: ../../steps/bicep/bicep.yml
+          parameters:
+            name: Bicep_No_Install
+            bicep_exe_path: $(BicepInstall.Bicep_Exe_Custom_Path)
+            bicep_file_path: '$(System.DefaultWorkingDirectory)/$(empty_bicep_filepath)'
+            arm_path_variable: ArmFilePath
 
-    #     - template: ../../steps/checks/check-variable-value.yml
-    #       parameters:
-    #         name: OutputCheck_Cache_Download
-    #         variable_to_check: 'BicepCacheCheckCheckbicepcacheBicepCacheCheckbicepexeDownloadItem.downloaded'
-    #         expected_value: 'false'
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            name: Bicep_No_Install_Arm_FilePath_Variable_Check
+            variable_to_check: 'Bicep_No_Install.ArmFilePath'
+            expected_value: '$(System.DefaultWorkingDirectory)/$(empty_bicep_generated_arm_filepath)'

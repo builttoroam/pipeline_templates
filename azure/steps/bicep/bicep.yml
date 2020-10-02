@@ -1,4 +1,13 @@
 parameters:
+
+# bicep_file_path - Bicep filename that's either relative or absolute path
+- name: bicep_file_path
+  type: string
+
+# bicep_exe_path - (Optional) Specifies the location of the bicep exe
+- name: bicep_exe_path
+  type: string
+  default: ''
 # bicep_download_url - (Optional) Override the download url for the bicep executable for Windows
 - name: bicep_download_url
   type: string
@@ -11,16 +20,35 @@ parameters:
 - name: name
   type: string
   default: ''
-# bicep_file_path - Bicep filename that's either relative or absolute path
-- name: bicep_file_path
+# arm_path_variable - (Optional) - The variable to use for the generated arm template file (.json file)
+- name: arm_path_variable
   type: string
+  default: 'arm_path'
 
 steps:
-- template: ../../steps/bicep/bicep-install.yml
-  parameters:
-    name: ${{ parameters.name }}BicepInstall
-    bicep_version: '${{ parameters.bicep_version }}'
-    bicep_path_variable: '${{ parameters.name }}bicepexe'
+- ${{ if ne(parameters.bicep_exe_path, '') }}:
+  - template: ../../steps/checks/check-file-exists.yml
+    parameters:
+      name: ${{ parameters.name }}CheckBicepExists
+      path_to_check: '${{ parameters.bicep_exe_path }}'
+      throw_on_fail: true
+      exists_variable: 'bicep_exe_exists'
+      full_path_variable: 'bicep_exe_full_path'
+
+- ${{ if ne(parameters.bicep_exe_path, '') }}:
+  - template: ../steps/set-variable-value.yml
+    parameters:
+      name: ${{ parameters.name }}BicepInstall
+      variable_name: '${{ parameters.name }}bicepexe'
+      new_value: '${{ parameters.name }}CheckBicepExists.bicep_exe_full_path'
+
+- ${{ if eq(parameters.bicep_exe_path, '') }}:
+  - template: ../../steps/bicep/bicep-install.yml
+    parameters:
+      name: ${{ parameters.name }}BicepInstall
+      bicep_download_url: '${{ parameters.bicep_download_url }}'
+      bicep_version: '${{ parameters.bicep_version }}'
+      bicep_path_variable: '${{ parameters.name }}bicepexe'
 
 - template: ../../steps/checks/check-file-exists.yml
   parameters:
@@ -32,6 +60,8 @@ steps:
 
 - task: PowerShell@2
   displayName: Generate ARM with Bicep
+  ${{ if ne(parameters.name, '') }}:
+    name: ${{ parameters.name }}
   inputs:
     targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
     script: |     
@@ -58,3 +88,6 @@ steps:
 
       $raw = Get-Content -Path $outputpath -Raw
       Write-Host "ARM file output: $raw"
+
+      echo "##vso[task.setvariable variable=${{ parameters.arm_path_variable }};isOutput=true]$outputpath"
+      Write-Host "Output variable '${{ parameters.arm_path_variable }}' set to $outputpath"          
