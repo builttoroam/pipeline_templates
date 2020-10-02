@@ -40,7 +40,7 @@ steps:
     parameters:
       name: ${{ parameters.name }}BicepInstall
       variable_name: '${{ parameters.name }}bicepexe'
-      new_value: '${{ parameters.name }}CheckBicepExists.bicep_exe_full_path'
+      new_value: '$(${{ parameters.name }}CheckBicepExists.bicep_exe_full_path)'
 
 - ${{ if eq(parameters.bicep_exe_path, '') }}:
   - template: ../../steps/bicep/bicep-install.yml
