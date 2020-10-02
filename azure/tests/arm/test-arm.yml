@@ -1,0 +1,31 @@
+trigger:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - azure/steps/bicep/bicep.yml
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  - template: ../test-variables.yml
+
+stages:
+  - stage: Test_ARM
+    pool:
+      vmImage: 'windows-latest'
+
+    jobs:
+    - job: Arm
+      steps:
+      - task: AzureCLI@2
+        displayName: Azure CLI
+        inputs:
+          azureSubscription: az-testing
+          scriptType: ps
+          scriptLocation: inlineScript
+          inlineScript: |
+            az --version
+            az account show
