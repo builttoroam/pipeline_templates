@@ -36,7 +36,7 @@ steps:
       full_path_variable: 'bicep_exe_full_path'
 
 - ${{ if ne(parameters.bicep_exe_path, '') }}:
-  - template: ../steps/set-variable-value.yml
+  - template: ../../steps/set-variable-value.yml
     parameters:
       name: ${{ parameters.name }}BicepInstall
       variable_name: '${{ parameters.name }}bicepexe'
