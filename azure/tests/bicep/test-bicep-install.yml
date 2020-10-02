@@ -31,7 +31,7 @@ stages:
             targetType: 'inline'
             workingDirectory: $(Pipeline.Workspace)
             script: |
-                $current = Get-Date -Format "yyyyMMddHH"
+                $current = Get-Date -Format "yyyyMMddHHmm"
                 echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
 
         - template: ../../steps/bicep/bicep-install.yml
