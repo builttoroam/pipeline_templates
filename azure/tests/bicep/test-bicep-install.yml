@@ -36,19 +36,19 @@ stages:
 
         - template: ../../steps/bicep/bicep-install.yml
           parameters:
-            name: Bicep
+            name: BicepInstall
             bicep_version: $(BicepVersion.VersionNumber)
 
         - template: ../../steps/checks/check-variable-value.yml
           parameters:
-            name: OutputCheck_bat
+            name: OutputCheck_exe
             variable_to_check: 'Bicep.bicep_exe'
             expected_value: '$(Pipeline.Workspace)\bicep\bicep.exe'
 
         - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_Download
-            variable_to_check: 'BicepbicepcacheBicepbicepexeDownloadItem.downloaded'
+            variable_to_check: 'BicepInstallbicepcacheBicepInstallbicepexeDownloadItem.downloaded'
             expected_value: 'true'
 
 
