@@ -10,7 +10,7 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  - template: test-variables.yml
+  - template: ../test-variables.yml
   - name: test_variable_1_name
     value: 'variable1'
   - name: test_variable_1_value
