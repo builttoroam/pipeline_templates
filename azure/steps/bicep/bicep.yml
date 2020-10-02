@@ -45,3 +45,8 @@ steps:
       Write-Host "Running Bicep with args $args"
       Start-Process -FilePath $bicep_exe_path -ArgumentList $args -Wait | Write-Host
       Write-Host "Bicep for ARM complete"
+
+      $outputpath = $bicep_file_path.Replace('.bicep','.json'); 
+
+      $raw = Get-Content -Path $outputpath -Raw
+      Write-Host "ARM file output: $raw"
