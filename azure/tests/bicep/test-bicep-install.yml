@@ -37,7 +37,7 @@ stages:
         - template: ../../steps/bicep/bicep-install.yml
           parameters:
             name: Bicep
-            apktool_version: $(BicepVersion.VersionNumber)
+            bicep_version: $(BicepVersion.VersionNumber)
 
         - template: ../../steps/checks/check-variable-value.yml
           parameters:
