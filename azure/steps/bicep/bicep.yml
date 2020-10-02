@@ -34,7 +34,7 @@ steps:
   displayName: Generate ARM with Bicep
   inputs:
     targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-    script: |
+    script: |     
       $bicep_exe_path = '$(${{ parameters.name }}BicepInstall.${{ parameters.name }}bicepexe)'
       Write-Host "Bicep exe $bicep_exe_path"
 
@@ -46,7 +46,14 @@ steps:
       Start-Process -FilePath $bicep_exe_path -ArgumentList $args -Wait | Write-Host
       Write-Host "Bicep for ARM complete"
 
-      $outputpath = $bicep_file_path.Replace('.bicep','.json'); 
+      $filename = (Split-Path -Path $bicep_file_path -Leaf).Replace('.bicep','.json')
+      Write-Host "Output filename $filename"
+
+      $currentdir = Get-Location
+      Write-Host "Current dir: $currentdir"
+
+      $outputpath = Join-Path $currentdir $filename; 
+      Write-Host "Output filepath $outputpath"
 
       $raw = Get-Content -Path $outputpath -Raw
       Write-Host "ARM file output: $raw"
