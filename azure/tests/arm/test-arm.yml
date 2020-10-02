@@ -21,11 +21,29 @@ stages:
     - job: Arm
       steps:
       - task: AzureCLI@2
-        displayName: Azure CLI
+        displayName: Delete existing resource group - tidy up from any failed runs
         inputs:
-          azureSubscription: az-testing
+          azureSubscription: $(az_testing_service_connection)
           scriptType: ps
           scriptLocation: inlineScript
           inlineScript: |
-            az --version
-            az account show
+            az group delete -n $(az_testing_resource_group_name) -y
+
+      - task: AzureCLI@2
+        displayName: Create testing resource group
+        inputs:
+          azureSubscription: $(az_testing_service_connection)
+          scriptType: ps
+          scriptLocation: inlineScript
+          inlineScript: |
+            az group create -n $(az_testing_resource_group_name) -l westus
+
+      - task: AzureCLI@2
+        displayName: Delete testing resource group
+        condition: always()
+        inputs:
+          azureSubscription: $(az_testing_service_connection)
+          scriptType: ps
+          scriptLocation: inlineScript
+          inlineScript: |
+            az group delete -n $(az_testing_resource_group_name) -y
