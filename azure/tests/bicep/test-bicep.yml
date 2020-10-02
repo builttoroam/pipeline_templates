@@ -27,13 +27,13 @@ stages:
             bicep_file_path: '$(System.DefaultWorkingDirectory)/$(empty_bicep_filepath)'
             arm_path_variable: ArmFilePath
 
-        - template: ../steps/checks/check-variable-value.yml
+        - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: Bicep_Arm_FilePath_Variable_Check
             variable_to_check: 'Bicep.ArmFilePath'
             expected_value: '$(System.DefaultWorkingDirectory)/$(empty_bicep_generated_arm_filepath)'
 
-        - template: ../steps/checks/check-file-exists.yml
+        - template: ../../steps/checks/check-file-exists.yml
           parameters:
             name: Bicep_Arm_FilePath_Exits_Check
             path_to_check: $(Bicep.ArmFilePath)
@@ -52,7 +52,7 @@ stages:
             bicep_file_path: '$(System.DefaultWorkingDirectory)/$(empty_bicep_filepath)'
             arm_path_variable: ArmFilePath
 
-        - template: ../steps/checks/check-variable-value.yml
+        - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: Bicep_No_Install_Arm_FilePath_Variable_Check
             variable_to_check: 'Bicep_No_Install.ArmFilePath'
