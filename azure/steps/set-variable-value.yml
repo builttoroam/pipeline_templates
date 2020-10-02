@@ -36,7 +36,7 @@ steps:
           $variable_name = '${{ parameters.variable_name }}'
           Write-Host "Variable to set $variable_name"
 
-          If ( (($variable_value -eq $null) -or ($variable_value -eq "")) -and ('${{ parameters.ignore_null_values }}' -eq 'True') )
+          If ( (($variable_value -eq $null) -or ($variable_value -eq "")) -and ('${{ parameters.ignore_null_or_empty_values }}' -eq 'True') )
           {
             Write-Host "New value is null and Ignore null values is true - Not setting variable"
           }
@@ -64,7 +64,7 @@ steps:
             $variable_value = $splits[1]
             Write-Host "Variable value: $variable_value"
 
-            If ( (($variable_value -eq $null) -or ($variable_value -eq "")) -and ('${{ parameters.ignore_null_values }}' -eq 'True') )
+            If ( (($variable_value -eq $null) -or ($variable_value -eq "")) -and ('${{ parameters.ignore_null_or_empty_values }}' -eq 'True') )
             {
               Write-Host "New value is null and Ignore null values is true - Not setting variable"
             }
