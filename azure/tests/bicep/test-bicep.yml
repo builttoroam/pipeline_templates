@@ -33,7 +33,7 @@ stages:
             variable_to_check: 'Bicep.ArmFilePath'
             expected_value: '$(System.DefaultWorkingDirectory)/$(empty_bicep_generated_arm_filepath)'
 
-        - template: /azure/steps/checks/check-file-exists.yml
+        - template: ../steps/checks/check-file-exists.yml
           parameters:
             name: Bicep_Arm_FilePath_Exits_Check
             path_to_check: $(Bicep.ArmFilePath)
