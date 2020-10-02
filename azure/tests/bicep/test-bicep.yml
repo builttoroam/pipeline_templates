@@ -23,7 +23,7 @@ stages:
         - template: ../../steps/bicep/bicep.yml
           parameters:
             name: Bicep
-            bicep_file_path: '$(System.DefaultWorkingDirectory)$(empty_bicep_filepath)'
+            bicep_file_path: '$(System.DefaultWorkingDirectory)/$(empty_bicep_filepath)'
 
     #     - template: ../../steps/checks/check-variable-value.yml
     #       parameters:
