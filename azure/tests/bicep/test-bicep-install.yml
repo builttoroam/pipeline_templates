@@ -34,18 +34,18 @@ stages:
                 $current = Get-Date -Format "yyyyMMddHHmm"
                 echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
 
-        - template: ../steps/bicep/bicep-install.yml
+        - template: ../../steps/bicep/bicep-install.yml
           parameters:
             name: Bicep
             apktool_version: $(BicepVersion.VersionNumber)
 
-        - template: ../steps/checks/check-variable-value.yml
+        - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_bat
             variable_to_check: 'Bicep.bicep_exe'
             expected_value: '$(Pipeline.Workspace)\bicep\bicep.exe'
 
-        - template: ../steps/checks/check-variable-value.yml
+        - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_Download
             variable_to_check: 'BicepbicepcacheBicepbicepexeDownloadItem.downloaded'
@@ -55,11 +55,11 @@ stages:
     - job: Bicep_Install_Check_Cache
       dependsOn: Bicep_Install
       steps:
-        - template: ../steps/bicep/bicep-install.yml
+        - template: ../../steps/bicep/bicep-install.yml
           parameters:
             name: BicepCacheCheck
 
-        - template: ../steps/checks/check-variable-value.yml
+        - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_Cache_Download
             variable_to_check: 'BicepCacheCheckCheckbicepcacheBicepCacheCheckbicepbatDownloadItem.downloaded'

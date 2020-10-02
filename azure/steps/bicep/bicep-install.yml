@@ -17,7 +17,7 @@ parameters:
   default: 'bicep_exe'
 
 steps:
-- template: multi-download-and-cache.yml
+- template: ../multi-download-and-cache.yml
   parameters:
     name: '${{ parameters.name }}bicepcache'
     cache_name: 'bicep'
@@ -29,7 +29,7 @@ steps:
         source_url:  ${{ parameters.bicep_download_url }}
         target_file_name:  'bicep.exe'
 
-- template: set-variable-value.yml
+- template: ../set-variable-value.yml
   parameters:
     ${{ if ne(parameters.name, '') }}:
       name: ${{ parameters.name }}
