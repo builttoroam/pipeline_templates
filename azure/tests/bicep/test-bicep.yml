@@ -42,7 +42,6 @@ stages:
         - template: ../../steps/bicep/bicep-install.yml
           parameters:
             name: BicepInstall
-            bicep_version: $(BicepVersion.VersionNumber)
             bicep_path_variable: Bicep_Exe_Custom_Path
 
         - template: ../../steps/bicep/bicep.yml
