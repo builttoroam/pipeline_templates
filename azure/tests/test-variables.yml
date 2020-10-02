@@ -8,7 +8,7 @@ variables:
   - name: large_download_url
     value: 'http://ovh.net/files/100Mio.dat'
   - name: empty_bicep_filepath
-    value: './data/empty.bicep'
+    value: 'data/empty.bicep'
 
 
 
