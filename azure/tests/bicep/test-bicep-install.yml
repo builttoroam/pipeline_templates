@@ -62,5 +62,5 @@ stages:
         - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_Cache_Download
-            variable_to_check: 'BicepCacheCheckCheckbicepcacheBicepCacheCheckbicepbatDownloadItem.downloaded'
+            variable_to_check: 'BicepCacheCheckCheckbicepcacheBicepCacheCheckbicepexeDownloadItem.downloaded'
             expected_value: 'false'
