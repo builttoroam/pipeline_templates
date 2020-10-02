@@ -1,0 +1,52 @@
+trigger:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - azure/steps/bicep/bicep.yml
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  - template: ../test-variables.yml
+
+stages:
+  - stage: Test_Bicep
+    pool:
+      vmImage: 'windows-latest'
+
+    jobs:
+    - job: Bicep
+      steps:
+        - template: ../../steps/bicep/bicep.yml
+          parameters:
+            name: Bicep
+            bicep_file_path: $(empty_bicep_filepath)
+
+    #     - template: ../../steps/checks/check-variable-value.yml
+    #       parameters:
+    #         name: OutputCheck_bat
+    #         variable_to_check: 'Bicep.bicep_exe'
+    #         expected_value: '$(Pipeline.Workspace)\bicep\bicep.exe'
+
+    #     - template: ../../steps/checks/check-variable-value.yml
+    #       parameters:
+    #         name: OutputCheck_Download
+    #         variable_to_check: 'BicepbicepcacheBicepbicepexeDownloadItem.downloaded'
+    #         expected_value: 'true'
+
+
+    # - job: Bicep_Install_Check_Cache
+    #   dependsOn: Bicep_Install
+    #   steps:
+    #     - template: ../../steps/bicep/bicep-install.yml
+    #       parameters:
+    #         name: BicepCacheCheck
+
+    #     - template: ../../steps/checks/check-variable-value.yml
+    #       parameters:
+    #         name: OutputCheck_Cache_Download
+    #         variable_to_check: 'BicepCacheCheckCheckbicepcacheBicepCacheCheckbicepexeDownloadItem.downloaded'
+    #         expected_value: 'false'

@@ -1,0 +1,47 @@
+parameters:
+# bicep_download_url - (Optional) Override the download url for the bicep executable for Windows
+- name: bicep_download_url
+  type: string
+  default: ''
+# bicep_version - (Optional) Override the bicep version number - used to cache bicep download
+- name: bicep_version
+  type: string
+  default: ''
+# name - (Optional) - Specify a name if you need to extract output variable values or want to use multiple times
+- name: name
+  type: string
+  default: ''
+# bicep_file_path - Bicep filename that's either relative or absolute path
+- name: bicep_file_path
+  type: string
+
+steps:
+- template: ../../steps/bicep/bicep-install.yml
+  parameters:
+    name: ${{ parameters.name }}BicepInstall
+    bicep_version: '${{ parameters.bicep_version }}'
+    bicep_path_variable: '${{ parameters.name }}bicepexe'
+
+- template: ../../steps/checks/check-file-exists.yml
+  parameters:
+    name: ${{ parameters.name }}CheckFileExists
+    path_to_check: '${{ parameters.bicep_file_path }}'
+    throw_on_fail: true
+    exists_variable: 'bicep_file_exists'
+    full_path_variable: 'bicep_file_path'
+
+- task: PowerShell@2
+  displayName: Generate ARM with Bicep
+  inputs:
+    targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+    script: |
+      $bicep_exe_path = '$(${{ parameters.name }}BicepInstall.${{ parameters.name }}bicepexe)'
+      Write-Host "Bicep exe $bicep_exe_path"
+
+      $bicep_file_path = '$(${{ parameters.name }}CheckFileExists.bicep_file_path)'
+      Write-Host "Bicep file $bicep_file_path"
+
+      $args = 'build', '$bicep_file_path'
+      Write-Host "Running Bicep with args $args"
+      Start-Process -FilePath $bicep_exe_path -ArgumentList $args -Wait | Write-Host
+      Write-Host "Bicep for ARM complete"
