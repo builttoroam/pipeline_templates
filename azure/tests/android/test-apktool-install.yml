@@ -4,8 +4,7 @@ trigger:
     - '*'  # must quote since "*" is a YAML reserved character; we want a string
   paths:
     include:
-    - azure/steps/apktool-install.yml
-    - azure/tests/test-apktool-install.yml
+    - azure/steps/android/apktool-install.yml
 
 pool:
   vmImage: 'windows-latest'
@@ -35,7 +34,7 @@ stages:
                 $current = Get-Date -Format "yyyyMMddHHmm"
                 echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
 
-        - template: ../steps/apktool-install.yml
+        - template: ../steps/android/apktool-install.yml
           parameters:
             name: ApkTool
             apktool_version: $(ApkToolVersion.VersionNumber)
@@ -62,7 +61,7 @@ stages:
     - job: ApkTool_Install_Check_Cache
       dependsOn: ApkTool_Install
       steps:
-        - template: ../steps/apktool-install.yml
+        - template: ../steps/android/apktool-install.yml
           parameters:
             name: ApkToolCacheCheck
 

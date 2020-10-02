@@ -133,7 +133,7 @@ stages:
                 $current = Get-Date -Format "yyyyMMddHHmm"
                 echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
 
-        - template: /azure/steps/apktool-install.yml
+        - template: /azure/steps/android/apktool-install.yml
           parameters:
             name: 'apktoolinstall1'
             apktool_version: $(ApkToolVersion.VersionNumber)
@@ -143,7 +143,7 @@ stages:
       variables:
         VersionNumber: $[ dependencies.Cache_ApkTool.outputs['ApkToolVersion.VersionNumber'] ]
       steps:
-        - template: /azure/steps/apktool-install.yml
+        - template: /azure/steps/android/apktool-install.yml
           parameters:
             name: 'apktoolinstall2'
             apktool_version: $(VersionNumber)
