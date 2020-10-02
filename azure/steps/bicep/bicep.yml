@@ -41,7 +41,7 @@ steps:
       $bicep_file_path = '$(${{ parameters.name }}CheckFileExists.bicep_file_path)'
       Write-Host "Bicep file $bicep_file_path"
 
-      $args = 'build', '$bicep_file_path'
+      $args = 'build', $bicep_file_path
       Write-Host "Running Bicep with args $args"
       Start-Process -FilePath $bicep_exe_path -ArgumentList $args -Wait | Write-Host
       Write-Host "Bicep for ARM complete"
