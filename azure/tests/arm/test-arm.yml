@@ -27,7 +27,11 @@ stages:
           scriptType: ps
           scriptLocation: inlineScript
           inlineScript: |
-            az group delete -n $(az_testing_resource_group_name) -y
+            $exists = az group exists -n $(az_testing_resource_group_name)
+            if( $exists -eq 'True')
+            {
+              az group delete -n $(az_testing_resource_group_name) -y
+            }
 
       - task: AzureCLI@2
         displayName: Create testing resource group
@@ -46,4 +50,8 @@ stages:
           scriptType: ps
           scriptLocation: inlineScript
           inlineScript: |
-            az group delete -n $(az_testing_resource_group_name) -y
+            $exists = az group exists -n $(az_testing_resource_group_name)
+            if( $exists -eq 'True')
+            {
+              az group delete -n $(az_testing_resource_group_name) -y
+            }
