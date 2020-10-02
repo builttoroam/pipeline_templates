@@ -46,13 +46,14 @@ steps:
       Start-Process -FilePath $bicep_exe_path -ArgumentList $args -Wait | Write-Host
       Write-Host "Bicep for ARM complete"
 
-      $filename = (Split-Path -Path $bicep_file_path -Leaf).Replace('.bicep','.json')
-      Write-Host "Output filename $filename"
+      # $filename = (Split-Path -Path $bicep_file_path -Leaf).Replace('.bicep','.json')
+      # Write-Host "Output filename $filename"
 
-      $currentdir = Get-Location
-      Write-Host "Current dir: $currentdir"
+      # $currentdir = Get-Location
+      # Write-Host "Current dir: $currentdir"
 
-      $outputpath = Join-Path $currentdir $filename; 
+      $outputpath = $bicep_file_path.Replace('.bicep','.json')
+      # Join-Path $currentdir $filename; 
       Write-Host "Output filepath $outputpath"
 
       $raw = Get-Content -Path $outputpath -Raw
