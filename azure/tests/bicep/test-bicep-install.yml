@@ -42,7 +42,7 @@ stages:
         - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_exe
-            variable_to_check: 'Bicep.bicep_exe'
+            variable_to_check: 'BicepInstall.bicep_exe'
             expected_value: '$(Pipeline.Workspace)\bicep\bicep.exe'
 
         - template: ../../steps/checks/check-variable-value.yml
