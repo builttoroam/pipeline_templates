@@ -26,7 +26,7 @@ steps:
   parameters:
     name: ${{ parameters.name }}CheckFileExists
     path_to_check: '${{ parameters.bicep_file_path }}'
-    throw_on_fail: false
+    throw_on_fail: true
     exists_variable: 'bicep_file_exists'
     full_path_variable: 'bicep_file_path'
 
