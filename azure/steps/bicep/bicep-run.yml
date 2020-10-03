@@ -33,6 +33,10 @@ parameters:
 - name: name
   type: string
   default: ''
+# arm_parameters_file - (Optional) - The parameters file to be passed to the arm template.
+- name: arm_parameters_file
+  type: string
+  default: ''
 # arm_parameters - (Optional) - The parameters to be passed to the arm template
 - name: arm_parameters
   type: string
@@ -60,6 +64,8 @@ steps:
     #csmFileLink: # Required when templateLocation == URL Of The File
     #csmParametersFileLink: # Optional
     csmFile: '$(${{ parameters.name }}Bicep.ARM_Path)' # Required when  TemplateLocation == Linked Artifact
+    ${{ if ne(parameters.arm_parameters_file, '') }}:
+      csmParametersFile: ${{ parameters.arm_parameters_file }}
     ${{ if ne(parameters.arm_parameters, '') }}:
-      arm_parameters: ${{ parameters.arm_parameters }}
+      overrideParameters: ${{ parameters.arm_parameters }}
 
