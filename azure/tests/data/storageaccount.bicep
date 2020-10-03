@@ -1,4 +1,4 @@
-param storageAccountName string
+param storageAccountName string = '' 
 param containerName string = 'logs'
 param location string = resourceGroup().location
 
