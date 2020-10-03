@@ -18,7 +18,7 @@ stages:
       vmImage: 'windows-latest'
 
     jobs:
-    - job: Arm
+    - job: Bicep_Run
       steps:
       - task: AzureCLI@2
         displayName: Delete existing resource group - tidy up from any failed runs
@@ -52,8 +52,26 @@ stages:
           az_service_connection: $(az_testing_service_connection)
           az_resource_group_name: $(az_testing_resource_group_name)
           az_resource_location: $(az_testing_resource_location)
-          bicep_file_path: '$(System.DefaultWorkingDirectory)/$(empty_bicep_filepath)'
+          bicep_file_path: '$(System.DefaultWorkingDirectory)/$(storageaccount_bicep_filepath)'
+          arm_parameters: '-storageAccountName $(az_testing_storageaccount_name) -containerName $(az_testing_container_name)'
 
+      - template: ../../steps/checks/check-az-resource-exists.yml
+        parameters:
+          name: CheckStorageAccountExists
+          az_service_connection: $(az_testing_service_connection)
+          resource_type: 'storage account check-name'
+          check_property: 'nameAvailable'
+          resource_name: $(az_testing_storageaccount_name)
+          invert: true
+          throw_on_fail: true
+
+      - template: ../../steps/checks/check-az-resource-exists.yml
+        parameters:
+          name: CheckStorageAccountExists
+          az_service_connection: $(az_testing_service_connection)
+          resource_type: 'storage container exists --account-name $(az_testing_storageaccount_name)'
+          resource_name: $(az_testing_container_name)
+          throw_on_fail: true
 
       - task: AzureCLI@2
         displayName: Delete testing resource group

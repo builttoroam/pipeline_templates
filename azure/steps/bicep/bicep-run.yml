@@ -33,10 +33,10 @@ parameters:
 - name: name
   type: string
   default: ''
-# # arm_path_variable - (Optional) - The variable to use for the generated arm template file (.json file)
-# - name: arm_path_variable
-#   type: string
-#   default: 'arm_path'
+# arm_parameters - (Optional) - The parameters to be passed to the arm template
+- name: arm_parameters
+  type: string
+  default: ''
 
 steps:
 - template: bicep.yml
@@ -60,4 +60,6 @@ steps:
     #csmFileLink: # Required when templateLocation == URL Of The File
     #csmParametersFileLink: # Optional
     csmFile: '$(${{ parameters.name }}Bicep.ARM_Path)' # Required when  TemplateLocation == Linked Artifact
+    ${{ if ne(parameters.arm_parameters, '') }}:
+      arm_parameters: ${{ parameters.arm_parameters }}
 
