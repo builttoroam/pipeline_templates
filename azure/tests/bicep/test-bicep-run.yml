@@ -46,9 +46,9 @@ stages:
             az group create -n $(az_testing_resource_group_name) -l $(az_testing_resource_location)
             Write-Host "Created: $(az_testing_resource_group_name)"
 
-      - template: ../../steps/bicep/bicep.yml
+      - template: ../../steps/bicep/bicep-run.yml
         parameters:
-          name: Bicep
+          name: BicepRun
           az_service_connection: $(az_testing_service_connection)
           az_resource_group_name: $(az_testing_resource_group_name)
           az_resource_location: $(az_testing_resource_location)
