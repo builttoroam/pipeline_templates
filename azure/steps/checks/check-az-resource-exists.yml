@@ -1,0 +1,44 @@
+parameters:
+# az_service_connection - Required - Azure Pipeline Service Connection to Azure subscription
+- name: az_service_connection
+  type: string
+# resource_type - Required - First parameter of az command (eg az storage would be storage)
+- name: resource_type
+  type: string
+# resource_name - Required - Name parameter of az comment (eg az storage exists -n XYZ the resource name is XYZ)
+- name: resource_name
+  type: string
+# exists_variable - (Optional) - The name of the variable that is created to store whether the file exists or not
+- name: exists_variable
+  type: string
+  default: 'resource_exists'
+# name - (Optional) - Specify a name if you need to extract output variable values
+- name: name
+  type: string
+  default: ''
+# throw_on_fail - (Optional) - Throw exception if file is missing
+- name: throw_on_fail
+  type: boolean
+  default: true
+
+
+steps:
+  - task: AzureCLI@2
+    displayName: Create testing resource group
+    inputs:
+      azureSubscription: ${{ parameters.az_service_connection }}
+      scriptType: ps
+      scriptLocation: inlineScript
+      inlineScript: |
+        $exists = az ${{ parameters.resource_type }} exists -n ${{ parameters.resource_name }}
+        Write-Host "Resource ${{ parameters.resource_name }} exists - $exists"
+
+        echo "##vso[task.setvariable variable=${{ parameters.exists_variable }};isOutput=true]$exists"
+        Write-Host "Output variable '${{ parameters.exists_variable }}' set to $exists"
+
+        If ( (-Not $file_exists) -and ('${{ parameters.throw_on_fail }}' -eq 'True')){
+          throw "Resource doesn't exist"
+        }
+
+
+          
