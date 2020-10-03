@@ -63,9 +63,11 @@ stages:
         parameters:
           name: CheckResourceExists
           az_service_connection: $(az_testing_service_connection)
-          resource_type: storage
+          resource_type: 'storage account check-name'
+          check_property: 'nameAvailable'
           resource_name: 'storepipelinetesting'
           exists_variable: storage_exists
+          invert: true
           throw_on_fail: true
 
       - task: AzureCLI@2

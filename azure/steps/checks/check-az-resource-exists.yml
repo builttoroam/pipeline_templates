@@ -20,6 +20,14 @@ parameters:
 - name: throw_on_fail
   type: boolean
   default: true
+# invert - (Optional) - Inverts the result
+- name: invert
+  type: boolean
+  default: false
+# check_property - (Optional) - Looks at specific property of resource check result (eg for storage account need to look if name is valid)
+- name: check_property
+  type: string
+  default: ''
 
 
 steps:
@@ -30,8 +38,25 @@ steps:
       scriptType: ps
       scriptLocation: inlineScript
       inlineScript: |
-        $exists = az ${{ parameters.resource_type }} exists -n ${{ parameters.resource_name }}
-        Write-Host "Resource ${{ parameters.resource_name }} exists - $exists"
+        $exists_check = az ${{ parameters.resource_type }} exists -n ${{ parameters.resource_name }}
+        Write-Host "Resource ${{ parameters.resource_name }} exists - $exists_check"
+
+        $exists = $false;
+        if( ne (${{ parameters.check_property }}, ''))
+        {
+          Write-Host "Check property ${{ parameters.check_property }}" 
+          $exists = $exists_check.${{ parameters.check_property }}
+        }
+        else{
+          $exists = $exists_check
+        }
+        Write-Host "Exists $exists" 
+
+        if( ($invert) )
+        {
+          Write-Host "Inverting exists" 
+          $exists = !($exists)
+        }
 
         echo "##vso[task.setvariable variable=${{ parameters.exists_variable }};isOutput=true]$exists"
         Write-Host "Output variable '${{ parameters.exists_variable }}' set to $exists"
