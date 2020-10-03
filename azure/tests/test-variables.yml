@@ -8,5 +8,25 @@ variables:
   - name: large_download_url
     value: 'http://ovh.net/files/100Mio.dat'
 
+  - name: empty_bicep_filepath
+    value: 'azure/tests/data/empty.bicep'
+  - name: empty_bicep_generated_arm_filepath
+    value: 'azure/tests/data/empty.json'
 
+  - name: storageaccount_bicep_filepath
+    value: 'azure/tests/data/storageaccount.bicep'
+
+  - name: az_testing_service_connection
+    value: 'az-testing'
+  - name: az_testing_resource_group_name
+    value: 'AZTesting_PipelineTesting'
+  - name: az_testing_resource_location
+    value: 'westus'
+  - name: az_testing_storageaccount_name
+    value: 'pipelinexxyyzz112233'
+  - name: az_testing_blob_container_name
+    value: 'testinglogs'
+
+  - name: create_storage_arm_template
+    value: 'azure/tests/data/azuredeploy-storage.json'
 

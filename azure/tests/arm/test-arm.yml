@@ -1,0 +1,88 @@
+trigger:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - azure/steps/bicep/bicep.yml
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  - template: ../test-variables.yml
+
+stages:
+  - stage: Test_ARM
+    pool:
+      vmImage: 'windows-latest'
+
+    jobs:
+    - job: Arm
+      steps:
+      - task: AzureCLI@2
+        displayName: Delete existing resource group - tidy up from any failed runs
+        inputs:
+          azureSubscription: $(az_testing_service_connection)
+          scriptType: ps
+          scriptLocation: inlineScript
+          inlineScript: |
+            $exists = az group exists -n $(az_testing_resource_group_name)
+            Write-Host "RG already exists $exists"
+            if( $exists -eq 'True')
+            {
+              az group delete -n $(az_testing_resource_group_name) -y
+              Write-Host "Existing RG deleted to clean up from prior test runs"
+            }
+
+      - task: AzureCLI@2
+        displayName: Create testing resource group
+        inputs:
+          azureSubscription: $(az_testing_service_connection)
+          scriptType: ps
+          scriptLocation: inlineScript
+          inlineScript: |
+            Write-Host "Creating RG: $(az_testing_resource_group_name)"
+            az group create -n $(az_testing_resource_group_name) -l $(az_testing_resource_location)
+            Write-Host "Created: $(az_testing_resource_group_name)"
+
+      # Azure resource group deployment
+      # Deploy an Azure Resource Manager (ARM) template to a resource group and manage virtual machines
+      - task: AzureResourceGroupDeployment@2
+        displayName: Deploying ARM template
+        inputs:
+          azureSubscription: $(az_testing_service_connection)
+          action: 'Create Or Update Resource Group' # Options: create Or Update Resource Group, select Resource Group, start, stop, stopWithDeallocate, restart, delete, deleteRG
+          resourceGroupName: $(az_testing_resource_group_name)
+          location: $(az_testing_resource_location) # Required when action == Create Or Update Resource Group
+          templateLocation: 'Linked artifact' # Options: linked Artifact, uRL Of The File
+          #csmFileLink: # Required when templateLocation == URL Of The File
+          #csmParametersFileLink: # Optional
+          csmFile: '$(System.DefaultWorkingDirectory)/$(create_storage_arm_template)' # Required when  TemplateLocation == Linked Artifact
+
+      - template: ../../steps/checks/check-az-resource-exists.yml
+        parameters:
+          name: CheckResourceExists
+          az_service_connection: $(az_testing_service_connection)
+          resource_type: 'storage account check-name'
+          check_property: 'nameAvailable'
+          resource_name: 'storepipelinetesting'
+          exists_variable: storage_exists
+          invert: true
+          throw_on_fail: true
+
+      - task: AzureCLI@2
+        displayName: Delete testing resource group
+        condition: always()
+        inputs:
+          azureSubscription: $(az_testing_service_connection)
+          scriptType: ps
+          scriptLocation: inlineScript
+          inlineScript: |
+            $exists = az group exists -n $(az_testing_resource_group_name)
+            Write-Host "RG exists after testing: $exists"
+            if( $exists -eq 'True')
+            {
+              az group delete -n $(az_testing_resource_group_name) -y
+              Write-Host "RG cleaned up after test run completed"
+            }

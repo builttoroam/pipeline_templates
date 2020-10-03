@@ -4,14 +4,13 @@ trigger:
     - '*'  # must quote since "*" is a YAML reserved character; we want a string
   paths:
     include:
-    - azure/steps/apktool-install.yml
-    - azure/tests/test-apktool-install.yml
+    - azure/steps/android/apktool-install.yml
 
 pool:
   vmImage: 'windows-latest'
 
 variables:
-  - template: test-variables.yml
+  - template: ../test-variables.yml
   - name: test_variable_1_name
     value: 'variable1'
   - name: test_variable_1_value
@@ -35,24 +34,24 @@ stages:
                 $current = Get-Date -Format "yyyyMMddHHmm"
                 echo "##vso[task.setvariable variable=VersionNumber;isOutput=true]$current"
 
-        - template: ../steps/apktool-install.yml
+        - template: ../../steps/android/apktool-install.yml
           parameters:
             name: ApkTool
             apktool_version: $(ApkToolVersion.VersionNumber)
 
-        - template: ../steps/checks/check-variable-value.yml
+        - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_bat
             variable_to_check: 'ApkTool.apktool_bat'
             expected_value: '$(Pipeline.Workspace)\apktool\apktool.bat'
 
-        - template: ../steps/checks/check-variable-value.yml
+        - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_jar
             variable_to_check: 'ApkTool.apktool_jar'
             expected_value: '$(Pipeline.Workspace)\apktool\apktool.jar'
 
-        - template: ../steps/checks/check-variable-value.yml
+        - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_Download
             variable_to_check: 'ApkToolapktoolcacheApkToolapktoolbatDownloadItem.downloaded'
@@ -62,11 +61,11 @@ stages:
     - job: ApkTool_Install_Check_Cache
       dependsOn: ApkTool_Install
       steps:
-        - template: ../steps/apktool-install.yml
+        - template: ../../steps/android/apktool-install.yml
           parameters:
             name: ApkToolCacheCheck
 
-        - template: ../steps/checks/check-variable-value.yml
+        - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: OutputCheck_Cache_Download
             variable_to_check: 'ApkToolCacheCheckapktoolcacheApkToolCacheCheckapktoolbatDownloadItem.downloaded'

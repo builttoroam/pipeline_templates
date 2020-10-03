@@ -1,0 +1,94 @@
+parameters:
+
+# bicep_file_path - Bicep filename that's either relative or absolute path
+- name: bicep_file_path
+  type: string
+
+# bicep_exe_path - (Optional) Specifies the location of the bicep exe
+- name: bicep_exe_path
+  type: string
+  default: ''
+# bicep_download_url - (Optional) Override the download url for the bicep executable for Windows
+- name: bicep_download_url
+  type: string
+  default: ''
+# bicep_version - (Optional) Override the bicep version number - used to cache bicep download
+- name: bicep_version
+  type: string
+  default: ''
+# name - (Optional) - Specify a name if you need to extract output variable values or want to use multiple times
+- name: name
+  type: string
+  default: ''
+# arm_path_variable - (Optional) - The variable to use for the generated arm template file (.json file)
+- name: arm_path_variable
+  type: string
+  default: 'arm_path'
+
+steps:
+- ${{ if ne(parameters.bicep_exe_path, '') }}:
+  - template: ../../steps/checks/check-file-exists.yml
+    parameters:
+      name: ${{ parameters.name }}CheckBicepExists
+      path_to_check: '${{ parameters.bicep_exe_path }}'
+      throw_on_fail: true
+      exists_variable: 'bicep_exe_exists'
+      full_path_variable: 'bicep_exe_full_path'
+
+- ${{ if ne(parameters.bicep_exe_path, '') }}:
+  - template: ../../steps/set-variable-value.yml
+    parameters:
+      name: ${{ parameters.name }}BicepInstall
+      variable_name: '${{ parameters.name }}bicepexe'
+      new_value: '$(${{ parameters.name }}CheckBicepExists.bicep_exe_full_path)'
+
+- ${{ if eq(parameters.bicep_exe_path, '') }}:
+  - template: ../../steps/bicep/bicep-install.yml
+    parameters:
+      name: ${{ parameters.name }}BicepInstall
+      ${{ if ne(parameters.bicep_download_url, '') }}:
+        bicep_download_url: ${{ parameters.bicep_download_url }}
+      bicep_version: '${{ parameters.bicep_version }}'
+      bicep_path_variable: '${{ parameters.name }}bicepexe'
+
+- template: ../../steps/checks/check-file-exists.yml
+  parameters:
+    name: ${{ parameters.name }}CheckFileExists
+    path_to_check: '${{ parameters.bicep_file_path }}'
+    throw_on_fail: true
+    exists_variable: 'bicep_file_exists'
+    full_path_variable: 'bicep_file_path'
+
+- task: PowerShell@2
+  displayName: Generate ARM with Bicep
+  ${{ if ne(parameters.name, '') }}:
+    name: ${{ parameters.name }}
+  inputs:
+    targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+    script: |     
+      $bicep_exe_path = '$(${{ parameters.name }}BicepInstall.${{ parameters.name }}bicepexe)'
+      Write-Host "Bicep exe $bicep_exe_path"
+
+      $bicep_file_path = '$(${{ parameters.name }}CheckFileExists.bicep_file_path)'
+      Write-Host "Bicep file $bicep_file_path"
+
+      $args = 'build', $bicep_file_path
+      Write-Host "Running Bicep with args $args"
+      Start-Process -FilePath $bicep_exe_path -ArgumentList $args -Wait | Write-Host
+      Write-Host "Bicep for ARM complete"
+
+      # $filename = (Split-Path -Path $bicep_file_path -Leaf).Replace('.bicep','.json')
+      # Write-Host "Output filename $filename"
+
+      # $currentdir = Get-Location
+      # Write-Host "Current dir: $currentdir"
+
+      $outputpath = $bicep_file_path.Replace('.bicep','.json')
+      # Join-Path $currentdir $filename; 
+      Write-Host "Output filepath $outputpath"
+
+      $raw = Get-Content -Path $outputpath -Raw
+      Write-Host "ARM file output: $raw"
+
+      echo "##vso[task.setvariable variable=${{ parameters.arm_path_variable }};isOutput=true]$outputpath"
+      Write-Host "Output variable '${{ parameters.arm_path_variable }}' set to $outputpath"          

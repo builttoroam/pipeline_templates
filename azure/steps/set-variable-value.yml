@@ -15,6 +15,10 @@ parameters:
 - name: name
   type: string
   default: ''
+# ignore_null_or_empty_values - (Optional) - Ignores values that are null (or empty string), not setting the variable value (Default: false)
+- name: ignore_null_or_empty_values
+  type: string
+  default: 'False'
 
 steps:
   - task: PowerShell@2
@@ -32,8 +36,14 @@ steps:
           $variable_name = '${{ parameters.variable_name }}'
           Write-Host "Variable to set $variable_name"
 
-          echo "##vso[task.setvariable variable=$variable_name;isOutput=true]$variable_value"
-          Write-Host "Output variable '$variable_name' set to $variable_value"
+          If ( (($variable_value -eq $null) -or ($variable_value -eq "")) -and ('${{ parameters.ignore_null_or_empty_values }}' -eq 'True') )
+          {
+            Write-Host "New value is null and Ignore null values is true - Not setting variable"
+          }
+          else{
+            echo "##vso[task.setvariable variable=$variable_name;isOutput=true]$variable_value"
+            Write-Host "Output variable '$variable_name' set to $variable_value"
+          }
 
   - task: PowerShell@2
     ${{ if and( ne(parameters.name, ''), eq(parameters.variable_name,'')) }}:
@@ -53,6 +63,13 @@ steps:
             Write-Host "Variable name: $variable_name"
             $variable_value = $splits[1]
             Write-Host "Variable value: $variable_value"
-            echo "##vso[task.setvariable variable=$variable_name;isOutput=true]$variable_value"
-            Write-Host "Output variable '$variable_name' set to $variable_value"
+
+            If ( (($variable_value -eq $null) -or ($variable_value -eq "")) -and ('${{ parameters.ignore_null_or_empty_values }}' -eq 'True') )
+            {
+              Write-Host "New value is null and Ignore null values is true - Not setting variable"
+            }
+            else{
+              echo "##vso[task.setvariable variable=$variable_name;isOutput=true]$variable_value"
+              Write-Host "Output variable '$variable_name' set to $variable_value"
+            }
           }
