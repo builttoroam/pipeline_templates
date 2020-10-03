@@ -28,9 +28,11 @@ stages:
           scriptLocation: inlineScript
           inlineScript: |
             $exists = az group exists -n $(az_testing_resource_group_name)
+            Write-Host "RG already exists $exists"
             if( $exists -eq 'True')
             {
               az group delete -n $(az_testing_resource_group_name) -y
+              Write-Host "Existing RG deleted to clean up from prior test runs"
             }
 
       - task: AzureCLI@2
@@ -40,7 +42,9 @@ stages:
           scriptType: ps
           scriptLocation: inlineScript
           inlineScript: |
+            Write-Host "Creating RG: $(az_testing_resource_group_name)"
             az group create -n $(az_testing_resource_group_name) -l westus
+            Write-Host "Created: $(az_testing_resource_group_name)"
 
       - task: AzureCLI@2
         displayName: Delete testing resource group
@@ -51,7 +55,9 @@ stages:
           scriptLocation: inlineScript
           inlineScript: |
             $exists = az group exists -n $(az_testing_resource_group_name)
+            Write-Host "RG exists after testing: $exists"
             if( $exists -eq 'True')
             {
               az group delete -n $(az_testing_resource_group_name) -y
+              Write-Host "RG cleaned up after test run completed"
             }
