@@ -65,13 +65,13 @@ stages:
           invert: true
           throw_on_fail: true
 
-      - template: ../../steps/checks/check-az-resource-exists.yml
-        parameters:
-          name: CheckStorageAccountExists
-          az_service_connection: $(az_testing_service_connection)
-          resource_type: 'storage container exists --account-name $(az_testing_storageaccount_name)'
-          resource_name: $(az_testing_container_name)
-          throw_on_fail: true
+      # - template: ../../steps/checks/check-az-resource-exists.yml
+      #   parameters:
+      #     name: CheckStorageAccountExists
+      #     az_service_connection: $(az_testing_service_connection)
+      #     resource_type: 'storage container exists --account-name $(az_testing_storageaccount_name)'
+      #     resource_name: $(az_testing_container_name)
+      #     throw_on_fail: true
 
       - task: AzureCLI@2
         displayName: Delete testing resource group
