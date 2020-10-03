@@ -44,7 +44,8 @@ steps:
     name: ${{ parameters.name }}Bicep
     bicep_file_path: ${{ parameters.bicep_file_path }}
     bicep_exe_path: ${{ parameters.bicep_exe_path }}
-    bicep_download_url: ${{ parameters.bicep_download_url }}
+    ${{ if ne(parameters.bicep_download_url, '') }}:
+      bicep_download_url: ${{ parameters.bicep_download_url }}
     bicep_version: ${{ parameters.bicep_version }}
     arm_path_variable: ARM_Path
 

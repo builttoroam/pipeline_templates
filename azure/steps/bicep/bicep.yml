@@ -46,7 +46,8 @@ steps:
   - template: ../../steps/bicep/bicep-install.yml
     parameters:
       name: ${{ parameters.name }}BicepInstall
-      bicep_download_url: '${{ parameters.bicep_download_url }}'
+      ${{ if ne(parameters.bicep_download_url, '') }}:
+        bicep_download_url: ${{ parameters.bicep_download_url }}
       bicep_version: '${{ parameters.bicep_version }}'
       bicep_path_variable: '${{ parameters.name }}bicepexe'
 
