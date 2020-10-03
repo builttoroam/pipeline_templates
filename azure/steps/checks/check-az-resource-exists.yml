@@ -38,7 +38,7 @@ steps:
       scriptType: ps
       scriptLocation: inlineScript
       inlineScript: |
-        $exists_check = az ${{ parameters.resource_type }} -n ${{ parameters.resource_name }}
+        $exists_check = az ${{ parameters.resource_type }} -n ${{ parameters.resource_name }} | ConvertFrom-Json
         Write-Host "Resource ${{ parameters.resource_name }} exists - $exists_check"
 
         $exists = $false;
