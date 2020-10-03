@@ -32,7 +32,7 @@ parameters:
 
 steps:
   - task: AzureCLI@2
-    displayName: Create testing resource group
+    displayName: Check to see if resource exists
     inputs:
       azureSubscription: ${{ parameters.az_service_connection }}
       scriptType: ps
@@ -52,7 +52,7 @@ steps:
         }
         Write-Host "Exists $exists" 
 
-        if( ($invert) )
+        if( '${{ parameters.invert}}' -eq 'True' )
         {
           Write-Host "Inverting exists" 
           $exists = !($exists)
