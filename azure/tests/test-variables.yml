@@ -23,7 +23,7 @@ variables:
   - name: az_testing_resource_location
     value: 'westus'
   - name: az_testing_storageaccount_name
-    value: 'pipeline_testing_xxyyzz_112233'
+    value: 'pipelinexxyyzz112233'
   - name: az_testing_blob_container_name
     value: 'testing_logs'
 
