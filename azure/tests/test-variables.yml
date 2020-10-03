@@ -25,7 +25,7 @@ variables:
   - name: az_testing_storageaccount_name
     value: 'pipelinexxyyzz112233'
   - name: az_testing_blob_container_name
-    value: 'testing_logs'
+    value: 'testinglogs'
 
   - name: create_storage_arm_template
     value: 'azure/tests/data/azuredeploy-storage.json'
