@@ -65,7 +65,6 @@ stages:
           az_service_connection: $(az_testing_service_connection)
           resource_type: storage
           resource_name: 'storepipelinetesting'
-          path_to_check: $(file_name_only_path_incorrect)
           exists_variable: storage_exists
           throw_on_fail: true
 
