@@ -42,7 +42,7 @@ steps:
         Write-Host "Resource ${{ parameters.resource_name }} exists - $exists_check"
 
         $exists = $false;
-        if( ne ('${{ parameters.check_property }}', ''))
+        if( '${{ parameters.check_property }}' -ne '' )
         {
           Write-Host "Check property ${{ parameters.check_property }}" 
           $exists = $exists_check.${{ parameters.check_property }}
