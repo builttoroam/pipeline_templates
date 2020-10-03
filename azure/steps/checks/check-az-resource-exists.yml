@@ -61,7 +61,7 @@ steps:
         echo "##vso[task.setvariable variable=${{ parameters.exists_variable }};isOutput=true]$exists"
         Write-Host "Output variable '${{ parameters.exists_variable }}' set to $exists"
 
-        If ( (-Not $file_exists) -and ('${{ parameters.throw_on_fail }}' -eq 'True')){
+        If ( (-Not $exists) -and ('${{ parameters.throw_on_fail }}' -eq 'True')){
           throw "Resource doesn't exist"
         }
 

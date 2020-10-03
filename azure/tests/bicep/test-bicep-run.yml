@@ -46,30 +46,14 @@ stages:
             az group create -n $(az_testing_resource_group_name) -l $(az_testing_resource_location)
             Write-Host "Created: $(az_testing_resource_group_name)"
 
-      # Azure resource group deployment
-      # Deploy an Azure Resource Manager (ARM) template to a resource group and manage virtual machines
-      - task: AzureResourceGroupDeployment@2
-        displayName: Deploying ARM template
-        inputs:
-          azureSubscription: $(az_testing_service_connection)
-          action: 'Create Or Update Resource Group' # Options: create Or Update Resource Group, select Resource Group, start, stop, stopWithDeallocate, restart, delete, deleteRG
-          resourceGroupName: $(az_testing_resource_group_name)
-          location: $(az_testing_resource_location) # Required when action == Create Or Update Resource Group
-          templateLocation: 'Linked artifact' # Options: linked Artifact, uRL Of The File
-          #csmFileLink: # Required when templateLocation == URL Of The File
-          #csmParametersFileLink: # Optional
-          csmFile: '$(System.DefaultWorkingDirectory)/$(create_storage_arm_template)' # Required when  TemplateLocation == Linked Artifact
-
-      - template: ../../steps/checks/check-az-resource-exists.yml
+      - template: ../../steps/bicep/bicep.yml
         parameters:
-          name: CheckResourceExists
+          name: Bicep
           az_service_connection: $(az_testing_service_connection)
-          resource_type: 'storage account check-name'
-          check_property: 'nameAvailable'
-          resource_name: 'storepipelinetesting'
-          exists_variable: storage_exists
-          invert: true
-          throw_on_fail: true
+          az_resource_group_name: $(az_testing_resource_group_name)
+          az_resource_location: $(az_testing_resource_location)
+          bicep_file_path: '$(System.DefaultWorkingDirectory)/$(empty_bicep_filepath)'
+
 
       - task: AzureCLI@2
         displayName: Delete testing resource group

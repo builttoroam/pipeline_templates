@@ -1,0 +1,62 @@
+parameters:
+
+# az_service_connection - Service connection in Azure Pipelines to Azure Subscription
+- name: az_service_connection
+  type: string
+
+# az_resource_group_name - Resource group to run the ARM template
+- name: az_resource_group_name
+  type: string
+
+# az_resource_location - Location of resources
+- name: az_resource_location
+  type: string
+
+
+# bicep_file_path - Bicep filename that's either relative or absolute path
+- name: bicep_file_path
+  type: string
+
+# bicep_exe_path - (Optional) Specifies the location of the bicep exe
+- name: bicep_exe_path
+  type: string
+  default: ''
+# bicep_download_url - (Optional) Override the download url for the bicep executable for Windows
+- name: bicep_download_url
+  type: string
+  default: ''
+# bicep_version - (Optional) Override the bicep version number - used to cache bicep download
+- name: bicep_version
+  type: string
+  default: ''
+# name - (Optional) - Specify a name if you need to extract output variable values or want to use multiple times
+- name: name
+  type: string
+  default: ''
+# # arm_path_variable - (Optional) - The variable to use for the generated arm template file (.json file)
+# - name: arm_path_variable
+#   type: string
+#   default: 'arm_path'
+
+steps:
+- template: bicep.yml
+  parameters:
+    name: ${{ parameters.name }}Bicep
+    bicep_file_path: ${{ parameters.bicep_file_path }}
+    bicep_exe_path: ${{ parameters.bicep_exe_path }}
+    bicep_download_url: ${{ parameters.bicep_download_url }}
+    bicep_version: ${{ parameters.bicep_version }}
+    arm_path_variable: ARM_Path
+
+- task: AzureResourceGroupDeployment@2
+  displayName: Deploying ARM template
+  inputs:
+    azureSubscription: ${{ parameters.az_service_connection }}
+    action: 'Create Or Update Resource Group' # Options: create Or Update Resource Group, select Resource Group, start, stop, stopWithDeallocate, restart, delete, deleteRG
+    resourceGroupName: ${{ parameters.az_resource_group_name }}
+    location: ${{ parameters.az_resource_location }} # Required when action == Create Or Update Resource Group
+    templateLocation: 'Linked artifact' # Options: linked Artifact, uRL Of The File
+    #csmFileLink: # Required when templateLocation == URL Of The File
+    #csmParametersFileLink: # Optional
+    csmFile: '$(${{ parameters.name }}Bicep.ARM_Path)' # Required when  TemplateLocation == Linked Artifact
+
