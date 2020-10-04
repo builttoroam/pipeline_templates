@@ -73,18 +73,18 @@ stages:
       #     resource_name: $(az_testing_container_name)
       #     throw_on_fail: true
 
-      - task: AzureCLI@2
-        displayName: Delete testing resource group
-        condition: always()
-        inputs:
-          azureSubscription: $(az_testing_service_connection)
-          scriptType: ps
-          scriptLocation: inlineScript
-          inlineScript: |
-            $exists = az group exists -n $(az_testing_resource_group_name)
-            Write-Host "RG exists after testing: $exists"
-            if( $exists -eq 'True')
-            {
-              az group delete -n $(az_testing_resource_group_name) -y
-              Write-Host "RG cleaned up after test run completed"
-            }
+      # - task: AzureCLI@2
+      #   displayName: Delete testing resource group
+      #   condition: always()
+      #   inputs:
+      #     azureSubscription: $(az_testing_service_connection)
+      #     scriptType: ps
+      #     scriptLocation: inlineScript
+      #     inlineScript: |
+      #       $exists = az group exists -n $(az_testing_resource_group_name)
+      #       Write-Host "RG exists after testing: $exists"
+      #       if( $exists -eq 'True')
+      #       {
+      #         az group delete -n $(az_testing_resource_group_name) -y
+      #         Write-Host "RG cleaned up after test run completed"
+      #       }
