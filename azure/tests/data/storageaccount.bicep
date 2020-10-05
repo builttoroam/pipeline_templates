@@ -14,3 +14,7 @@ resource sa 'Microsoft.Storage/storageAccounts@2019-06-01' = {
     accessTier: 'Hot'
   }
 }
+
+resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2019-06-01' = {
+  name: '${sa.name}/default/${containerName}'
+}

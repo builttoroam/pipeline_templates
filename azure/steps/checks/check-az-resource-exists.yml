@@ -45,7 +45,7 @@ steps:
         if( '${{ parameters.check_property }}' -ne '' )
         {
           Write-Host "Check property ${{ parameters.check_property }}" 
-          $exists = $exists_check.${{ parameters.check_property }}
+          $exists = $exists_check['${{ parameters.check_property }}']
         }
         else{
           $exists = $exists_check
