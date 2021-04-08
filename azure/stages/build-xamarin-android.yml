@@ -56,6 +56,9 @@ parameters:
 # key_alias - (Required) The alias of the key.
 - name: key_alias
   type: string
+# key_password - (Required) The password to access the key.
+- name: key_password
+  type: string
 
 # artifact_name - (Optional) The name of the artifact to copy application to
 - name: artifact_name
@@ -224,7 +227,7 @@ stages:
         /p:AndroidPackageFormat="$(packageFormat)"
         /p:AndroidKeyStore="True" 
         /p:AndroidSigningKeyStore="$(signing_keystore.secureFilePath)"
-        /p:AndroidSigningKeyPass="${{ parameters.keystore_password }}" 
+        /p:AndroidSigningKeyPass="${{ parameters.key_password }}" 
         /p:AndroidSigningKeyAlias="${{ parameters.key_alias }}" 
         /p:AndroidSigningStorePass="${{ parameters.keystore_password }}"' 
 
