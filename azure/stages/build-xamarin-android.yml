@@ -50,11 +50,11 @@ parameters:
 # of the keystore in Secure Files
 - name: secure_file_keystore_filename
   type: string
-# keystore_alias - (Required) The alias of the keystore. 
-- name: keystore_alias
-  type: string
 # keystore_password - (Required) The password to access the keystore
 - name: keystore_password
+  type: string
+# key_alias - (Required) The alias of the key.
+- name: key_alias
   type: string
 
 # artifact_name - (Optional) The name of the artifact to copy application to
@@ -225,7 +225,7 @@ stages:
         /p:AndroidKeyStore="True" 
         /p:AndroidSigningKeyStore="$(signing_keystore.secureFilePath)"
         /p:AndroidSigningKeyPass="${{ parameters.keystore_password }}" 
-        /p:AndroidSigningKeyAlias="${{ parameters.keystore_alias }}" 
+        /p:AndroidSigningKeyAlias="${{ parameters.key_alias }}" 
         /p:AndroidSigningStorePass="${{ parameters.keystore_password }}"' 
 
     # postBuild steps - performs steps immediately after executing the solution build
