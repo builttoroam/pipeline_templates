@@ -325,5 +325,3 @@ stages:
 
     # onEnd steps - performs steps after publishing artifacts, at the end of the build stage
     - ${{ parameters.onEnd }}
-
-

@@ -2,7 +2,7 @@ parameters:
 # nuget_version_to_install - (Optional) Use to override the NuGet version (defaults to 4.4.1)
 - name: nuget_version_to_install
   type: string
-  default: '4.4.1'
+  default: '5.8.1'
 # solution_filename - (Required) The relative path to the solution file that should be built
 - name: solution_filename
   type: string
