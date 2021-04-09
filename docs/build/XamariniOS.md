@@ -70,7 +70,7 @@ stages:
 <tr><td>onEnd</td><td>(Optional) Steps to be executed at the end of the stage</td></tr>
 <tr><td>ios_nuget_version</td><td>(Optional) Use to override the NuGet version (defaults to 5.9.1)</td></tr>
 <tr><td>net_core_version</td><td>(Optional) Use to override the .NET Core version (defaults to 3.0.x)</td></tr>
-<tr><td>xamarin_sdk_version</td><td>(Optional) Use to override the Xamarin SDK version (defaults to 6.4.0)</td></tr>
+<tr><td>xamarin_sdk_version</td><td>(Optional) Use to override the Xamarin SDK version (defaults to 6.12.0)</td></tr>
 
 
 </table>
