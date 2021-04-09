@@ -6,6 +6,9 @@ parameters:
 # solution_filename - (Required) The relative path to the solution file that should be built
 - name: solution_filename
   type: string
+# vsts_feed - (Optional) Include the selected feed in the generated NuGet.config
+- name: vsts_feed
+  type: string
 
 steps:
   # Select the NuGet version based on the nuget_version_to_install parameter          
@@ -19,3 +22,4 @@ steps:
     displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
     inputs:
       restoreSolution: '${{ parameters.solution_filename }}'
+      vstsFeed: '${{ parameters.vsts_feed }}'

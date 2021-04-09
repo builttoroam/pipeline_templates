@@ -103,6 +103,10 @@ parameters:
 - name: windows_nuget_version
   type: string
   default: '5.9.1'
+# vsts_feed - (Optional) Include the selected feed in the generated NuGet.config
+- name: vsts_feed
+  type: string
+  default: ''
 
 stages:
 - stage: ${{ parameters.stage_name }}
@@ -256,6 +260,7 @@ stages:
       parameters:
         nuget_version_to_install: '${{ parameters.windows_nuget_version }}'
         solution_filename: '$(solutionFilename)'
+        vsts_feed: '${{ parameters.vsts_feed }}'
 
     # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
