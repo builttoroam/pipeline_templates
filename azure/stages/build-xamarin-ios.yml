@@ -269,10 +269,6 @@ stages:
           Write-Host "Provisioning Profile: $cn"
           Write-Host "##vso[task.setvariable variable=prov_profile]$cn"
 
-    # Select the Xamarin SDK version based on the xamarin_sdk_version parameter          
-    - script: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh '${{ parameters.xamarin_sdk_version }}'
-      displayName: 'Select the Xamarin SDK version'
-
     # Select the .Net Core version based on the net_core_version parameter          
     - task: UseDotNet@2
       displayName: 'Use .Net Core sdk ${{ parameters.net_core_version }}'
