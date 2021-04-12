@@ -132,6 +132,10 @@ stages:
       value: ${{ parameters.ios_provisioning_profile_id }}
     - name: bundle_id
       value: ''
+    - name: bundle_name
+      value: ''
+    - name: bundle_display_name
+      value: ''
       
   pool:
     vmImage: 'macos-latest'
@@ -232,13 +236,15 @@ stages:
         versionName: '${{ parameters.full_version_number }}' 
         printFile: true
 
-    # Update the Info.plist with the correct bundle id
+    # Update the Info.plist with the correct bundle id/name
     - task: ios-bundle-identifier@1
-      displayName: 'Setting application bundle id ${{ parameters.ios_plist_filename }}'
+      displayName: 'Setting application bundle id/name ${{ parameters.ios_plist_filename }}'
       condition: and( succeeded(), ne( variables['bundle_id'], '') )
       inputs:
         sourcePath: '$(manifestPath)'
         bundleIdentifier: '$(bundle_id)'
+        bundleName: '$(bundle_name)'
+        bundleDisplayName: '$(bundle_display_name)'
         printFile: true
  
     # This task is linked to the InstallAppleCertificate task at the begining of this template
