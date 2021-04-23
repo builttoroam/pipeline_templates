@@ -29,6 +29,7 @@ stages:
     #appcenter_release_notes: # Optional 
     #appcenter_release_notes_option: 'input' # Options: input, file
     #appcenter_release_notes_file: # Required when appcenter_release_notes_option == Input 
+    #appcenter_release_notes_source: 'artifact' # Options: artifact, source_control
     #appcenter_is_mandatory_update: # Required when appcenter_release_notes_option == File
     #appcenter_destination_type: 'groups' # Options: groups, store
     #appcenter_distribution_group_ids: # Optional
@@ -59,7 +60,8 @@ stages:
 <tr><td>artifact_name</td><td>(Optional) The name of the artifact to copy application from</td></tr>  
 <tr><td>appcenter_release_notes_option</td><td>(Optional) Whether release notes for App Center should be inputted via the appcenter_release_notes parameter or if it should come from a file (appcenter_release_notes_file parameter).  More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr> 
 <tr><td>appcenter_release_notes</td><td>(Optional) The release notes to be set in App Center for the release. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr> 
-<tr><td>appcenter_release_notes_file</td><td>(Optional) The file to read the release notes from to be set in App Center for the release. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr> 
+<tr><td>appcenter_release_notes_file</td><td>(Optional) Whether release notes for App Center should be inputted from the source code or from the artifact. Only if appcenter_release_notes_option is file.</td></tr> 
+<tr><td>appcenter_release_notes_source</td><td>(Optional) The file to read the release notes from to be set in App Center for the release. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr> 
 <tr><td>appcenter_is_mandatory_update</td><td>(Optional) Whether the App Center release should be marked as a mandatory update. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr>
 <tr><td>appcenter_destination_type</td><td>(Optional) Whether the release is pushed out to a distribution group or a store. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr> 
 <tr><td>appcenter_distribution_group_ids</td><td>(Optional) The id(s) (comma separated list of guids) of the distribution groups to distribute the release to. More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops</td></tr>
