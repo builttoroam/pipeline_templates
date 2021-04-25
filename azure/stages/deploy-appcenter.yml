@@ -161,6 +161,7 @@ stages:
       runOnce:
         deploy:
           steps:
+            - checkout: self
             # If the keystore has been specified, download it from secure files
             - task: DownloadSecureFile@1
               displayName: Download keystore from Secure Files (for repackaging AAB to APK)
