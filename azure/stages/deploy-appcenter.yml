@@ -145,10 +145,10 @@ stages:
   - name: application_fullpath
     value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
   - name: release_notes_fullpath
-  ${{ if eq(parameters.appcenter_release_notes_source, 'artifact') }}:
-    value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.appcenter_release_notes_file }}'
-  ${{ if eq(parameters.appcenter_release_notes_source, 'source_control') }}:
-    value: '$(Build.SourcesDirectory)/${{ parameters.appcenter_release_notes_file }}'
+    ${{ if eq(parameters.appcenter_release_notes_source, 'artifact') }}:
+      value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.appcenter_release_notes_file }}'
+    ${{ if eq(parameters.appcenter_release_notes_source, 'source_control') }}:
+      value: '$(Build.SourcesDirectory)/${{ parameters.appcenter_release_notes_file }}'
 
   pool:
     vmImage: 'windows-latest'
