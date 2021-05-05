@@ -162,7 +162,7 @@ stages:
         deploy:
           steps:
             - checkout: self
-              enabled: eq('${{ parameters.appcenter_release_notes_source }}', 'source_control')
+              condition: eq('${{ parameters.appcenter_release_notes_source }}', 'source_control')
 
             # If the keystore has been specified, download it from secure files
             - task: DownloadSecureFile@1
