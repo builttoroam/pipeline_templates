@@ -190,7 +190,7 @@ stages:
               Write-Host "File specified is solution filter"
               $actualSolutionFile = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).solution.path
               Write-Host "Solution relative path is $actualSolutionFile"
-              $filterPath = (get-item .\Inspector.Uno.Android.slnf).directory.fullname 
+              $filterPath = (get-item '${{ parameters.solution_filename }}').directory.fullname 
               Write-Host "Filter path is $filterPath"
               $solutionFile = "$filterPath/$actualSolutionFile"
               Write-Host "Full path to solution file is $solutionFile"
