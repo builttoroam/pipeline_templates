@@ -1,6 +1,6 @@
 parameters:
-# nuget_version - (Optional) Use to override the NuGet version (defaults to 4.4.1)
-- name: nuget_version
+# nuget_version_to_install - (Optional) Use to override the NuGet version (defaults to 4.4.1)
+- name: nuget_version_to_install
   type: string
   default: '4.4.1'
 # solution_filename - (Required) The relative path to the solution file that should be built
@@ -8,11 +8,11 @@ parameters:
   type: string
 
 steps:
-  # Select the NuGet version based on the nuget_version parameter          
+  # Select the NuGet version based on the nuget_version_to_install parameter          
   - task: NuGetToolInstaller@1
-    displayName: 'Use NuGet ${{ parameters.nuget_version }}'
+    displayName: 'Use NuGet ${{ parameters.nuget_version_to_install }}'
     inputs:
-      versionSpec: '${{ parameters.nuget_version }}'
+      versionSpec: '${{ parameters.nuget_version_to_install }}'
 
   # NuGet restore for solution
   - task: NuGetCommand@2
