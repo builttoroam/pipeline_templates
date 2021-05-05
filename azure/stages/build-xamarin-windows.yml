@@ -238,7 +238,7 @@ stages:
     - template: ../steps/nuget-install-and-restore.yml
       parameters:
         nuget_version_to_install: '${{ parameters.windows_nuget_version }}'
-        solution_filename: '${{ parameters.solutionFilename }}'
+        solution_filename: '$(solutionFilename)'
 
     # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
