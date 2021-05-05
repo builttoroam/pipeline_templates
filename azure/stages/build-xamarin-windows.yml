@@ -207,7 +207,8 @@ stages:
           [xml]$manifest= get-content "$(manifestPath)"
           $manifest.Package.Identity.Version = "${{ parameters.full_version_number }}.0"
           $manifest.Package.Identity.Publisher = "$(cert_subject)"
-          Write-Host "Updated manifest $manifest.OuterXml"
+          $outxml = $manifest.OuterXml
+          Write-Host "Updated manifest $outxml"
           $manifest.save("$(manifestPath)")
 
     # Check for solution filter - if filter, need to extract actual solution file
