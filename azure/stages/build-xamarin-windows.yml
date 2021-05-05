@@ -273,7 +273,6 @@ stages:
               /p:DebugSymbols=false 
               /p:DebugType=None 
               /p:AppxPackageDir="$(appxPackageDir)"
-              /p:AppxBundle=Always 
               /p:AppxPackageSigningEnabled=true 
               /p:UapAppxPackageBuildMode=StoreUpload 
               /p:platform="${{ parameters.solution_target_platform }}" 
