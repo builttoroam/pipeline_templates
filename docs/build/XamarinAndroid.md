@@ -64,7 +64,7 @@ stages:
 <tr><td>postBuild</td><td>Steps to be executed after the build has been invoked</td></tr>
 <tr><td>prePublish</td><td>Steps to be executed before application package is published to artifact</td></tr>
 <tr><td>onEnd</td><td>Steps to be executed at the end of the stage</td></tr>
-<tr><td>android_nuget_version</td><td>(Optional) Use to override the NuGet version (defaults to 5.6.0)</td></tr>
+<tr><td>android_nuget_version</td><td>(Optional) Use to override the NuGet version (defaults to 5.9.1)</td></tr>
 <tr><td>net_core_version</td><td>(Optional) Use to override the .NET Core version (defaults to 3.0.x)</td></tr>
 
 
