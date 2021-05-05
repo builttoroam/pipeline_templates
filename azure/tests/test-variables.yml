@@ -2,11 +2,11 @@ variables:
   - name: system.debug
     value: true
   - name: small_download_url
-    value: 'http://ovh.net/files/1Mio.dat'
+    value: 'http://speedtest-syd.apac-tools.ovh/files/100Mb.dat'
   - name: medium_download_url
-    value: 'http://ovh.net/files/10Mio.dat'
+    value: 'http://speedtest-syd.apac-tools.ovh/files/100Mio.dat'
   - name: large_download_url
-    value: 'http://ovh.net/files/100Mio.dat'
+    value: 'http://speedtest-syd.apac-tools.ovh/files/1Gb.dat'
 
   - name: empty_bicep_filepath
     value: 'azure/tests/data/empty.bicep'
