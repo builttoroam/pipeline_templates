@@ -37,7 +37,7 @@ stages:
     #postBuild:  # Optional 
     #prePublish:  # Optional
     #onEnd:  # Optional 
-    #nuget_version:  # Optional 
+    #windows_nuget_version:  # Optional 
 
 ```
 
@@ -68,7 +68,7 @@ stages:
 <tr><td>prePublish</td><td>(Optional) Steps to be executed before application package is published to artifact</td></tr>
 <tr><td>onEnd</td><td>(Optional) Steps to be executed at the end of the stage</td></tr>
 
-<tr><td>nuget_version</td><td>(Optional) Use to override the NuGet version (defaults to 4.4.1)</td></tr>
+<tr><td>windows_nuget_version</td><td>(Optional) Use to override the NuGet version (defaults to 5.6.0)</td></tr>
 
 
 </table>

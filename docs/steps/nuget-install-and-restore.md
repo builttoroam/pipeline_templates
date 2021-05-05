@@ -17,14 +17,14 @@ stages:
 - template:  azure/steps/nuget-install-and-restore.yml@builttoroam_templates
   parameters:
     solution_filename:
-    #nuget_version: # Optional
+    #nuget_version_to_install: # Optional
 ```
 
 
 ## Arguments
 
 <table><thead><tr><th>Argument</th><th>Description</th></tr></thead>
-<tr><td>nuget_version</td><td>(Optional) Use to override the NuGet version (defaults to 4.4.1)</td></tr>
+<tr><td>nuget_version_to_install</td><td>(Optional) Use to override the NuGet version (defaults to 4.4.1)</td></tr>
 <tr><td>solution_filename</td><td>The relative path to the solution file that should be built</td></tr>
 
 

@@ -99,8 +99,8 @@ parameters:
   type: stepList
   default: []
 
-# nuget_version - (Optional) Use to override the NuGet version (defaults to 5.6.0)
-- name: nuget_version
+# ios_nuget_version - (Optional) Use to override the NuGet version (defaults to 5.6.0)
+- name: ios_nuget_version
   type: string
   default: '5.6.0'
 # net_core_version - (Optional) Use to override the .NET Core version (defaults to 3.1.x)
@@ -277,7 +277,7 @@ stages:
     # Install and Restore NuGet for the solution
     - template: ../steps/nuget-install-and-restore.yml
       parameters:
-        nuget_version: '${{ parameters.nuget_version }}'
+        nuget_version_to_install: '${{ parameters.ios_nuget_version }}'
         solution_filename: '${{ parameters.solution_filename }}'
 
     # preBuild steps - performs steps prior to executing the solution build
