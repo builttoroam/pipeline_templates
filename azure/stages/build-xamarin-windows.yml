@@ -197,19 +197,17 @@ stages:
 
           Write-Host "Variables exported"
 
-    # This task updates the version number and publisher in the package.manifest file
-    - task: MagicChunks@2
+    # Update appxmanifest. This must be done before the build.
+    - task: PowerShell@2
       displayName: 'Updating manifest file with version number and publisher - $(manifestPath)'
       inputs:
-        sourcePath: $(manifestPath)
-        fileType: Xml
-        targetPathType: 'source'
-        transformationType: 'json'
-        transformations: |
-          {
-            "Package/Identity/@Version": "${{ parameters.full_version_number }}.0",
-            "Package/Identity/@Publisher": "$(cert_subject)"
-          }
+        targetType: 'inline'                                                                                                 
+        script: |
+          # Update appxmanifest. This must be done before the build.
+          [xml]$manifest= get-content "$(manifestPath)"
+          $manifest.Package.Identity.Version = "${{ parameters.full_version_number }}.0"
+          $manifest.Package.Identity.Publisher = "$(cert_subject)"
+          $manifest.save("$(manifestPath)")
 
     # Check for solution filter - if filter, need to extract actual solution file
     - task: PowerShell@2
