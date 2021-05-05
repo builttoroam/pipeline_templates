@@ -274,11 +274,34 @@ stages:
       inputs:
         version: '${{ parameters.net_core_version }}'
 
+    # Check for solution filter - if filter, need to extract actual solution file
+    - task: PowerShell@2
+      displayName: 'Determine Solution File for ${{ parameters.solution_filename }}'
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          if( '${{ parameters.solution_filename }}'.contains(".slnf") ) {
+              Write-Host "File specified is solution filter"
+              $actualSolutionFile = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).solution.path
+              Write-Host "Solution relative path is $actualSolutionFile"
+              $filterPath = (get-item '${{ parameters.solution_filename }}').directory.fullname 
+              Write-Host "Filter path is $filterPath"
+              $solutionFile = "$filterPath/$actualSolutionFile"
+              Write-Host "Full path to solution file is $solutionFile"
+              Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
+          }
+          else{
+              Write-Host "File specified is a solution file"
+              $solutionFile = "${{ parameters.solution_filename }}"
+              Write-Host "Full path to solution file is $solutionFile"
+              Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
+          }
+
     # Install and Restore NuGet for the solution
     - template: ../steps/nuget-install-and-restore.yml
       parameters:
         nuget_version_to_install: '${{ parameters.ios_nuget_version }}'
-        solution_filename: '${{ parameters.solution_filename }}'
+        solution_filename: '$(solutionFilename)'
 
     # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
