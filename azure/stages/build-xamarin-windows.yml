@@ -232,9 +232,11 @@ stages:
               $projects = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).projects
               for($i=0;$i -lt $projects.length;$i++)
               {
-                  if($projects[$i].contains('wapproj'))
+                  $proj = $projects[$i]
+                  Write-Host "Project - $proj" 
+                  if($proj.contains('wapproj'))
                   {
-                      $buildproject = $project[$i]
+                      $buildproject = $proj
                       $buildproject = "$filterPath/$buildproject"
                       Write-Host "Wapproj found - building $buildproject instead of solution"
                   }
