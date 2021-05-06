@@ -230,11 +230,11 @@ stages:
               Write-Host "Checking projects for wapproj for Windows fix"
               $buildproject = '${{ parameters.solution_filename }}'
               $projects = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).projects
-              for(i=0;i<$projects.length;i++)
+              for($i=0;$i<$projects.length;$i++)
               {
-                  if($projects[i].contains('wapproj'))
+                  if($projects[$i].contains('wapproj'))
                   {
-                      $buildproject = $project[i]
+                      $buildproject = $project[$i]
                       $buildproject = "$filterPath/$buildproject"
                       Write-Host "Wapproj found - building $buildproject instead of solution"
                   }
