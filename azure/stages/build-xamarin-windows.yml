@@ -229,7 +229,7 @@ stages:
 
               Write-Host "Checking projects for wapproj for Windows fix"
               $buildproject = '${{ parameters.solution_filename }}'
-              $projects = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).projects
+              $projects = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).solution.projects
               for($i=0;$i -lt $projects.length;$i++)
               {
                   $proj = $projects[$i]
