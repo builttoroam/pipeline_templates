@@ -226,12 +226,27 @@ stages:
               $solutionFile = "$filterPath/$actualSolutionFile"
               Write-Host "Full path to solution file is $solutionFile"
               Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
+
+              Write-Host "Checking projects for wapproj for Windows fix"
+              $buildproject = '${{ parameters.solution_filename }}'
+              $projects = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).projects
+              for(i=0;i<$projects.length;i++)
+              {
+                  if($projects[i].contains('wapproj'))
+                  {
+                      $buildproject = $project[i]
+                      $buildproject = "$filterPath/$buildproject"
+                      Write-Host "Wapproj found - building $buildproject instead of solution"
+                  }
+              }
+              Write-Host "##vso[task.setvariable variable=buildProjectOrSolution]$buildproject"
           }
           else{
               Write-Host "File specified is a solution file"
               $solutionFile = "${{ parameters.solution_filename }}"
               Write-Host "Full path to solution file is $solutionFile"
               Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
+              Write-Host "##vso[task.setvariable variable=buildProjectOrSolution]$solutionFile"
           }
         
     # Install and Restore NuGet for the solution
@@ -247,7 +262,7 @@ stages:
     - task: VSBuild@1
       displayName: 'Building solution ${{ parameters.solution_filename }}'
       inputs:
-        solution: ${{ parameters.solution_filename }}
+        solution: '$(buildProjectOrSolution)'
         msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpPackagePlatforms }}" 
               /p:DebugSymbols=false 
               /p:DebugType=None 
