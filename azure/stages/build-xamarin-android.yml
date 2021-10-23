@@ -118,6 +118,15 @@ stages:
       value: ${{ parameters.android_manifest_filename }}
     - name: outputSearch
       value: ''
+    - name: keystore_signing    
+      ${{ if ne( parameters.secure_file_keystore_filename , '') }}:
+        value: '/p:AndroidKeyStore="True" 
+          /p:AndroidSigningKeyStore="$(signing_keystore.secureFilePath)"
+          /p:AndroidSigningKeyPass="${{ parameters.keystore_password }}" 
+          /p:AndroidSigningKeyAlias="${{ parameters.keystore_alias }}" 
+          /p:AndroidSigningStorePass="${{ parameters.keystore_password }}"'
+      ${{ else }}:
+        value: ''
 
   pool:
     vmImage: 'windows-2022'
@@ -225,12 +234,7 @@ stages:
         configuration: '${{ parameters.solution_build_configuration }}'
         msbuildArgs: '/p:platform="${{ parameters.solution_target_platform }}" 
         /p:AndroidBuildApplicationPackage="true" 
-        /p:AndroidPackageFormat="$(packageFormat)"
-        /p:AndroidKeyStore="True" 
-        /p:AndroidSigningKeyStore="$(signing_keystore.secureFilePath)"
-        /p:AndroidSigningKeyPass="${{ parameters.keystore_password }}" 
-        /p:AndroidSigningKeyAlias="${{ parameters.keystore_alias }}" 
-        /p:AndroidSigningStorePass="${{ parameters.keystore_password }}"' 
+        /p:AndroidPackageFormat="$(packageFormat)" $(keystore_signing)' 
 
     # postBuild steps - performs steps immediately after executing the solution build
     - ${{ parameters.postBuild }}
