@@ -129,7 +129,7 @@ stages:
     # specified in the parameter secure_file_keystore_filename
     - task: DownloadSecureFile@1
       displayName: 'Download secure file ${{ parameters.secure_file_keystore_filename }}'
-      condition: ne( ${{ parameters.secure_file_keystore_filename }}, '')
+      condition: ne( '${{ parameters.secure_file_keystore_filename }}', '')
       name: signing_keystore
       inputs:
         secureFile: '${{ parameters.secure_file_keystore_filename }}'
