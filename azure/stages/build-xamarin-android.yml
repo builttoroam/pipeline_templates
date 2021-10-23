@@ -120,7 +120,7 @@ stages:
       value: ''
 
   pool:
-    vmImage: 'windows-latest'
+    vmImage: 'windows-2022'
 
   jobs:
   - job: BuildAndroid
