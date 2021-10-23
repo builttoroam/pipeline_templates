@@ -22,6 +22,7 @@ stages:
     # Solution to build
     solution_filename: $(xamarin_android_project_file)
     solution_build_configuration: $(solution_build_config)
+    solution_target_platform: $(android_project_target_platform)
     # Output information
     artifact_folder: $(artifact_android_folder)
     # application_package: $(android_application_package)
