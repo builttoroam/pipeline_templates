@@ -1,0 +1,35 @@
+
+trigger: none
+
+resources:
+  repositories:
+    - repository: builttoroam_templates
+      type: github
+      name: builttoroam/pipeline_templates
+      ref: refs/tags/v0.7.3
+      endpoint: github_connection
+  
+variables:
+  - group: 'Common Variables'
+  - group: 'Apps Variables'
+  - group: 'DotNet Variables'
+  - group: 'Xamarin Variables'
+
+stages:
+- template:  azure/stages/build-xamarin-android.yml@builttoroam_templates
+  parameters:
+    # Stage name and whether it's enabled
+    stage_name: 'Build_Android'
+    # build_android_enabled: ${{parameters.android_enabled}}
+    # Version information
+    # full_version_number: '$(version_prefix).$(Build.BuildId)'
+    # Signing information
+    # secure_file_keystore_filename: '$(android_keystore_filename)'
+    # keystore_alias: '$(android_keystore_alias)'
+    # keystore_password: '$(android_keystore_password)'
+    # Solution to build
+    solution_filename: $(solution_file)
+    solution_build_configuration: $(solution_build_config)
+    # Output information
+    artifact_folder: $(artifact_android_folder)
+    # application_package: $(android_application_package)
