@@ -11,7 +11,7 @@ stages:
 - template:  ../../../../../azure/stages/build-xamarin-android.yml
   parameters:
     # Stage name and whether it's enabled
-    stage_name: 'Build_Android - Project File'
+    stage_name: 'Build_Android_Project_File'
     # build_android_enabled: ${{parameters.android_enabled}}
     # Version information
     # full_version_number: '$(version_prefix).$(Build.BuildId)'
@@ -31,7 +31,7 @@ stages:
 - template:  ../../../../../azure/stages/build-xamarin-android.yml
   parameters:
     # Stage name and whether it's enabled
-    stage_name: 'Build_Android - Solution'
+    stage_name: 'Build_Android_Solution_File'
     # build_android_enabled: ${{parameters.android_enabled}}
     # Version information
     # full_version_number: '$(version_prefix).$(Build.BuildId)'
