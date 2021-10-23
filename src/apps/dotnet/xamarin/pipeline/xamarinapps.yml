@@ -82,7 +82,7 @@ stages:
     # Stage name and whether it's enabled
     stage_name: 'Build_Android_Solution_File_APK'
     # Solution to build
-    solution_filename: $(solution_file)
+    solution_filename: $(xamarin_android_project_file)
     solution_build_configuration: $(solution_build_config)
     # Output information
     artifact_folder: $(artifact_android_folder)
