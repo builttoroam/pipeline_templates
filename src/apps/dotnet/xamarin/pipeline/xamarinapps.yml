@@ -11,7 +11,7 @@ stages:
 - template:  ../../../../../azure/stages/build-xamarin-android.yml
   parameters:
     # Stage name and whether it's enabled
-    stage_name: 'Build_Android'
+    stage_name: 'Build_Android - Project File'
     # build_android_enabled: ${{parameters.android_enabled}}
     # Version information
     # full_version_number: '$(version_prefix).$(Build.BuildId)'
@@ -23,6 +23,25 @@ stages:
     solution_filename: $(xamarin_android_project_file)
     solution_build_configuration: $(solution_build_config)
     solution_target_platform: $(android_project_target_platform)
+    # Output information
+    artifact_folder: $(artifact_android_folder)
+    # application_package: $(android_application_package)
+
+
+- template:  ../../../../../azure/stages/build-xamarin-android.yml
+  parameters:
+    # Stage name and whether it's enabled
+    stage_name: 'Build_Android - Solution'
+    # build_android_enabled: ${{parameters.android_enabled}}
+    # Version information
+    # full_version_number: '$(version_prefix).$(Build.BuildId)'
+    # Signing information
+    # secure_file_keystore_filename: '$(android_keystore_filename)'
+    # keystore_alias: '$(android_keystore_alias)'
+    # keystore_password: '$(android_keystore_password)'
+    # Solution to build
+    solution_filename: $(solution_file)
+    solution_build_configuration: $(solution_build_config)
     # Output information
     artifact_folder: $(artifact_android_folder)
     # application_package: $(android_application_package)
