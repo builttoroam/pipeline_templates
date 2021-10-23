@@ -20,7 +20,7 @@ stages:
     # keystore_alias: '$(android_keystore_alias)'
     # keystore_password: '$(android_keystore_password)'
     # Solution to build
-    solution_filename: $(solution_file)
+    solution_filename: $(xamarin_android_project_file)
     solution_build_configuration: $(solution_build_config)
     # Output information
     artifact_folder: $(artifact_android_folder)
