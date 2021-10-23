@@ -227,14 +227,10 @@ stages:
         /p:AndroidBuildApplicationPackage="true" 
         /p:AndroidPackageFormat="$(packageFormat)"
         /p:AndroidKeyStore="True" 
-        ${{ if ne( parameters.secure_file_keystore_filename , '') }}:
-          /p:AndroidSigningKeyStore="$(signing_keystore.secureFilePath)"
-        ${{ if ne( parameters.keystore_password , '') }}:
-          /p:AndroidSigningKeyPass="${{ parameters.keystore_password }}" 
-        ${{ if ne( parameters.keystore_alias , '') }}:
-          /p:AndroidSigningKeyAlias="${{ parameters.keystore_alias }}" 
-        ${{ if ne( parameters.keystore_password , '') }}:
-          /p:AndroidSigningStorePass="${{ parameters.keystore_password }}"' 
+        /p:AndroidSigningKeyStore="$(signing_keystore.secureFilePath)"
+        /p:AndroidSigningKeyPass="${{ parameters.keystore_password }}" 
+        /p:AndroidSigningKeyAlias="${{ parameters.keystore_alias }}" 
+        /p:AndroidSigningStorePass="${{ parameters.keystore_password }}"' 
 
     # postBuild steps - performs steps immediately after executing the solution build
     - ${{ parameters.postBuild }}
