@@ -116,6 +116,10 @@ parameters:
 - name: xamarin_sdk_version
   type: string 
   default: '6_12_0'
+# macos_version - (Optional) Use to override the MacOS Build Agent version (defaults to macOS-latest)
+- name: macos_version
+  type: string
+  default: 'macOS-latest'
 
 
 
@@ -138,7 +142,7 @@ stages:
       value: ''
       
   pool:
-    vmImage: 'macos-latest'
+    vmImage: ${{ parameters.macos_version }}
 
   jobs:
   - job: BuildiOS
