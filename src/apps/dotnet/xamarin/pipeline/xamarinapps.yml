@@ -8,6 +8,34 @@ variables:
   - group: 'Xamarin Variables'
 
 stages:
+- template:  ../../../../../azure/stages/build-xamarin-ios.yml@builttoroam_templates
+  parameters:
+    # Solution to build
+    solution_filename: $(xamarin_ios_project_file)
+    solution_build_configuration: $(solution_build_config)
+    # Signing information
+    ios_plist_filename: 'src/apps/dotnet/xamarin/XamarinApps/XamainiOSApp/Info.plist'
+    ios_cert_password: '$(ios_signing_certificate_password)'
+    ios_cert_securefiles_filename: '$(ios_signing_certificate_securefiles_filename)'
+    ios_provisioning_profile_securefiles_filename: '$(ios_provisioning_profile_securefiles_filename)'
+    # Output information
+    artifact_folder: $(artifact_ios_folder)
+    application_package: $(xamarin_ios_project_package)
+
+- template:  ../../../../../azure/stages/build-xamarin-ios.yml@builttoroam_templates
+  parameters:
+    # Solution to build
+    solution_filename: $(solution_file)
+    solution_build_configuration: $(solution_build_config)
+    # Signing information
+    ios_cert_password: '$(ios_signing_certificate_password)'
+    ios_cert_securefiles_filename: '$(ios_signing_certificate_securefiles_filename)'
+    ios_provisioning_profile_securefiles_filename: '$(ios_provisioning_profile_securefiles_filename)'
+    # Output information
+    artifact_folder: $(artifact_ios_folder)
+    application_package: $(xamarin_ios_solution_package)
+
+
 - template:  ../../../../../azure/stages/build-xamarin-android.yml
   parameters:
     # Stage name and whether it's enabled
