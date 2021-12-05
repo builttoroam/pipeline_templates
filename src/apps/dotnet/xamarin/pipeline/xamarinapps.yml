@@ -8,7 +8,7 @@ variables:
   - group: 'Xamarin Variables'
 
 stages:
-- template:  ../../../../../azure/stages/build-xamarin-ios.yml@builttoroam_templates
+- template:  ../../../../../azure/stages/build-xamarin-ios.yml
   parameters:
     # Solution to build
     solution_filename: $(xamarin_ios_project_file)
@@ -22,7 +22,7 @@ stages:
     artifact_folder: $(artifact_ios_folder)
     application_package: $(xamarin_ios_project_package)
 
-- template:  ../../../../../azure/stages/build-xamarin-ios.yml@builttoroam_templates
+- template:  ../../../../../azure/stages/build-xamarin-ios.yml
   parameters:
     # Solution to build
     solution_filename: $(solution_file)
