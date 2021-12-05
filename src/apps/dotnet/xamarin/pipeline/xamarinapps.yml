@@ -10,6 +10,8 @@ variables:
 stages:
 - template:  ../../../../../azure/stages/build-xamarin-ios.yml
   parameters:
+    # Stage name and whether it's enabled
+    stage_name: 'Build_iOS_Project_File'
     # Solution to build
     solution_filename: $(xamarin_ios_project_file)
     solution_build_configuration: $(solution_build_config)
@@ -24,6 +26,8 @@ stages:
 
 - template:  ../../../../../azure/stages/build-xamarin-ios.yml
   parameters:
+    # Stage name and whether it's enabled
+    stage_name: 'Build_iOS_Solution_File'
     # Solution to build
     solution_filename: $(solution_file)
     solution_build_configuration: $(solution_build_config)
