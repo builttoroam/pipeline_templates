@@ -2,7 +2,7 @@
 using System;
 using UIKit;
 
-namespace XamarinOSApp
+namespace XamariniOSApp
 {
     public partial class ViewController : UIViewController
     {
