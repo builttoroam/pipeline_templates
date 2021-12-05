@@ -9,7 +9,7 @@ using System;
 using System.CodeDom.Compiler;
 using UIKit;
 
-namespace XamariniOSApp
+namespace XamarinOSApp
 {
     [Register ("ViewController")]
     partial class ViewController
