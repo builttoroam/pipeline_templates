@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleDisplayName</key>
-    <string>XamariniOSApp</string>
+    <string>XamarinOSApp</string>
     <key>CFBundleIdentifier</key>
-    <string>com.companyname.XamariniOSApp</string>
+    <string>com.companyname.XamarinOSApp</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0</string>
     <key>CFBundleVersion</key>

@@ -46,7 +46,7 @@ The templates in this repository are broken down into build and deploy templates
 The following are all stageList templates
 
 [Xamarin Android](./build//XamarinAndroid.md)   
-[Xamarin iOS](./build//XamariniOS.md)   
+[Xamarin iOS](./build//XamarinOS.md)   
 [Xamarin Windows (UWP)](./build//XamarinWindows.md)   
 
 ## Deploy
