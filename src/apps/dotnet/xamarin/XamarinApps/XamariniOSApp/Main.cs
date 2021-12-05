@@ -1,6 +1,6 @@
 ﻿using UIKit;
 
-namespace XamarinOSApp
+namespace XamariniOSApp
 {
     public class Application
     {

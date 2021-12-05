@@ -307,7 +307,7 @@ stages:
     - ${{ parameters.preBuild }}
 
     # Build the solution
-    - task: XamarinOS@2
+    - task: XamariniOS@2
       displayName: 'Building solution ${{ parameters.solution_filename }}'
       inputs:
         solutionFile: '${{ parameters.solution_filename }}'
