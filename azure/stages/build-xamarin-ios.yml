@@ -99,18 +99,18 @@ parameters:
   type: stepList
   default: []
 
-# ios_nuget_version - (Optional) Use to override the NuGet version (defaults to 5.9.1)
+# ios_nuget_version - (Optional) Use to override the NuGet version (defaults to 6.0.0)
 - name: ios_nuget_version
   type: string
-  default: '5.9.1'
-# net_core_version - (Optional) Use to override the .NET Core version (defaults to 3.1.x)
+  default: '6.0.0'
+# net_core_version - (Optional) Use to override the .NET Core version (defaults to 6.0.x)
 - name: net_core_version 
   type: string 
-  default: '3.1.x'
-# xamarin_sdk_version - (Optional) Use to override the Xamarin SDK version (defaults to 6.8.0)
+  default: '6.0.x'
+# xamarin_sdk_version - (Optional) Use to override the Xamarin SDK version (defaults to 6.12.11)
 - name: xamarin_sdk_version
   type: string 
-  default: '6_8_0'
+  default: '6_12_11'
 
 
 
