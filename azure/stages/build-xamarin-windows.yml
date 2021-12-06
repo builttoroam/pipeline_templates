@@ -151,8 +151,8 @@ stages:
     # any other build steps are executed
     - ${{ parameters.onStart }}
 
-   - powershell: .\build\Install-WindowsSdkISO.ps1 18362
-    displayName: Install Windows SDK 18362
+    - powershell: .\build\Install-WindowsSdkISO.ps1 18362
+      displayName: Install Windows SDK 18362
 
     # This task searches for the package.appxmanifest file so that the version information can be updated
     # The windows_package_manifest_filename property can be used to set this location if the source code includes
