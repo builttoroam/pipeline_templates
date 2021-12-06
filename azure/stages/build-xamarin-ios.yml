@@ -301,12 +301,6 @@ stages:
               Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
           }
 
-    # Install and Restore NuGet for the solution
-    - template: ../steps/nuget-install-and-restore.yml
-      parameters:
-        nuget_version_to_install: '${{ parameters.ios_nuget_version }}'
-        solution_filename: '$(solutionFilename)'
-
     # Add Roslyn Override to allow for LangVersion 10.0
     - task: PowerShell@2
       displayName: 'Add Roslyn Override to allow for LangVersion 10.0'
@@ -390,6 +384,12 @@ stages:
           "@
           $roslynoverridesxml.Save($overrides_path)
 
+    # Install and Restore NuGet for the solution
+    - template: ../steps/nuget-install-and-restore.yml
+      parameters:
+        nuget_version_to_install: '${{ parameters.ios_nuget_version }}'
+        solution_filename: '$(solutionFilename)'
+                  
     # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
 
