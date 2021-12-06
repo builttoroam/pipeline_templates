@@ -9,10 +9,10 @@ parameters:
 - name: depends_on
   type: string
   default: ''
-# vm_image - (Optional) The name of the vm image to use for execution. Defaults to windows-2022
+# vm_image - (Optional) The name of the vm image to use for execution. Defaults to windows-2019
 - name: vm_image
   type: string
-  default: 'windows-2022'
+  default: 'windows-2019'
 # build_windows_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
 # cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
 # any stages that depend on this stage will attempt to execute
