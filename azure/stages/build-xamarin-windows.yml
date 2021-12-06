@@ -55,10 +55,11 @@ parameters:
 - name: windows_package_manifest_filename
   type: string
   default: ''
-# windows_cert_securefiles_filename - (Required) The certificate file used to sign the application. This is the name
+# windows_cert_securefiles_filename - (Optional) The certificate file used to sign the application. This is the name
 # of the certificate in Secure Files
 - name:  windows_cert_securefiles_filename
   type: string
+  default: ''
 # windows_cert_password - (Optional) The password to unlock the certificate so it can be used. This is required
 # if the certificate has a password set
 - name: windows_cert_password
@@ -123,7 +124,13 @@ stages:
       value: ${{ parameters.windows_package_manifest_filename}}
     - name: windows_upload_filename
       value: ${{ parameters. windows_upload_name }}
-  
+    - name: package_signing    
+      ${{ if and( ne( parameters.windows_cert_securefiles_filename , ''), ne( parameters.windows_cert_password , '') ) }}:
+        value: '/p:PackageCertificateThumbprint="$(cert_thumbprint)" 
+              /p:PackageCertificateKeyFile="$(signing_certificate.secureFilePath)" 
+              /p:PackageCertificatePassword="${{ parameters.windows_cert_password }}"'
+      ${{ else }}:
+        value: ''  
   pool:
     vmImage: '${{ parameters.vm_image }}'
 
@@ -135,6 +142,7 @@ stages:
     # specified in the parameter windows_cert_securefiles_filename
     - task: DownloadSecureFile@1
       displayName: 'Download secure file ${{ parameters.windows_cert_securefiles_filename }}'
+      condition: ne( '${{ parameters.windows_cert_securefiles_filename }}', '')
       name: signing_certificate
       inputs:
         secureFile: '${{ parameters.windows_cert_securefiles_filename }}'
@@ -176,6 +184,7 @@ stages:
     # and subject of the certificate
     - task: PowerShell@2
       displayName: Extract certificate thumbnail and subject
+      condition: ne( '${{ parameters.windows_cert_securefiles_filename }}', '')
       inputs:
         targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         script: |
@@ -210,7 +219,10 @@ stages:
           # Update appxmanifest. This must be done before the build.
           [xml]$manifest= get-content "$(manifestPath)"
           $manifest.Package.Identity.Version = "${{ parameters.full_version_number }}.0"
-          $manifest.Package.Identity.Publisher = "$(cert_subject)"
+          if( '$(cert_subject)' -ne '')
+          {
+            $manifest.Package.Identity.Publisher = "$(cert_subject)"
+          }
           $outxml = $manifest.OuterXml
           Write-Host "Updated manifest $outxml"
           $manifest.save("$(manifestPath)")
@@ -276,10 +288,7 @@ stages:
               /p:AppxBundle=Always 
               /p:AppxPackageSigningEnabled=true 
               /p:UapAppxPackageBuildMode=StoreUpload 
-              /p:platform="${{ parameters.solution_target_platform }}" 
-              /p:PackageCertificateThumbprint="$(cert_thumbprint)" 
-              /p:PackageCertificateKeyFile="$(signing_certificate.secureFilePath)" 
-              /p:PackageCertificatePassword="${{ parameters.windows_cert_password }}"'
+              /p:platform="${{ parameters.solution_target_platform }}"  $(package_signing)' 
         configuration: '${{ parameters.solution_build_configuration }}'
 
     # postBuild steps - performs steps immediately after executing the solution build
