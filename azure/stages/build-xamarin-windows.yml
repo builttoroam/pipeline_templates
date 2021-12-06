@@ -104,10 +104,10 @@ parameters:
   type: stepList
   default: []
 
-# windows_nuget_version - (Optional) Use to override the NuGet version (defaults to 5.9.1)
+# windows_nuget_version - (Optional) Use to override the NuGet version (defaults to 6.0.0)
 - name: windows_nuget_version
   type: string
-  default: '5.9.1'
+  default: '6.0.0'
 
 stages:
 - stage: ${{ parameters.stage_name }}
