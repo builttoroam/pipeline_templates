@@ -9,6 +9,10 @@ parameters:
 - name: depends_on
   type: string
   default: ''
+# vm_image - (Optional) The name of the vm image to use for execution. Defaults to macos-11
+- name: vm_image
+  type: string
+  default: 'macos-11'
 # build_ios_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
 # cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
 # any stages that depend on this stage will attempt to execute
@@ -133,7 +137,7 @@ stages:
       value: ''
       
   pool:
-    vmImage: 'macos-latest'
+    vmImage: '${{ parameters.vm_image }}'
 
   jobs:
   - job: BuildiOS
@@ -389,7 +393,7 @@ stages:
       parameters:
         nuget_version_to_install: '${{ parameters.ios_nuget_version }}'
         solution_filename: '$(solutionFilename)'
-                  
+
     # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
 
