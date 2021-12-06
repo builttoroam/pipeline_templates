@@ -6,6 +6,8 @@ variables:
   - group: 'Apps Variables'
   - group: 'DotNet Variables'
   - group: 'Xamarin Variables'
+  - name: DISABLE_NODE6_DEPRECATION_WARNING
+    value: true
 
 stages:
 - template:  ../../../../../azure/stages/build-xamarin-ios.yml
