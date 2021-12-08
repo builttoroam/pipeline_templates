@@ -87,10 +87,10 @@ stages:
     vmImage: '${{ parameters.vm_image }}'
 
   jobs:
-  - job: BuildAndroid
+  - job: BuildWasm
     steps:
-  - checkout: self
-    clean: 'true'
+    - checkout: self
+      clean: 'true'
     
     # onStart steps - performed after any secure files are downloaded but before 
     # any other build steps are executed
