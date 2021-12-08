@@ -137,9 +137,10 @@ stages:
     - task: CopyFiles@2
       displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
       inputs:
-        contents: '$(wasmDistFolder)'
+        SourceFolder: '$(wasmDistFolder)'
+        Contents: '**/*.*'
         targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
-        flattenFolders: true
+        flattenFolders: false
         overWrite: true
 
     # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
