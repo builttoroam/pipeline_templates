@@ -102,17 +102,18 @@ stages:
       inputs:
         version: '${{ parameters.net_core_version }}'
 
-    # Install Ninja build
-    - script: |
-        sudo apt-get update
-        sudo apt-get install -y ninja-build
-      displayName: Install Ninja build
+    # # Install Ninja build
+    # - script: |
+    #     sudo apt-get update
+    #     sudo apt-get install -y ninja-build
+    #   displayName: Install Ninja build
 
     # preBuild steps - performs steps prior to executing the build
     - ${{ parameters.preBuild }}
 
     # Build the project
     - script: |
+        displayName: 'Building wasm project ${{ parameters.project_filename }}'
         dotnet build '${{ parameters.project_filename }}' /p:Configuration='${{ parameters.project_build_configuration }}' /p:GeneratePackageOnBuild=false /detailedsummary 
 
     # Find the dist folder
@@ -143,6 +144,13 @@ stages:
         flattenFolders: false
         overWrite: true
 
+    - task: AzureStaticWebApp@0
+      inputs:
+        app_location: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
+        api_location: ''
+        output_location: ''
+        azure_static_web_apps_api_token: $(wasm_deployment_token)
+
     # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}
 
@@ -153,13 +161,6 @@ stages:
         pathtoPublish: '$(build.artifactStagingDirectory)' 
         artifactName: '${{ parameters.artifact_name }}' 
         publishLocation: Container
-
-    - task: AzureStaticWebApp@0
-      inputs:
-        app_location: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
-        api_location: ''
-        output_location: ''
-        azure_static_web_apps_api_token: $(wasm_deployment_token)
 
     # onEnd steps - performs steps after publishing artifacts, at the end of the build stage
     - ${{ parameters.onEnd }}
