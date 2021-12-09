@@ -64,20 +64,15 @@ stages:
     vmImage: '${{ parameters.vm_image }}'
 
   jobs:
-  - deployment: Deploy
-    displayName: Deploy app to Static Web App
-    environment: ${{ parameters.environment_name }}
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - template: ../steps/deploy/static-web-app.yml
-            parameters:
-              artifact_name: ${{ parameters.artifact_name }}
-              artifact_folder: ${{ parameters.artifact_folder }}
-              staticwebapp_token: ${{ parameters.staticwebapp_token }}
-              onStart: ${{ parameters.onStart }}
-              postArtifactDownload: ${{ parameters.postArtifactDownload }}
-              prePublish: ${{ parameters.prePublish }}
-              onEnd: ${{ parameters.onEnd }}
+  - template: ../jobs/deploy/static-web-app.yml
+    parameters:
+      vm_image: '${{ parameters.vm_image }}'
+      environment_name: ${{ parameters.environment_name }}
+      artifact_name: ${{ parameters.artifact_name }}
+      artifact_folder: ${{ parameters.artifact_folder }}
+      staticwebapp_token: ${{ parameters.staticwebapp_token }}
+      onStart: ${{ parameters.onStart }}
+      postArtifactDownload: ${{ parameters.postArtifactDownload }}
+      prePublish: ${{ parameters.prePublish }}
+      onEnd: ${{ parameters.onEnd }}
 
