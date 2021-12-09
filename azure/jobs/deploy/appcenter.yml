@@ -3,7 +3,11 @@ parameters:
 - name: environment_name
   type: string
   default: 'Default Environment'
-  
+# vm_image - (Optional) The name of the vm image to use for execution. Defaults to windows-2022
+- name: vm_image
+  type: string
+  default: 'windows-2022'
+
   # artifact_name - (Optional) The name of the artifact to copy application from
 - name: artifact_name
   type: string
@@ -123,6 +127,9 @@ jobs:
 - deployment: Deploy
   displayName: Deploy app to App Center
   environment: ${{ parameters.environment_name }}
+
+  pool:
+    vmImage: '${{ parameters.vm_image }}'
 
   variables:
   - name: application_fullpath
