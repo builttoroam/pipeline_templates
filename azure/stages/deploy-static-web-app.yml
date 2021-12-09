@@ -1,0 +1,101 @@
+parameters:
+# stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
+# Defaults to 'Deploy_Static_Web_App'
+- name: stage_name
+  type: string
+  default: 'Deploy_Static_Web_App'
+# depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
+# any other stage. However, since this is a deployment stage, you'll probably want to specify a build stage that
+# this stage depends on.
+- name: depends_on
+  type: string
+  default: ''
+# vm_image - (Optional) The name of the vm image to use for execution. Defaults to ubuntu-latest
+- name: vm_image
+  type: string
+  default: 'ubuntu-latest'
+# deploy_staticwebapp_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
+# cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
+# any stages that depend on this stage will attempt to execute
+- name: deploy_staticwebapp_enabled
+  type: boolean
+  default: true
+# environment_name - (Optional) The environment to deploy to. Can be used to introduce a manual gate for approval for stage to proceed
+- name: environment_name
+  type: string
+  default: 'Default Environment'
+
+# artifact_name - (Optional) The name of the artifact to copy application from
+- name: artifact_name
+  type: string
+  default: 'drop'
+# artifact_folder - (Required) The name of the folder to copy application from in the artifact
+- name: artifact_folder
+  type: string
+
+# staticwebapp_token - (Required) The token for deployting a static web app
+- name: staticwebapp_token
+  type: string
+
+# onStart - (Optional) Steps to be executed before stage starts
+- name: onStart
+  type: stepList
+  default: []
+# postArtifactDownload - (Optional) Steps to be executed after artifacts from previous stages have been downloaded
+- name: postArtifactDownload
+  type: stepList
+  default: []
+# preAppCenterPublish - (Optional) Steps to be executed before application package is published to App Center
+- name: preAppCenterPublish
+  type: stepList
+  default: []
+# onEnd - (Optional) Steps to be executed at the end of the stage
+- name: onEnd
+  type: stepList
+  default: []
+
+
+stages:
+- stage: ${{ parameters.stage_name }}
+  dependsOn: ${{ parameters.depends_on }}
+  condition: ${{ parameters.deploy_staticwebapp_enabled }} 
+
+  pool:
+    vmImage: '${{ parameters.vm_image }}'
+
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy app to Static Web App
+    environment: ${{ parameters.environment_name }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+            # onStart steps - performed after any secure files are downloaded but before 
+            # artifacts are downloaded and any other steps
+            - ${{ parameters.onStart }}
+
+            # Download the artifacts
+            - task: DownloadBuildArtifacts@0
+              displayName: Download pipeline artifacts
+              inputs:
+                buildType: 'current' 
+                artifactName: ${{ parameters.artifact_name }}
+                downloadPath: '$(Pipeline.Workspace)'
+                buildVersionToDownload: 'latest'
+
+            - ${{ parameters.postArtifactDownload }}
+
+            - ${{ parameters.preAppCenterPublish }}
+                  
+            - task: AzureStaticWebApp@0
+              displayName: Deploy to Static Web App
+              inputs:
+                app_location: '${{ parameters.artifact_folder }}'
+                azure_static_web_apps_api_token: $(wasm_deployment_token)
+                cwd: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}'
+                skip_app_build: true
+
+            - ${{ parameters.onEnd }}
+
