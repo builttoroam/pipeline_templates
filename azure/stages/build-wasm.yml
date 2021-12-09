@@ -154,5 +154,12 @@ stages:
         artifactName: '${{ parameters.artifact_name }}' 
         publishLocation: Container
 
+    - task: AzureStaticWebApp@0
+      inputs:
+        app_location: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
+        api_location: ''
+        output_location: ''
+        azure_static_web_apps_api_token: $(wasm_deployment_token)
+
     # onEnd steps - performs steps after publishing artifacts, at the end of the build stage
     - ${{ parameters.onEnd }}
