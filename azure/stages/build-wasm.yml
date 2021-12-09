@@ -146,7 +146,8 @@ stages:
 
     - task: AzureStaticWebApp@0
       inputs:
-        output_location: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
+        app_location: '$(build.artifactStagingDirectory)'
+        output_location: '${{ parameters.artifact_folder }}'
         azure_static_web_apps_api_token: $(wasm_deployment_token)
         skip_app_build: true
 
