@@ -24,10 +24,6 @@ parameters:
 - name: environment_name
   type: string
   default: 'Default Environment'
-# variables_group - (Optional) Variable group to be included (useful for environment specific variables) 
-- name: variables_group
-  type: string
-  default: ''
 
 # artifact_name - (Optional) The name of the artifact to copy application from
 - name: artifact_name
@@ -150,8 +146,6 @@ stages:
   dependsOn: ${{ parameters.depends_on }}
   condition: ${{ parameters.deploy_appcenter_enabled }} 
   variables:
-  ${{ if ne(parameters.variables_group, '') }}:
-    - group: '${{ parameters.variables_group }}'
   - name: application_fullpath
     value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
   - name: release_notes_fullpath
