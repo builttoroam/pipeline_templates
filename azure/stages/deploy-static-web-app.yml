@@ -24,6 +24,10 @@ parameters:
 - name: environment_name
   type: string
   default: 'Default Environment'
+# variables_group - (Optional) Variable group to be included (useful for environment specific variables) 
+- name: variables_group
+  type: string
+  default: ''
 
 # artifact_name - (Optional) The name of the artifact to copy application from
 - name: artifact_name
@@ -59,6 +63,9 @@ stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }}
   condition: ${{ parameters.deploy_staticwebapp_enabled }} 
+  ${{ if ne(parameters.variables_group, '') }}:
+    variables:
+    - group: '${{ parameters.variables_group }}'
 
   pool:
     vmImage: '${{ parameters.vm_image }}'
