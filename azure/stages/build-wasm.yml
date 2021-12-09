@@ -113,8 +113,8 @@ stages:
 
     # Build the project
     - script: |
-        displayName: 'Building wasm project ${{ parameters.project_filename }}'
         dotnet build '${{ parameters.project_filename }}' /p:Configuration='${{ parameters.project_build_configuration }}' /p:GeneratePackageOnBuild=false /detailedsummary 
+      displayName: 'Building wasm project ${{ parameters.project_filename }}'
 
     # Find the dist folder
     - task: PowerShell@2
@@ -146,10 +146,9 @@ stages:
 
     - task: AzureStaticWebApp@0
       inputs:
-        app_location: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
-        api_location: ''
-        output_location: ''
+        output_location: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
         azure_static_web_apps_api_token: $(wasm_deployment_token)
+        skip_app_build: true
 
     # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}
