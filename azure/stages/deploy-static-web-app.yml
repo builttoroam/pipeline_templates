@@ -72,7 +72,7 @@ stages:
         deploy:
           steps:
           - template: ../steps/deploy/static-web-app.yml
-            inputs:
+            parameters:
               artifact_name: ${{ parameters.artifact_name }}
               artifact_folder: ${{ parameters.artifact_folder }}
               staticwebapp_token: ${{ parameters.staticwebapp_token }}

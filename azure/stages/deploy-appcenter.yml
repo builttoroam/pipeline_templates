@@ -166,7 +166,7 @@ stages:
         deploy:
           steps:
           - template: ../steps/deploy/appcenter.yml
-            inputs:
+            parameters:
               artifact_name: ${{ parameters.artifact_name }}
               artifact_folder: ${{ parameters.artifact_folder }}
               application_package: ${{ parameters.application_package }}
