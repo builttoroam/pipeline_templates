@@ -145,22 +145,12 @@ stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }}
   condition: ${{ parameters.deploy_appcenter_enabled }} 
-  # variables:
-  # - name: application_fullpath
-  #   value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
-  # - name: release_notes_fullpath
-  #   ${{ if eq(parameters.appcenter_release_notes_source, 'artifact') }}:
-  #     value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.appcenter_release_notes_file }}'
-  #   ${{ if eq(parameters.appcenter_release_notes_source, 'source_control') }}:
-  #     value: '$(Build.SourcesDirectory)/${{ parameters.appcenter_release_notes_file }}'
-
-  pool:
-    vmImage: '${{ parameters.vm_image }}'
 
   jobs:
   - template: ../jobs/deploy/appcenter.yml
     parameters:
       environment_name: ${{ parameters.environment_name }}
+      vm_image: '${{ parameters.vm_image }}'
       artifact_name: ${{ parameters.artifact_name }}
       artifact_folder: ${{ parameters.artifact_folder }}
       application_package: ${{ parameters.application_package }}
