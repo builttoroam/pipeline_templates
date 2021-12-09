@@ -144,13 +144,6 @@ stages:
         flattenFolders: false
         overWrite: true
 
-    - task: AzureStaticWebApp@0
-      inputs:
-        app_location: '${{ parameters.artifact_folder }}'
-        azure_static_web_apps_api_token: $(wasm_deployment_token)
-        cwd: '$(build.artifactStagingDirectory)'
-        skip_app_build: true
-
     # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}
 
