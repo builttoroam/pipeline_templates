@@ -93,7 +93,7 @@ stages:
               displayName: Deploy to Static Web App
               inputs:
                 app_location: '${{ parameters.artifact_folder }}'
-                azure_static_web_apps_api_token: $(wasm_deployment_token)
+                azure_static_web_apps_api_token: '${{ parameters.staticwebapp_token }}'
                 cwd: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}'
                 skip_app_build: true
 
