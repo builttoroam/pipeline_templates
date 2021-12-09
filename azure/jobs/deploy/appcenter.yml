@@ -1,0 +1,215 @@
+parameters:
+# environment_name - (Optional) The environment to deploy to. Can be used to introduce a manual gate for approval for stage to proceed
+- name: environment_name
+  type: string
+  default: 'Default Environment'
+  
+  # artifact_name - (Optional) The name of the artifact to copy application from
+- name: artifact_name
+  type: string
+  default: 'drop'
+# artifact_folder - (Required) The name of the folder to copy application from in the artifact
+- name: artifact_folder
+  type: string
+# application_package - (Required) The name of the application package to deploy
+- name: application_package
+  type: string
+
+# appcenter_service_connection - (Required) The name of the service connection that connects Azure DevOps
+# to App Center. Go to Service Connections in Azure DevOps to setup the connection and assign permissions
+# for pipelines to access it
+- name: appcenter_service_connection
+  type: string
+# appcenter_organisation - (Required) The organisation (or individual) in App Center that the application 
+# is associated with. In AppCenter navigate to the application and extract organisation from URL
+# eg https://appcenter.ms/users/[organisation]/apps/[applicationid]
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_organisation
+  type: string
+# appcenter_applicationid - (Required) The application id in App Center that identifies 
+# the application. In AppCenter navigate to the application and extract application id from URL
+# eg https://appcenter.ms/users/[organisation]/apps/[applicationid]
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_applicationid
+  type: string
+# appcenter_release_notes_option - (Optional) Whether release notes for App Center should be inputted via the appcenter_release_notes parameter
+# or if it should come from a file (appcenter_release_notes_file parameter). 
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_release_notes_option
+  type: string
+  default: 'input'
+  values: 
+  - input
+  - file
+# appcenter_release_notes_source - (Optional) Whether release notes for App Center should be inputted from the source code 
+# or from the artifact. Only if appcenter_release_notes_option is file.
+- name: appcenter_release_notes_source
+  type: string
+  default: 'artifact'
+  values: 
+  - artifact
+  - source_control
+# appcenter_release_notes - (Optional) The release notes to be set in App Center for the release. 
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_release_notes
+  type: string
+  default: 'Default release notes'
+# appcenter_release_notes_file - (Optional) The file to read the release notes from to be set in App Center for the release. 
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_release_notes_file
+  type: string
+  default: ''
+# appcenter_is_mandatory_update - (Optional) Whether the App Center release should be marked as a mandatory update
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_is_mandatory_update
+  type: boolean
+  default: false
+# appcenter_destination_type - (Optional) Whether the release is pushed out to a distribution group or a store
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_destination_type
+  type: string
+  default: 'groups'
+  values: 
+  - groups
+  - store
+# appcenter_distribution_group_ids - (Optional) The id(s) (comma separated list of guids) of the distribution groups to distribute the release to
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_distribution_group_ids
+  type: string
+  default: ''
+# appcenter_destination_store_id - (Optional) The id of the destination store
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_destination_store_id
+  type: string
+  default: ''
+# appcenter_dont_notify_testers - (Optional) Whether testers are notified about an App Center release
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_dont_notify_testers
+  type: boolean
+  default: false
+
+# secure_file_keystore_filename - (Optiona) IMPORTANT: This is required if application package is an AAB. 
+# The keystore file used to sign the APK when extracte from an AAB. This is the name of the keystore in Secure Files. 
+- name: secure_file_keystore_filename
+  type: string
+  default: ''
+# keystore_alias - (Optional) IMPORTANT: This is required if application package is an AAB. The alias of the keystore. 
+- name: keystore_alias
+  type: string
+  default: ''
+# keystore_password - (Optional) IMPORTANT: This is required if application package is an AAB. The password to access the keystore
+- name: keystore_password
+  type: string
+  default: ''
+
+# onStart - (Optional) Steps to be executed before stage starts
+- name: onStart
+  type: stepList
+  default: []
+# postArtifactDownload - (Optional) Steps to be executed after artifacts from previous stages have been downloaded
+- name: postArtifactDownload
+  type: stepList
+  default: []
+# prePublish - (Optional) Steps to be executed before application package is published to App Center
+- name: prePublish
+  type: stepList
+  default: []
+# onEnd - (Optional) Steps to be executed at the end of the stage
+- name: onEnd
+  type: stepList
+  default: []
+
+jobs:
+- deployment: Deploy
+  displayName: Deploy app to App Center
+  environment: ${{ parameters.environment_name }}
+
+  variables:
+  - name: application_fullpath
+    value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.application_package }}'
+  - name: release_notes_fullpath
+    ${{ if eq(parameters.appcenter_release_notes_source, 'artifact') }}:
+      value: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/${{ parameters.appcenter_release_notes_file }}'
+    ${{ if eq(parameters.appcenter_release_notes_source, 'source_control') }}:
+      value: '$(Build.SourcesDirectory)/${{ parameters.appcenter_release_notes_file }}'
+
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+          - checkout: self
+            condition: eq('${{ parameters.appcenter_release_notes_source }}', 'source_control')
+
+          # If the keystore has been specified, download it from secure files
+          - task: DownloadSecureFile@1
+            displayName: Download keystore from Secure Files (for repackaging AAB to APK)
+            condition: ne( '${{ parameters.secure_file_keystore_filename }}','') 
+            name: signing_keystore
+            inputs:
+              secureFile: '${{ parameters.secure_file_keystore_filename }}'
+
+          # onStart steps - performed after any secure files are downloaded but before 
+          # artifacts are downloaded and any other steps
+          - ${{ parameters.onStart }}
+
+          # Download the artifacts
+          - task: DownloadBuildArtifacts@0
+            displayName: Download pipeline artifacts
+            inputs:
+              buildType: 'current' 
+              artifactName: ${{ parameters.artifact_name }}
+              downloadPath: '$(Pipeline.Workspace)'
+              buildVersionToDownload: 'latest'
+
+          - ${{ parameters.postArtifactDownload }}
+
+          - task: PowerShell@2
+            displayName: Use Bundletool to extract and sign APK
+            condition: and( succeeded(), contains( variables['application_fullpath'],'.aab') ) 
+            inputs:
+              targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+              script: |
+                Write-Host "Downloading bundletool jar"
+                Invoke-WebRequest 'https://github.com/google/bundletool/releases/download/0.12.0/bundletool-all-0.12.0.jar' -OutFile  '$(Pipeline.Workspace)\bundle.jar'
+                Write-Host "Downloading bundletool jar COMPLETE"
+
+                $args = '-jar', '$(Pipeline.Workspace)\bundle.jar', 'build-apks', '--bundle=$(application_fullpath)', '--mode=universal', '--output=$(Pipeline.Workspace)\fatapk.apks', '--ks=$(signing_keystore.secureFilePath)', '--ks-key-alias=${{ parameters.keystore_alias }}', '--ks-pass=pass:${{ parameters.keystore_password }}'
+                Write-Host "Running Java with args $args"
+                Start-Process -FilePath java -ArgumentList $args -Wait | Write-Host
+                Write-Host "Bundle extract complete"
+
+                Write-Host "Unzipping fat apk"
+                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                [System.IO.Compression.ZipFile]::ExtractToDirectory('$(Pipeline.Workspace)\fatapk.apks', '$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/fatapkextract')
+                Write-Host "Apk extracted"
+                Write-Host "##vso[task.setvariable variable=application_fullpath]$(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/fatapkextract/universal.apk"                  
+                Write-Host "App path updated - $(Pipeline.Workspace)/${{ parameters.artifact_name }}/${{ parameters.artifact_folder }}/fatapkextract/universal.apk"
+
+          - ${{ parameters.prePublish }}
+                
+          - task: AppCenterDistribute@3
+            displayName: 'Deploy to Visual Studio App Center'
+            inputs:
+              serverEndpoint: ${{ parameters.appcenter_service_connection }}
+              appSlug: '${{ parameters.appcenter_organisation }}/${{ parameters.appcenter_applicationid }}'
+              appFile: '$(application_fullpath)'
+              ${{ if contains( parameters.application_package , 'appbundle') }}:
+                symbolsOption: UWP
+              ${{ if contains( parameters.application_package , 'apk') }}:
+                symbolsOption: Android
+              ${{ if contains( parameters.application_package , 'ipa') }}:
+                symbolsOption: iOS
+              releaseNotesOption: ${{ parameters.appcenter_release_notes_option }}
+              ${{ if eq(parameters.appcenter_release_notes_option, 'input') }}:
+                releaseNotesInput: ${{ parameters.appcenter_release_notes }}
+              ${{ if eq(parameters.appcenter_release_notes_option, 'file') }}:
+                releaseNotesFile: $(release_notes_fullpath)
+              isMandatory: ${{ parameters.appcenter_is_mandatory_update }}
+              destinationType: ${{ parameters.appcenter_destination_type }}
+              distributionGroupId: ${{ parameters.appcenter_distribution_group_ids }}
+              destinationStoreId: ${{ parameters.appcenter_destination_store_id }}
+              isSilent: ${{ parameters.appcenter_dont_notify_testers }}
+
+
+          - ${{ parameters.onEnd }}
+
