@@ -149,8 +149,8 @@ stages:
   jobs:
   - template: ../jobs/deploy/appcenter.yml
     parameters:
-      environment_name: ${{ parameters.environment_name }}
       vm_image: '${{ parameters.vm_image }}'
+      environment_name: ${{ parameters.environment_name }}
       artifact_name: ${{ parameters.artifact_name }}
       artifact_folder: ${{ parameters.artifact_folder }}
       application_package: ${{ parameters.application_package }}
