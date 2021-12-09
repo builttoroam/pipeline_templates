@@ -1,0 +1,60 @@
+parameters:
+# artifact_name - (Optional) The name of the artifact to copy application from
+- name: artifact_name
+  type: string
+  default: 'drop'
+# artifact_folder - (Required) The name of the folder to copy application from in the artifact
+- name: artifact_folder
+  type: string
+
+# staticwebapp_token - (Required) The token for deployting a static web app
+- name: staticwebapp_token
+  type: string
+
+# onStart - (Optional) Steps to be executed before stage starts
+- name: onStart
+  type: stepList
+  default: []
+# postArtifactDownload - (Optional) Steps to be executed after artifacts from previous stages have been downloaded
+- name: postArtifactDownload
+  type: stepList
+  default: []
+# prePublish - (Optional) Steps to be executed before application package is published to App Center
+- name: prePublish
+  type: stepList
+  default: []
+# onEnd - (Optional) Steps to be executed at the end of the stage
+- name: onEnd
+  type: stepList
+  default: []
+
+
+steps:
+
+  # onStart steps - performed after any secure files are downloaded but before 
+  # artifacts are downloaded and any other steps
+  - ${{ parameters.onStart }}
+
+  # Download the artifacts
+  - task: DownloadBuildArtifacts@0
+    displayName: Download pipeline artifacts
+    inputs:
+      buildType: 'current' 
+      artifactName: ${{ parameters.artifact_name }}
+      downloadPath: '$(Pipeline.Workspace)'
+      buildVersionToDownload: 'latest'
+
+  - ${{ parameters.postArtifactDownload }}
+
+  - ${{ parameters.prePublish }}
+        
+  - task: AzureStaticWebApp@0
+    displayName: Deploy to Static Web App
+    inputs:
+      app_location: '${{ parameters.artifact_folder }}'
+      azure_static_web_apps_api_token: '${{ parameters.staticwebapp_token }}'
+      cwd: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}'
+      skip_app_build: true
+
+  - ${{ parameters.onEnd }}
+

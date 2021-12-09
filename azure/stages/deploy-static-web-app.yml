@@ -71,31 +71,13 @@ stages:
       runOnce:
         deploy:
           steps:
-
-            # onStart steps - performed after any secure files are downloaded but before 
-            # artifacts are downloaded and any other steps
-            - ${{ parameters.onStart }}
-
-            # Download the artifacts
-            - task: DownloadBuildArtifacts@0
-              displayName: Download pipeline artifacts
-              inputs:
-                buildType: 'current' 
-                artifactName: ${{ parameters.artifact_name }}
-                downloadPath: '$(Pipeline.Workspace)'
-                buildVersionToDownload: 'latest'
-
-            - ${{ parameters.postArtifactDownload }}
-
-            - ${{ parameters.preAppCenterPublish }}
-                  
-            - task: AzureStaticWebApp@0
-              displayName: Deploy to Static Web App
-              inputs:
-                app_location: '${{ parameters.artifact_folder }}'
-                azure_static_web_apps_api_token: '${{ parameters.staticwebapp_token }}'
-                cwd: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}'
-                skip_app_build: true
-
-            - ${{ parameters.onEnd }}
+          - template: ../steps/deploy/static-web-app.yml
+            inputs:
+              artifact_name: ${{ parameters.artifact_name }}
+              artifact_folder: ${{ parameters.artifact_folder }}
+              staticwebapp_token: ${{ parameters.staticwebapp_token }}
+              onStart: ${{ parameters.onStart }}
+              postArtifactDownload: ${{ parameters.postArtifactDownload }}
+              prePublish: ${{ parameters.prePublish }}
+              onEnd: ${{ parameters.onEnd }}
 
