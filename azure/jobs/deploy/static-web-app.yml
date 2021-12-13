@@ -94,6 +94,7 @@ jobs:
               scriptLocation: inlineScript
               inlineScript: |
                 $webapptoken = (az staticwebapp secrets list --name '${{ parameters.staticwebapp_name }}' --query properties.apiKey --resource-group '${{ parameters.resource_group_name }}').trim("""")
+                Write-Host "Token >$webapptoken<"
                 Write-Host "##vso[task.setvariable variable=swa_token]$webapptoken"
 
 
