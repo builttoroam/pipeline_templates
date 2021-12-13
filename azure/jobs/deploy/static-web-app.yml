@@ -90,7 +90,7 @@ jobs:
             condition: and( succeeded(), eq( variables['swa_token'], '') )
             inputs:
               azureSubscription: '${{ parameters.azure_subscription_connection_name }}'
-              scriptType: ps
+              scriptType: pscore
               scriptLocation: inlineScript
               inlineScript: |
                 $webapptoken = az staticwebapp secrets list --name '${{ parameters.staticwebapp_name }}' --query properties.apiKey --resource-group '${{ parameters.resource_group_name }}'
