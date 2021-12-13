@@ -16,7 +16,22 @@ parameters:
 - name: artifact_folder
   type: string
 
-# staticwebapp_token - (Required) The token for deployting a static web app
+# staticwebapp_name - (Optional) The name of the static web app to deploy too (Required if staticwebapp_token not specified)
+- name: staticwebapp_name
+  type: string
+  default: ''
+
+# azure_subscription_connection_name - (Optional) Required if staticwebapp_token is not specified
+- name: azure_subscription_connection_name
+  type: string
+  default: ''
+
+# resource_group_name  - (Optional)  Required if staticwebapp_token is not specified
+- name: resource_group_name 
+  type: string
+  default: ''
+
+# staticwebapp_token - (Optional) The token for deploying a static web app (Required if staticwebapp_name not specified)
 - name: staticwebapp_token
   type: string
 
@@ -45,6 +60,10 @@ jobs:
   pool:
     vmImage: '${{ parameters.vm_image }}'
 
+  variables:
+  - name: swa_token
+    value: ${{ parameters.staticwebapp_token }}
+
   strategy:
     runOnce:
       deploy:
@@ -65,13 +84,25 @@ jobs:
 
           - ${{ parameters.postArtifactDownload }}
 
+          - task: AzureCLI@2
+            displayName: Retrieve static web app token for deployment
+            condition: and( succeeded(), eq( variables['swa_token'], '') )
+            inputs:
+              azureSubscription: '${{ parameters.azure_subscription_connection_name }}'
+              scriptType: ps
+              scriptLocation: inlineScript
+              inlineScript: |
+                $webapptoken = az staticwebapp secrets list --name '${{ parameters.staticwebapp_name }}' --query properties.apiKey --resource-group '${{ parameters.resource_group }}'
+                Write-Host "##vso[task.setvariable variable=swa_token]$webapptoken"
+
+
           - ${{ parameters.prePublish }}
                 
           - task: AzureStaticWebApp@0
             displayName: Deploy to Static Web App
             inputs:
               app_location: '${{ parameters.artifact_folder }}'
-              azure_static_web_apps_api_token: '${{ parameters.staticwebapp_token }}'
+              azure_static_web_apps_api_token: '$(swa_token)'
               cwd: '$(Pipeline.Workspace)/${{ parameters.artifact_name }}'
               skip_app_build: true
 
