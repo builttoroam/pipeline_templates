@@ -34,6 +34,7 @@ parameters:
 # staticwebapp_token - (Optional) The token for deploying a static web app (Required if staticwebapp_name not specified)
 - name: staticwebapp_token
   type: string
+  default: ''
 
 # onStart - (Optional) Steps to be executed before stage starts
 - name: onStart
