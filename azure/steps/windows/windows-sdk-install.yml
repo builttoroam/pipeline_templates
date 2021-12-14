@@ -1,0 +1,27 @@
+parameters:
+# windows_sdk_url - (Optional) Override the download url for the Windows SDK
+- name: windows_sdk_url
+  type: string
+  default: 'https://raw.githubusercontent.com/CommunityToolkit/WindowsCommunityToolkit/rel/7.1.2/build/Install-WindowsSdkISO.ps1'
+# windows_sdk_version - (Optional) Override the windows sdk version to install (default is 18362)
+- name: windows_sdk_version
+  type: string
+  default: '18362'
+# name - (Optional) - Specify a name if you need to extract output variable values or want to use multiple times
+- name: name
+  type: string
+  default: ''
+
+steps:
+- template: ../multi-download-and-cache.yml
+  parameters:
+    name: '${{ parameters.name }}windowssdk'
+    cache_name: 'windowssdk'
+    folder_to_cache: 'windowssdk'
+    downloads:  
+      - name:  '${{ parameters.name }}windowsdkiso'
+        source_url:  ${{ parameters.windows_sdk_url }}
+        target_file_name:  'windowssdkiso.ps1'
+
+- powershell: '$(${{ parameters.name }}windowssdk${{ parameters.name }}windowsdkisoDownloadItem.downloaded_file_path) ${{ parameters.windows_sdk_version }}'
+  displayName: 'Install Windows SDK ${{ parameters.windows_sdk_version }}'
