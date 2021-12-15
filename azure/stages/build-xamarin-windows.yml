@@ -131,8 +131,6 @@ stages:
               /p:PackageCertificatePassword="${{ parameters.windows_cert_password }}"'
       ${{ else }}:
         value: ''  
-    - name: full_download_path
-      value: '$(Pipeline.Workspace)\Install-WindowsSdkISO.ps1'
 
   pool:
     vmImage: '${{ parameters.vm_image }}'
