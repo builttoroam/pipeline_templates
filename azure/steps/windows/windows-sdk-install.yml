@@ -15,13 +15,13 @@ parameters:
 steps:
 - template: ../multi-download-and-cache.yml
   parameters:
-    name: '${{ parameters.name }}windowssdk'
-    cache_name: 'windowssdk'
-    folder_to_cache: 'windowssdk'
+    name: '${{ parameters.name }}windowssdkiso'
+    cache_name: 'windowssdkiso'
+    folder_to_cache: 'windowssdkiso'
     downloads:  
-      - name:  '${{ parameters.name }}windowsdkiso'
+      - name:  '${{ parameters.name }}windowsdkisofile'
         source_url:  ${{ parameters.windows_sdk_url }}
         target_file_name:  'windowssdkiso.ps1'
 
-- powershell: '$(${{ parameters.name }}windowssdk${{ parameters.name }}windowsdkisoDownloadItem.downloaded_file_path) ${{ parameters.windows_sdk_version }}'
+- powershell: '$(${{ parameters.name }}windowssdkiso${{ parameters.name }}windowsdkisofileDownloadItem.downloaded_file_path) ${{ parameters.windows_sdk_version }}'
   displayName: 'Install Windows SDK ${{ parameters.windows_sdk_version }}'
