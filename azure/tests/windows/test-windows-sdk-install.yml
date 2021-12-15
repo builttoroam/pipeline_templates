@@ -25,15 +25,20 @@ stages:
           parameters:
             name: InstallDefault
 
-        - template: ../../steps/windows/windows-sdk-install.yml
-          parameters:
-            name: Install16299
-            windows_sdk_version: '16299'
+        # List of Windows SDK downloads
+        # https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/
+        # Earliest that has an iso is 17763
 
-        - template: ../../steps/windows/windows-sdk-install.yml
-          parameters:
-            name: Install17134
-            windows_sdk_version: '17134'
+
+        # - template: ../../steps/windows/windows-sdk-install.yml
+        #   parameters:
+        #     name: Install16299
+        #     windows_sdk_version: '16299'
+
+        # - template: ../../steps/windows/windows-sdk-install.yml
+        #   parameters:
+        #     name: Install17134
+        #     windows_sdk_version: '17134'
 
         - template: ../../steps/windows/windows-sdk-install.yml
           parameters:
