@@ -152,7 +152,6 @@ stages:
       parameters:
         nuget_version_to_install: '${{ parameters.windows_nuget_version }}'
         solution_filename: '$(solutionFilename)'
-        build_configuration: '${{ parameters.solution_build_configuration }}'
 
     # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
