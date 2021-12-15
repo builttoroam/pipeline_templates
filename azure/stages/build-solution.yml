@@ -95,11 +95,12 @@ stages:
     # any other build steps are executed
     - ${{ parameters.onStart }}
 
-    ${{ if ne( parameters.windows_sdk_version , '') }}:
-      - template: ../steps/windows/windows-sdk-install.yml
-        parameters:
-          name: DownloadInstallWindowsSdk
-          windows_sdk_version: '${{ parameters.windows_sdk_version }}'
+    # ${{ if ne( parameters.windows_sdk_version , '') }}:
+    - template: ../steps/windows/windows-sdk-install.yml
+      condition: ne( '${{ parameters.windows_sdk_version }}', '')
+      parameters:
+        name: DownloadInstallWindowsSdk
+        windows_sdk_version: '${{ parameters.windows_sdk_version }}'
 
     # Check for solution filter - if filter, need to extract actual solution file
     - task: PowerShell@2
