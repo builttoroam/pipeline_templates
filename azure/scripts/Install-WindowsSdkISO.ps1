@@ -55,6 +55,11 @@ function Download-File
         [System.IO.Directory]::Delete($downloadDest, $true)
     }
 
+    if (Test-Path -PathType Leaf $downloadDest)
+    {
+        [System.IO.File]::Delete($downloadDest)
+    }
+
     Move-Item -Force $downloadDestTemp $downloadDest
     Write-Host "Done"
 
