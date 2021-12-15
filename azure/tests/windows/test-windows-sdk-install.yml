@@ -32,5 +32,30 @@ stages:
 
         - template: ../../steps/windows/windows-sdk-install.yml
           parameters:
+            name: Install17134
+            windows_sdk_version: '17134'
+
+        - template: ../../steps/windows/windows-sdk-install.yml
+          parameters:
             name: Install17763
             windows_sdk_version: '17763'
+
+        - template: ../../steps/windows/windows-sdk-install.yml
+          parameters:
+            name: Install18362
+            windows_sdk_version: '18362'
+
+        - template: ../../steps/windows/windows-sdk-install.yml
+          parameters:
+            name: Install19041
+            windows_sdk_version: '19041'
+
+        - template: ../../steps/windows/windows-sdk-install.yml
+          parameters:
+            name: Install20348
+            windows_sdk_version: '20348'
+
+        - template: ../../steps/windows/windows-sdk-install.yml
+          parameters:
+            name: Install22000
+            windows_sdk_version: '22000'
