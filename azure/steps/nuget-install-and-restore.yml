@@ -41,5 +41,5 @@ steps:
     displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
     inputs:
       ${{ if ne( parameters.build_configuration , '') }}:
-      configuration: '${{ parameters.build_configuration }}'
+        configuration: '${{ parameters.build_configuration }}'
       restoreSolution: '${{ parameters.solution_filename }}'
