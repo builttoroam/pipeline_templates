@@ -14,7 +14,7 @@ parameters:
 
 steps:
   - task: Cache@2
-    condition: ne(parameters.nuget_cache_enabled, true)
+    condition: ne( ${{ parameters.nuget_cache_enabled }}, true)
     displayName: Cache
     inputs:
       key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'
@@ -26,14 +26,14 @@ steps:
 
   # Select the NuGet version based on the nuget_version_to_install parameter          
   - task: NuGetToolInstaller@1
-    condition: or( ne(parameters.nuget_cache_enabled, true), ne(variables.CACHE_RESTORED, true))
+    condition: or( ne(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true))
     displayName: 'Use NuGet ${{ parameters.nuget_version_to_install }}'
     inputs:
       versionSpec: '${{ parameters.nuget_version_to_install }}'
 
   # NuGet restore for solution
   - task: NuGetCommand@2
-    condition: or( ne(parameters.nuget_cache_enabled, true), ne(variables.CACHE_RESTORED, true))
+    condition: or( ne(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true))
     displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
     inputs:
       restoreSolution: '${{ parameters.solution_filename }}'
