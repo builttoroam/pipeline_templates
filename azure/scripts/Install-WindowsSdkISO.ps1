@@ -253,6 +253,17 @@ if ($InstallWindowsSDK)
         $uri = "https://software-download.microsoft.com/download/pr/19041.1.191206-1406.vb_release_WindowsSDK.iso";
     }
 
+    if($buildNumber -eq 20348)
+    {
+        $url = 'https://software-download.microsoft.com/download/sg/20348.1.210507-1500.fe_release_WindowsSDK.iso'
+    }
+
+    if($buildNumber -eq 22000)
+    {
+        $url = 'https://software-download.microsoft.com/download/sg/22000.194.210911-1543.co_release_svc_prod1_WindowsSDK.iso'
+    }
+
+
     if ($env:TEMP -eq $null)
     {
         $env:TEMP = Join-Path $env:SystemDrive 'temp'
