@@ -55,12 +55,12 @@ function Download-File
         [System.IO.Directory]::Delete($downloadDest, $true)
     }
 
-    if (Test-Path -PathType Leaf $downloadDest)
-    {
-        [System.IO.File]::Delete($downloadDest)
+    try{
+        Move-Item -Force $downloadDestTemp $downloadDest
     }
-
-    Move-Item -Force $downloadDestTemp $downloadDest
+    catch{
+        Write-Host "File exists $downloadDest"
+    }
     Write-Host "Done"
 
     return $downloadDest
