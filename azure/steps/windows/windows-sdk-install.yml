@@ -3,7 +3,10 @@ parameters:
 - name: windows_sdk_url
   type: string
   default: 'https://raw.githubusercontent.com/builttoroam/pipeline_templates/master/azure/scripts/Install-WindowsSdkISO.ps1'
-# windows_sdk_version - (Optional) Override the windows sdk version to install (default is 18362)
+# windows_sdk_version - (Optional) Override the windows sdk version to install (default is 18362). 
+# Minimum supported version is 17763 as that's the earliest where there is an iso available
+# List of Windows SDK downloads
+# https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/
 - name: windows_sdk_version
   type: string
   default: '18362'
