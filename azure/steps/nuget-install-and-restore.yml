@@ -6,16 +6,34 @@ parameters:
 # solution_filename - (Required) The relative path to the solution file that should be built
 - name: solution_filename
   type: string
+# nuget_cache_enabled - (Required) Whether nuget packages should be cached
+- name: nuget_cache_enabled
+  type: boolean
+  default: true
+
 
 steps:
+  - task: Cache@2
+    condition: ne(parameters.nuget_cache_enabled, true)
+    displayName: Cache
+    inputs:
+      key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'
+      path: '$(Pipeline.Workspace)/.nuget/packages'
+      restoreKeys: |
+        nuget | "$(Agent.OS)"
+        nuget
+      cacheHitVar: 'CACHE_RESTORED'
+
   # Select the NuGet version based on the nuget_version_to_install parameter          
   - task: NuGetToolInstaller@1
+    condition: or( ne(parameters.nuget_cache_enabled, true), ne(variables.CACHE_RESTORED, true))
     displayName: 'Use NuGet ${{ parameters.nuget_version_to_install }}'
     inputs:
       versionSpec: '${{ parameters.nuget_version_to_install }}'
 
   # NuGet restore for solution
   - task: NuGetCommand@2
+    condition: or( ne(parameters.nuget_cache_enabled, true), ne(variables.CACHE_RESTORED, true))
     displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
     inputs:
       restoreSolution: '${{ parameters.solution_filename }}'
