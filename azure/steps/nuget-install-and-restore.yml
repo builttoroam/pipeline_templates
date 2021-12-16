@@ -6,6 +6,10 @@ parameters:
 # solution_filename - (Required) The relative path to the solution file that should be built
 - name: solution_filename
   type: string
+# nuget_config_file - (Optional) Path to nuget.config file
+- name: nuget_config_file
+  type: string
+  default: ''
 # nuget_cache_enabled - (Required) Whether nuget packages should be cached
 - name: nuget_cache_enabled
   type: boolean
@@ -36,6 +40,8 @@ steps:
     condition: or( ne(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true))
     displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
     inputs:
-      feedsToUse: 'config'
-      nugetConfigPath: 'nuget.config'
+      ${{ if ne( parameters.nuget_config_file , '')) }}:
+        feedsToUse: 'config'
+      ${{ if ne( parameters.nuget_config_file , '')) }}:
+        nugetConfigPath: '${{ parameters.nuget_config_file }}'
       restoreSolution: '${{ parameters.solution_filename }}'
