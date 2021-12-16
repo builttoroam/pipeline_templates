@@ -40,8 +40,8 @@ steps:
     condition: or( ne(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true))
     displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
     inputs:
-      ${{ if ne( parameters.nuget_config_file , '')) }}:
+      ${{ if ne( parameters.nuget_config_file , '') }}:
         feedsToUse: 'config'
-      ${{ if ne( parameters.nuget_config_file , '')) }}:
+      ${{ if ne( parameters.nuget_config_file , '') }}:
         nugetConfigPath: '${{ parameters.nuget_config_file }}'
       restoreSolution: '${{ parameters.solution_filename }}'
