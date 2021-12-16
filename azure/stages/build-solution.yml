@@ -188,7 +188,7 @@ stages:
       inputs:
         solution: '$(solutionFilename)'
         ${{ if ne( variables.CACHE_RESTORED , true ) }}:
-          msbuildArgs: '/r /p:platform="${{ parameters.solution_target_platform }}"' 
+          msbuildArgs: '/r /p:platform="${{ parameters.solution_target_platform }}" /p:RestoreConfigFile="$(nugetConfig)"' 
         ${{ if eq( variables.CACHE_RESTORED , true ) }}:
           msbuildArgs: '/p:platform="${{ parameters.solution_target_platform }}"' 
         configuration: '${{ parameters.solution_build_configuration }}'
