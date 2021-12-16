@@ -36,4 +36,6 @@ steps:
     condition: or( ne(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true))
     displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
     inputs:
+      feedsToUse: 'config'
+      nugetConfigPath: 'nuget.config'
       restoreSolution: '${{ parameters.solution_filename }}'
