@@ -141,8 +141,10 @@ stages:
               Write-Host "##vso[task.setvariable variable=buildProjectOrSolution]$solutionFile"
           }
           $nugetFile = "$filterPath/nuget.config"
+          Write-Host "Nuget config is $nugetFile"
           $nugetExits = Test-Path -Path $nugetFile -PathType Leaf
           if( $nugetExits -eq $false ){
+            Write-Host "Nuget config doesn't exist"
             $nugetFile = ''
           }
           Write-Host "##vso[task.setvariable variable=nugetConfig]$nugetFile"
