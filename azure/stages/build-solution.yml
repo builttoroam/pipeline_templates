@@ -155,12 +155,13 @@ stages:
       inputs:
         version: '${{ parameters.net_core_version }}'
 
-    # # Install and Restore NuGet for the solution
-    # - template: ../steps/nuget-install-and-restore.yml
-    #   parameters:
-    #     nuget_version_to_install: '${{ parameters.windows_nuget_version }}'
-    #     solution_filename: '$(solutionFilename)'
-    #     nuget_config_file: '$(nugetConfig)'
+    # Install and Restore NuGet for the solution
+    - template: ../steps/nuget-install-and-restore.yml
+      parameters:
+        nuget_version_to_install: '${{ parameters.windows_nuget_version }}'
+        solution_filename: '$(solutionFilename)'
+        nuget_config_file: '$(nugetConfig)'
+        nuget_cache_enabled: true
 
     # - powershell: |
     #     dotnet tool update -g dotnet-vs
@@ -169,15 +170,15 @@ stages:
     #     echo MSBUILDPATH: $MSBUILDPATH
     #   displayName: Setup VS Path
 
-    - task: Cache@2
-      displayName: Cache NuGet packages
-      inputs:
-        key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'
-        path: '$(Pipeline.Workspace)/.nuget/packages'
-        restoreKeys: |
-          nuget | "$(Agent.OS)"
-          nuget
-        cacheHitVar: 'CACHE_RESTORED'
+    # - task: Cache@2
+    #   displayName: Cache NuGet packages
+    #   inputs:
+    #     key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'
+    #     path: '$(Pipeline.Workspace)/.nuget/packages'
+    #     restoreKeys: |
+    #       nuget | "$(Agent.OS)"
+    #       nuget
+    #     cacheHitVar: 'CACHE_RESTORED'
 
     # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
@@ -187,10 +188,10 @@ stages:
       displayName: 'Building solution ${{ parameters.solution_filename }}'
       inputs:
         solution: '$(solutionFilename)'
-        ${{ if ne( variables.CACHE_RESTORED , true ) }}:
-          msbuildArgs: '/r /p:platform="${{ parameters.solution_target_platform }}" /p:RestoreConfigFile="$(nugetConfig)"' 
-        ${{ if eq( variables.CACHE_RESTORED , true ) }}:
-          msbuildArgs: '/p:platform="${{ parameters.solution_target_platform }}"' 
+        # ${{ if ne( variables.CACHE_RESTORED , true ) }}:
+        #   msbuildArgs: '/r /p:platform="${{ parameters.solution_target_platform }}" /p:RestoreConfigFile="$(nugetConfig)"' 
+        # ${{ if eq( variables.CACHE_RESTORED , true ) }}:
+        msbuildArgs: '/p:platform="${{ parameters.solution_target_platform }}"' 
         configuration: '${{ parameters.solution_build_configuration }}'
 
     # postBuild steps - performs steps immediately after executing the solution build
