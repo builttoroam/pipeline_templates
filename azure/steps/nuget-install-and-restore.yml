@@ -78,6 +78,7 @@ steps:
       targetFolder:  '$(Build.ArtifactStagingDirectory)/${{ parameters.artifact_folder }}'
 
   - script: |
+      git rm **/packages.lock.json -f
       git reset --hard
     displayName: Restore package lock files so the nuget is cached
     condition: and( eq(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true))
