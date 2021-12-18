@@ -25,16 +25,23 @@ parameters:
 
 
 steps:
+  # Select the NuGet version based on the nuget_version_to_install parameter          
+  - task: NuGetToolInstaller@1
+    displayName: 'Use NuGet ${{ parameters.nuget_version_to_install }}'
+    inputs:
+      versionSpec: '${{ parameters.nuget_version_to_install }}'
+
   - task: PowerShell@2
     displayName: Find nuget packages folder and set NUGET_PACKAGES
     inputs:
       targetType: 'inline'
       script: |
-        $cache = dotnet nuget locals global-packages -l
-        $cacheLocation = $cache.Replace('info : global-packages: ', '')
+        Write-Host "Finding cache"
+        $cache = nuget locals global-packages -l
+        Write-Host "Cache: $cache"
+        $cacheLocation = $cache.Replace('global-packages: ', '')
         Write-Host "Nuget packages location: $cacheLocation"
         Write-Host "##vso[task.setvariable variable=NUGET_PACKAGES;]$cacheLocation"
-      pwsh: true
 
   - task: Cache@2
     condition: eq( ${{ parameters.nuget_cache_enabled }}, true)
@@ -46,12 +53,6 @@ steps:
         nuget | "$(Agent.OS)"
         nuget
       cacheHitVar: 'CACHE_RESTORED'
-
-  # Select the NuGet version based on the nuget_version_to_install parameter          
-  - task: NuGetToolInstaller@1
-    displayName: 'Use NuGet ${{ parameters.nuget_version_to_install }}'
-    inputs:
-      versionSpec: '${{ parameters.nuget_version_to_install }}'
 
   - script: |
       git rm **/packages.lock.json -f
