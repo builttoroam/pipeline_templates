@@ -197,6 +197,12 @@ stages:
     # postBuild steps - performs steps immediately after executing the solution build
     - ${{ parameters.postBuild }}
 
+    - script: |
+        del packages.lock.json /s /f
+        git reset --hard
+      displayName: Restore package lock files so the nuget is cached
+
+
     # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
     - ${{ parameters.prePublish }}
  
