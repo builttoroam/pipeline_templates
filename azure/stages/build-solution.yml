@@ -160,8 +160,8 @@ stages:
       parameters:
         nuget_version_to_install: '${{ parameters.windows_nuget_version }}'
         solution_filename: '$(solutionFilename)'
-        nuget_config_file: '$(nugetConfig)'
-        nuget_cache_enabled: true
+        # nuget_config_file: '$(nugetConfig)'
+        # nuget_cache_enabled: true
 
     # - powershell: |
     #     dotnet tool update -g dotnet-vs

@@ -74,7 +74,7 @@ steps:
     condition: and( eq(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true))
     displayName: Copy packages.lock.json files to staging directory
     inputs:
-      contents: '**\*.*xupload' 
+      contents: '**\*.*packages.lock.json' 
       targetFolder:  '$(Build.ArtifactStagingDirectory)/${{ parameters.artifact_folder }}'
 
   - script: |
