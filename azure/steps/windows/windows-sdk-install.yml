@@ -2,8 +2,8 @@ parameters:
 # windows_sdk_url - (Optional) Override the download url for the Windows SDK
 - name: windows_sdk_url
   type: string
-  default: 'https://raw.githubusercontent.com/builttoroam/pipeline_templates/dev/nr/windowsios/azure/scripts/Install-WindowsSdkISO.ps1'
-  #default: 'https://raw.githubusercontent.com/builttoroam/pipeline_templates/master/azure/scripts/Install-WindowsSdkISO.ps1'
+  # default: 'https://raw.githubusercontent.com/builttoroam/pipeline_templates/dev/nr/windowsios/azure/scripts/Install-WindowsSdkISO.ps1'
+  default: 'https://raw.githubusercontent.com/builttoroam/pipeline_templates/master/azure/scripts/Install-WindowsSdkISO.ps1'
 # windows_sdk_version - (Optional) Override the windows sdk version to install (default is 18362). 
 # Minimum supported version is 17763 as that's the earliest where there is an iso available
 # List of Windows SDK downloads
