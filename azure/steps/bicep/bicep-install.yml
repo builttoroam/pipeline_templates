@@ -2,7 +2,7 @@ parameters:
 # bicep_download_url - (Optional) Override the download url for the bicep executable for Windows
 - name: bicep_download_url
   type: string
-  default: https://github.com/Azure/bicep/releases/download/v0.1.37-alpha/bicep-win-x64.exe
+  default: https://github.com/Azure/bicep/releases/download/v0.4.1124/bicep-win-x64.exe
 # bicep_version - (Optional) Override the bicep version number - used to cache bicep download
 - name: bicep_version
   type: string
