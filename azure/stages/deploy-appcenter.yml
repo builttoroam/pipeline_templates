@@ -144,7 +144,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }}
-  condition: ${{ parameters.deploy_appcenter_enabled }} 
+  condition: and(succeeded(), ${{ parameters.deploy_appcenter_enabled }} )
 
   jobs:
   - template: ../jobs/deploy/appcenter.yml
