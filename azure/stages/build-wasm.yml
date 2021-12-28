@@ -78,7 +78,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
-  condition: ${{ parameters.build_wasm_enabled }}
+  condition: and(succeeded(), ${{ parameters.build_wasm_enabled }} )
   # variables: 
   #   - name: 
   #     value: 

@@ -80,7 +80,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
-  condition: ${{ parameters.build_enabled }}
+  condition: and(succeeded(), ${{ parameters.build_enabled }} )
 
 
   pool:

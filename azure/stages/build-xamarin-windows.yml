@@ -112,7 +112,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
-  condition: ${{ parameters.build_windows_enabled }}
+  condition: and(succeeded(),${{ parameters.build_windows_enabled }})
   variables: 
     - name: cert_thumbprint
       value: ''

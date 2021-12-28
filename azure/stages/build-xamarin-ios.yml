@@ -125,7 +125,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
-  condition: ${{ parameters.build_ios_enabled }}
+  condition: and(succeeded(), ${{ parameters.build_ios_enabled }})
   variables: 
     - name: manifestPath
       value: ${{ parameters.ios_plist_filename }}

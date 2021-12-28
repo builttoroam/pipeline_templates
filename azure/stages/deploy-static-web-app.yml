@@ -58,7 +58,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }}
-  condition: ${{ parameters.deploy_staticwebapp_enabled }} 
+  condition: and(succeeded(),${{ parameters.deploy_staticwebapp_enabled }} )
 
   pool:
     vmImage: '${{ parameters.vm_image }}'
