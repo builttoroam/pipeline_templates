@@ -73,7 +73,7 @@ stages:
 
       - task: AzureCLI@2
         displayName: Delete testing resource group
-        condition: always()
+        condition: succeededOrFailed()
         inputs:
           azureSubscription: $(az_testing_service_connection)
           scriptType: ps

@@ -44,7 +44,7 @@ steps:
         Write-Host "##vso[task.setvariable variable=NUGET_PACKAGES;]$cacheLocation"
 
   - task: Cache@2
-    condition: eq( ${{ parameters.nuget_cache_enabled }}, true)
+    condition: and( succeeded(), eq( ${{ parameters.nuget_cache_enabled }}, true))
     displayName: Cache Nuget Packages
     inputs:
       key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'
@@ -57,11 +57,11 @@ steps:
   - script: |
       git rm **/packages.lock.json -f
     displayName: Deleting all package lock files
-    condition: and( eq(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true))
+    condition: and( succeeded(), and( eq(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true)))
 
   # NuGet restore for solution
   - task: NuGetCommand@2
-    condition: or( ne(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true))
+    condition: and( succeeded(), or( ne(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true)))
     displayName: 'Restore NuGet for solution ${{ parameters.solution_filename }}'
     inputs:
       ${{ if ne( parameters.nuget_config_file , '') }}:
@@ -71,7 +71,7 @@ steps:
       restoreSolution: '${{ parameters.solution_filename }}'
 
   - task: CopyFiles@2
-    condition: and( eq(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true))
+    condition: and( succeeded(), and( eq(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true)))
     displayName: Copy packages.lock.json files to staging directory
     inputs:
       contents: '**\*.*packages.lock.json' 
@@ -81,4 +81,4 @@ steps:
       del packages.lock.json /s /f
       git reset --hard
     displayName: Restore package lock files so the nuget is cached
-    condition: and( eq(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true))
+    condition: and( succeeded(), and( eq(${{ parameters.nuget_cache_enabled }}, true), ne(variables.CACHE_RESTORED, true)))

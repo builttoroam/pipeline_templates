@@ -143,7 +143,7 @@ stages:
     # specified in the parameter windows_cert_securefiles_filename
     - task: DownloadSecureFile@1
       displayName: 'Download secure file ${{ parameters.windows_cert_securefiles_filename }}'
-      condition: ne( '${{ parameters.windows_cert_securefiles_filename }}', '')
+      condition: and( succeeded(), ne( '${{ parameters.windows_cert_securefiles_filename }}', ''))
       name: signing_certificate
       inputs:
         secureFile: '${{ parameters.windows_cert_securefiles_filename }}'
@@ -189,7 +189,7 @@ stages:
     # and subject of the certificate
     - task: PowerShell@2
       displayName: Extract certificate thumbnail and subject
-      condition: ne( '${{ parameters.windows_cert_securefiles_filename }}', '')
+      condition: and( succeeded(), ne( '${{ parameters.windows_cert_securefiles_filename }}', ''))
       inputs:
         targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         script: |
