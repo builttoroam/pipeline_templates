@@ -24,7 +24,7 @@ steps:
   - task: PowerShell@2
     ${{ if and( ne(parameters.name, ''), ne(parameters.variable_name,'')) }}:
       name: ${{ parameters.name }}
-    condition: ${{ ne(parameters.variable_name,'') }}
+    condition: and( succeeded(), ${{ ne(parameters.variable_name,'') }})
     displayName: 'Set variable [${{ parameters.variable_name }}] to value [${{ parameters.new_value }}]'
     inputs:
       targetType: 'inline'
@@ -48,7 +48,7 @@ steps:
   - task: PowerShell@2
     ${{ if and( ne(parameters.name, ''), eq(parameters.variable_name,'')) }}:
       name: ${{ parameters.name }}
-    condition: ${{ eq(parameters.variable_name,'') }}
+    condition: and( succeeded(), ${{ eq(parameters.variable_name,'') }})
     displayName: 'Set variables'
     inputs:
       targetType: 'inline'

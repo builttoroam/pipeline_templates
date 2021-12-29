@@ -145,12 +145,12 @@ jobs:
       deploy:
         steps:
           - checkout: self
-            condition: eq('${{ parameters.appcenter_release_notes_source }}', 'source_control')
+            condition: and( succeeded(), eq('${{ parameters.appcenter_release_notes_source }}', 'source_control'))
 
           # If the keystore has been specified, download it from secure files
           - task: DownloadSecureFile@1
             displayName: Download keystore from Secure Files (for repackaging AAB to APK)
-            condition: ne( '${{ parameters.secure_file_keystore_filename }}','') 
+            condition: and( succeeded(), ne( '${{ parameters.secure_file_keystore_filename }}','') )
             name: signing_keystore
             inputs:
               secureFile: '${{ parameters.secure_file_keystore_filename }}'
