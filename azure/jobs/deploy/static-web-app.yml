@@ -6,7 +6,7 @@ parameters:
 # environment_name - (Optional) The environment to deploy to. Can be used to introduce a manual gate for approval for stage to proceed
 - name: environment_name
   type: string
-  default: 'Default Environment'
+  default: ''
 
 # artifact_name - (Optional) The name of the artifact to copy application from
 - name: artifact_name
@@ -56,7 +56,8 @@ parameters:
 jobs:
 - deployment: Deploy
   displayName: Deploy app to Static Web App
-  environment: ${{ parameters.environment_name }}
+  ${{ if ne( parameters.environment_name , '') }}:
+    environment: ${{ parameters.environment_name }}
 
   pool:
     vmImage: '${{ parameters.vm_image }}'
