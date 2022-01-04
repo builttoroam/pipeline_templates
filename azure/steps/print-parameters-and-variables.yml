@@ -26,7 +26,7 @@ steps:
             Foreach( $name in $names)
             {
                 $trimmedName = ($name).Trim() 
-                Write-Host "$trimmedName: $(parameters['$trimmedName'])"
+                Write-Host "$trimmedName : $(parameters['$trimmedName'])"
             }
 
   - ${{ if ne(parameters.variable_names, '') }}:
@@ -43,5 +43,5 @@ steps:
             Foreach( $name in $names)
             {
                 $trimmedName = ($name).Trim() 
-                Write-Host "$trimmedName: $(variables['$trimmedName'])"
+                Write-Host "$trimmedName : $(variables['$trimmedName'])"
             }
