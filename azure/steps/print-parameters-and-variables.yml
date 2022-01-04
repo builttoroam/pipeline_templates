@@ -16,8 +16,8 @@ steps:
   - ${{ if ne(parameters.parameter_names, '') }}:
     - script: echo 'Parameter names  ${{ parameters.parameter_names }}' 
   - ${{ each parameter in parameters }}:
-    - ${{ if contains(parameters.parameter_names, parameter.Key) }}:
-      - script: echo '${{ parameter.Key }} ${{ parameter.Value }}' 
+    # - ${{ if contains(parameters.parameter_names, parameter.Key) }}:
+    - script: echo '${{ parameter.Key }} ${{ parameter.Value }}' 
 
   # - ${{ if ne(parameters.parameter_names, '') }}:
   #   - task: PowerShell@2
