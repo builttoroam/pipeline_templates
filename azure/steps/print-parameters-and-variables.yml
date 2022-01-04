@@ -1,0 +1,47 @@
+parameters:
+# parameter_names - (Optional) - A comma delimited list of parameter names to print the value of
+- name: parameter_names
+  displayName: 'Parameter Names (separate with comma)'
+  type: string
+  default: ''
+# variable_names - (Optional) - A comma delimited list of variable names to print the value of
+- name: variable_names
+  displayName: 'Variable Names (separate with comma)'
+  type: string
+  default: ''
+
+
+steps:
+  - ${{ if ne(parameters.parameter_names, '') }}:
+    - task: PowerShell@2
+      displayName: 'Print pipeline parameters'
+      inputs:
+        targetType: 'inline'
+        script: |
+            $allNames = '${{ parameters.parameter_names }}'
+            Write-Host "Parameter names: $allNames"
+            Write-Host $allNames
+            $names = ($allNames).Split(',')
+            Write-Host $names.Length
+            Foreach( $name in $names)
+            {
+                $trimmedName = ($name).Trim() 
+                Write-Host "$trimmedName: $(parameters['$trimmedName'])"
+            }
+
+  - ${{ if ne(parameters.variable_names, '') }}:
+    - task: PowerShell@2
+      displayName: 'Print pipeline variables'
+      inputs:
+        targetType: 'inline'
+        script: |
+            $allNames = '${{ parameters.variable_names }}'
+            Write-Host "Variable names: $allNames"
+            Write-Host $allNames
+            $names = ($allNames).Split(',')
+            Write-Host $names.Length
+            Foreach( $name in $names)
+            {
+                $trimmedName = ($name).Trim() 
+                Write-Host "$trimmedName: $(variables['$trimmedName'])"
+            }
