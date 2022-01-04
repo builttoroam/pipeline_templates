@@ -25,6 +25,23 @@ parameters:
 
 
 steps:
+  - task: Bash@3
+    displayName: 'Parameters'
+    condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+    inputs:
+      targetType: inline
+      script: |
+        echo -------------------------------------------------------------
+        echo -------------------------------------------------------------
+        echo Source url: "${{ parameters.source_url }}"
+        echo Target path: "${{ parameters.target_path }}"
+        echo Is download variable: "${{ parameters.is_downloaded_variable }}"
+        echo File path variable: "${{ parameters.file_path_variable }}"
+        echo Name: "${{ parameters.name }}"
+        echo Overwrite existing: "${{ parameters.overwrite_existing }}"
+        echo -------------------------------------------------------------
+        echo -------------------------------------------------------------
+  
   - template: /azure/steps/checks/check-filename-for-download.yml
     parameters:
       name: ${{ parameters.name }}CheckDownloadFileName
