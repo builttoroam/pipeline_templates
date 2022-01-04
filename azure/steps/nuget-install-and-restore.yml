@@ -14,10 +14,6 @@ parameters:
 - name: nuget_cache_enabled
   type: boolean
   default: false
-# nuget_commit_lock_updates - (Optional) Whether changes to package.lock.json files should be committed
-- name: nuget_commit_lock_updates
-  type: boolean
-  default: false
 # artifact_folder - (Optional) The name of the folder to copy application to in the artifact
 - name: artifact_folder
   type: string
@@ -25,6 +21,20 @@ parameters:
 
 
 steps:
+  - script: |
+      echo -------------------------------------------------------------
+      echo ------------------------ PARAMETERS -------------------------
+      echo -------------------------------------------------------------
+      echo New value: "${{ parameters.nuget_version_to_install }}"
+      echo Solution filename: "${{ parameters.solution_filename }}"
+      echo Nuget config file: "${{ parameters.nuget_config_file }}"
+      echo Nuget cache enabled: "${{ parameters.nuget_cache_enabled }}"
+      echo Artifact folder: "${{ parameters.artifact_folder }}"
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+    displayName: 'Print parameters and variables'
+    condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+
   # Select the NuGet version based on the nuget_version_to_install parameter          
   - task: NuGetToolInstaller@1
     displayName: 'Use NuGet ${{ parameters.nuget_version_to_install }}'
