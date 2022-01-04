@@ -21,18 +21,21 @@ parameters:
 
 
 steps:
-  - script: |
-      echo -------------------------------------------------------------
-      echo -------------------------------------------------------------
-      echo New value: "${{ parameters.nuget_version_to_install }}"
-      echo Solution filename: "${{ parameters.solution_filename }}"
-      echo Nuget config file: "${{ parameters.nuget_config_file }}"
-      echo Nuget cache enabled: "${{ parameters.nuget_cache_enabled }}"
-      echo Artifact folder: "${{ parameters.artifact_folder }}"
-      echo -------------------------------------------------------------
-      echo -------------------------------------------------------------
+  - task: Bash@3
     displayName: 'Parameters'
     condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+    inputs:
+      targetType: inline
+      script: |
+        echo -------------------------------------------------------------
+        echo -------------------------------------------------------------
+        echo New value: "${{ parameters.nuget_version_to_install }}"
+        echo Solution filename: "${{ parameters.solution_filename }}"
+        echo Nuget config file: "${{ parameters.nuget_config_file }}"
+        echo Nuget cache enabled: "${{ parameters.nuget_cache_enabled }}"
+        echo Artifact folder: "${{ parameters.artifact_folder }}"
+        echo -------------------------------------------------------------
+        echo -------------------------------------------------------------
 
   # Select the NuGet version based on the nuget_version_to_install parameter          
   - task: NuGetToolInstaller@1

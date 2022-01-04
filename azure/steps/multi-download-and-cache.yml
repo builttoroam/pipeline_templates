@@ -61,11 +61,11 @@ steps:
       echo Cache hit variable: "${{ parameters.cache_hit_variable }}"
       echo Cache timeout: "${{ parameters.cache_timeout }}"
       echo Name: "${{ parameters.name }}"
-      echo On start - # steps: "${{ length(parameters.onStart) }}"
-      echo Post cache restore - # steps: "${{ length(parameters.postCacheRestore) }}"
-      echo Pre download - # steps: "${{ length(parameters.preDownload) }}"
-      echo Post download - # steps: "${{ length(parameters.postDownload) }}"
-      echo On end - # steps: "${{ length(parameters.onEnd) }}"
+      echo On start: ${{ length(parameters.onStart) }} steps
+      echo Post cache restore: ${{ length(parameters.postCacheRestore) }}  steps
+      echo Pre download: ${{ length(parameters.preDownload) }} steps
+      echo Post download: ${{ length(parameters.postDownload) }} steps
+      echo On end: ${{ length(parameters.onEnd) }} steps
       echo -------------------------------------------------------------
       echo -------------------------------------------------------------
 
