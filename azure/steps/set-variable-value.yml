@@ -21,20 +21,19 @@ parameters:
   default: 'False'
 
 steps:
-  - ${{ if eq(variables['agent.diagnostic'], 'true') }}:
-    - script: |
-        echo -------------------------------------------------------------
-        echo ------------------------ PARAMETERS -------------------------
-        echo -------------------------------------------------------------
-        echo New value: "${{ parameters.new_value }}"
-        echo Variable name: "${{ parameters.variable_name }}"
-        echo Variable to set: "${{ parameters.variables_to_set }}"
-        echo Name: "${{ parameters.name }}"
-        echo Ignore null or empty: "${{ parameters.ignore_null_or_empty_values }}"
-        echo -------------------------------------------------------------
-        echo -------------------------------------------------------------
-      displayName: 'Print parameters and variables'
-      # condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+  - script: |
+      echo -------------------------------------------------------------
+      echo ------------------------ PARAMETERS -------------------------
+      echo -------------------------------------------------------------
+      echo New value: "${{ parameters.new_value }}"
+      echo Variable name: "${{ parameters.variable_name }}"
+      echo Variable to set: "${{ parameters.variables_to_set }}"
+      echo Name: "${{ parameters.name }}"
+      echo Ignore null or empty: "${{ parameters.ignore_null_or_empty_values }}"
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+    displayName: 'Print parameters and variables'
+    condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
     
   - task: PowerShell@2
     ${{ if and( ne(parameters.name, ''), ne(parameters.variable_name,'')) }}:
