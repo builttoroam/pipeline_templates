@@ -61,6 +61,7 @@ steps:
       echo Cache hit variable: "${{ parameters.cache_hit_variable }}"
       echo Cache timeout: "${{ parameters.cache_timeout }}"
       echo Name: "${{ parameters.name }}"
+      echo On Start (# steps): "${{ length(parameters.onStart) }}"
       echo -------------------------------------------------------------
       echo -------------------------------------------------------------
 
