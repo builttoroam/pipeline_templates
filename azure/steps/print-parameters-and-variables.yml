@@ -23,11 +23,9 @@ steps:
             Write-Host $allNames
             $names = ($allNames).Split(',')
             Write-Host $names.Length
-            Foreach( $name in $names)
-            {
-                $trimmedName = ($name).Trim() 
-                Write-Host "$trimmedName : $(parameters['$trimmedName'])"
-            }
+            ${{ each parameter in parameters }}:
+              ${{ if contains(parameters.parameter_names, parameter.Key) }}:
+                Write-Host "${{ parameter.Key }} : ${{ parameter.Value }}"
 
   - ${{ if ne(parameters.variable_names, '') }}:
     - task: PowerShell@2
