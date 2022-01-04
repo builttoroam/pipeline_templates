@@ -33,7 +33,7 @@ steps:
       echo -------------------------------------------------------------
       echo -------------------------------------------------------------
     displayName: 'Print parameters and variables'
-    condition: and( succeeded(), $(system.debug) )
+    condition: and( succeeded(), system.debug )
     
   - task: PowerShell@2
     ${{ if and( ne(parameters.name, ''), ne(parameters.variable_name,'')) }}:
