@@ -22,19 +22,19 @@ parameters:
 
 steps:
   - script: |
-      echo '-------------------------------------------------------------'
-      echo '------------------------ PARAMETERS -------------------------'
-      echo '-------------------------------------------------------------'
-      echo 'New value: ${{ parameters.new_value }}'
-      echo 'Variable name: ${{ parameters.variable_name }}'
-      echo 'Variable to set: ${{ parameters.variables_to_set }}'
-      echo 'Name: ${{ parameters.name }}'
-      echo 'Ignore null or empty: ${{ parameters.ignore_null_or_empty_values }}'
-      echo '-------------------------------------------------------------'
-      echo '------------------------ PARAMETERS -------------------------'
-      echo '-------------------------------------------------------------'
-      echo ''
-      echo '-------------------------- END ------------------------------'
+      echo "-------------------------------------------------------------"
+      echo "------------------------ PARAMETERS -------------------------"
+      echo "-------------------------------------------------------------"
+      echo "New value: '${{ parameters.new_value }}'"
+      echo "Variable name: '${{ parameters.variable_name }}'"
+      echo "Variable to set: '${{ parameters.variables_to_set }}'"
+      echo "Name: '${{ parameters.name }}'"
+      echo "Ignore null or empty: '${{ parameters.ignore_null_or_empty_values }}'"
+      echo "-------------------------------------------------------------"
+      echo "------------------------ PARAMETERS -------------------------"
+      echo "-------------------------------------------------------------"
+      echo ""
+      echo "-------------------------- END ------------------------------"
     displayName: 'Print parameters and variables'
     
   - task: PowerShell@2
