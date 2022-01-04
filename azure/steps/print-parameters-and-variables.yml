@@ -13,6 +13,8 @@ parameters:
 
 steps:
 
+  - script: echo '${{ parameters.string_parameter }}' 
+
   - ${{ if ne(parameters.parameter_names, '') }}:
     - script: echo 'Parameter names  ${{ parameters.parameter_names }}' 
   - ${{ each parameter in parameters }}:
