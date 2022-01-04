@@ -23,7 +23,6 @@ parameters:
 steps:
   - script: |
       echo -------------------------------------------------------------
-      echo ------------------------ PARAMETERS -------------------------
       echo -------------------------------------------------------------
       echo New value: "${{ parameters.nuget_version_to_install }}"
       echo Solution filename: "${{ parameters.solution_filename }}"
@@ -32,7 +31,7 @@ steps:
       echo Artifact folder: "${{ parameters.artifact_folder }}"
       echo -------------------------------------------------------------
       echo -------------------------------------------------------------
-    displayName: 'Print parameters and variables'
+    displayName: 'Parameters'
     condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
 
   # Select the NuGet version based on the nuget_version_to_install parameter          

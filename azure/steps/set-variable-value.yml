@@ -22,9 +22,7 @@ parameters:
 
 steps:
   - script: |
-      echo "${{ convertToJson(parameters) }}"
       echo -------------------------------------------------------------
-      echo ------------------------ PARAMETERS -------------------------
       echo -------------------------------------------------------------
       echo New value: "${{ parameters.new_value }}"
       echo Variable name: "${{ parameters.variable_name }}"
@@ -33,7 +31,7 @@ steps:
       echo Ignore null or empty: "${{ parameters.ignore_null_or_empty_values }}"
       echo -------------------------------------------------------------
       echo -------------------------------------------------------------
-    displayName: 'Print parameters and variables'
+    displayName: 'Parameters'
     condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
     
   - task: PowerShell@2
