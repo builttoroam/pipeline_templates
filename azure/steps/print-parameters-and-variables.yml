@@ -12,20 +12,27 @@ parameters:
 
 
 steps:
+
   - ${{ if ne(parameters.parameter_names, '') }}:
-    - task: PowerShell@2
-      displayName: 'Print pipeline parameters'
-      inputs:
-        targetType: 'inline'
-        script: |
-            $allNames = '${{ parameters.parameter_names }}'
-            Write-Host "Parameter names: $allNames"
-            Write-Host $allNames
-            $names = ($allNames).Split(',')
-            Write-Host $names.Length
-            ${{ each parameter in parameters }}:
-              ${{ if contains(parameters.parameter_names, parameter.Key) }}:
-                Write-Host "${{ parameter.Key }} : ${{ parameter.Value }}"
+    - script: echo 'Parameter names  ${{ parameters.parameter_names }}' 
+    - ${{ each parameter in parameters }}:
+      - ${{ if contains(parameters.parameter_names, parameter.Key) }}:
+        - script: echo '${{ parameter.Key }} ${{ parameter.Value }}' 
+
+  # - ${{ if ne(parameters.parameter_names, '') }}:
+  #   - task: PowerShell@2
+  #     displayName: 'Print pipeline parameters'
+  #     inputs:
+  #       targetType: 'inline'
+  #       script: |
+  #           $allNames = '${{ parameters.parameter_names }}'
+  #           Write-Host "Parameter names: $allNames"
+  #           Write-Host $allNames
+  #           $names = ($allNames).Split(',')
+  #           Write-Host $names.Length
+  #           ${{ each parameter in parameters }}:
+  #             ${{ if contains(parameters.parameter_names, parameter.Key) }}:
+  #               Write-Host "${{ parameter.Key }} : ${{ parameter.Value }}"
 
   - ${{ if ne(parameters.variable_names, '') }}:
     - task: PowerShell@2
