@@ -49,7 +49,7 @@ steps:
 - script: |
     echo -------------------------------------------------------------
     echo -------------------------------------------------------------
-    echo 'Downloads: ${{ convertToJson(parameters.downloads) }}'
+    echo 'Downloads: ${{ replace(convertToJson(parameters.downloads),"\n","") }}'
     echo Folder to cache: "${{ parameters.folder_to_cache }}"
     echo Cache name: "${{ parameters.cache_name }}"
     echo Version: "${{ parameters.version }}"
