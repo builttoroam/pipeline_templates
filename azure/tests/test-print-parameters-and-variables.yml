@@ -25,19 +25,19 @@ stages:
   - stage: Test_Print_Parameters_And_Variables
 
     jobs:
-    - job: Print Parameters
+    - job: Print_Parameters
       steps:
         - template: ../steps/print-parameters-and-variables.yml
           parameters:
             parameter_names: 'boolean_parameter,string_parameter'
 
-    - job: Print Variables
+    - job: Print_Variables
       steps:
         - template: ../steps/print-parameters-and-variables.yml
           parameters:
             variable_names: ' small_download_url ,medium_download_url, large_download_url'
 
-    - job: Print Parameters and Variables
+    - job: Print_Parameters_and_Variables
       steps:
         - template: ../steps/print-parameters-and-variables.yml
           parameters:
