@@ -1,4 +1,8 @@
 parameters:
+# name - (Optional) - Specify a name if you need to extract output variable values
+- name: name
+  type: string
+  default: ''
 # source_url - Required - The path to download
 - name: source_url
   type: string
@@ -14,10 +18,6 @@ parameters:
 - name: file_path_variable
   type: string
   default: 'downloaded_file_path'
-# name - (Optional) - Specify a name if you need to extract output variable values
-- name: name
-  type: string
-  default: ''
 # overwrite_existing - (Optional) - Default is to only download file if it doesn't exist
 - name: overwrite_existing
   type: string
@@ -33,11 +33,11 @@ steps:
       script: |
         echo -------------------------------------------------------------
         echo -------------------------------------------------------------
+        echo Name: "${{ parameters.name }}"
         echo Source url: "${{ parameters.source_url }}"
         echo Target path: "${{ parameters.target_path }}"
         echo Is download variable: "${{ parameters.is_downloaded_variable }}"
         echo File path variable: "${{ parameters.file_path_variable }}"
-        echo Name: "${{ parameters.name }}"
         echo Overwrite existing: "${{ parameters.overwrite_existing }}"
         echo -------------------------------------------------------------
         echo -------------------------------------------------------------

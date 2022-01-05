@@ -1,4 +1,8 @@
 parameters:
+# name - (Optional) - Specify a name if you need to extract output variable values or want to use multiple times
+- name: name
+  type: string
+  default: ''
 # windows_sdk_url - (Optional) Override the download url for the Windows SDK
 - name: windows_sdk_url
   type: string
@@ -11,10 +15,6 @@ parameters:
 - name: windows_sdk_version
   type: string
   default: '18362'
-# name - (Optional) - Specify a name if you need to extract output variable values or want to use multiple times
-- name: name
-  type: string
-  default: ''
 
 steps:
 - task: Bash@3
@@ -25,9 +25,9 @@ steps:
     script: |
       echo -------------------------------------------------------------
       echo -------------------------------------------------------------
+      echo Name: "${{ parameters.name }}"
       echo Windows sdk url: "${{ parameters.windows_sdk_url }}"
       echo Windows sdk version: "${{ parameters.windows_sdk_version }}"
-      echo Name: "${{ parameters.name }}"
       echo -------------------------------------------------------------
       echo -------------------------------------------------------------
 

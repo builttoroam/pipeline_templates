@@ -1,4 +1,8 @@
 parameters:
+# name - (Optional) - Specify a name if you need to extract output variable values
+- name: name
+  type: string
+  default: ''
 # az_service_connection - Required - Azure Pipeline Service Connection to Azure subscription
 - name: az_service_connection
   type: string
@@ -12,14 +16,6 @@ parameters:
 - name: exists_variable
   type: string
   default: 'resource_exists'
-# name - (Optional) - Specify a name if you need to extract output variable values
-- name: name
-  type: string
-  default: ''
-# throw_on_fail - (Optional) - Throw exception if file is missing
-- name: throw_on_fail
-  type: boolean
-  default: true
 # invert - (Optional) - Inverts the result
 - name: invert
   type: boolean
@@ -28,42 +24,67 @@ parameters:
 - name: check_property
   type: string
   default: ''
+# throw_on_fail - (Optional) - Throw exception if file is missing
+- name: throw_on_fail
+  type: boolean
+  default: true
 
 
 steps:
-  - task: AzureCLI@2
-    displayName: Check to see if resource exists
-    inputs:
-      azureSubscription: ${{ parameters.az_service_connection }}
-      scriptType: ps
-      scriptLocation: inlineScript
-      inlineScript: |
-        $exists_check = az ${{ parameters.resource_type }} -n ${{ parameters.resource_name }} | ConvertFrom-Json
-        Write-Host "Resource ${{ parameters.resource_name }} exists - $exists_check"
+- task: Bash@3
+  displayName: 'Parameters'
+  condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+  inputs:
+    targetType: inline
+    script: |
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+      echo Name: "${{ parameters.name }}"
+      echo Azure service connection: "${{ parameters.az_service_connection }}"
+      echo Resource type: "${{ parameters.resource_type }}"
+      echo Resource name: "${{ parameters.resource_name }}"
+      echo Exists variable: "${{ parameters.exists_variable }}"
+      echo Invert: "${{ parameters.invert }}"
+      echo Check property: "${{ parameters.check_property }}"
+      echo Throw on fail: "${{ parameters.throw_on_fail }}"
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
 
-        $exists = $false;
-        if( '${{ parameters.check_property }}' -ne '' )
-        {
-          Write-Host "Check property ${{ parameters.check_property }}" 
-          $exists = $exists_check['${{ parameters.check_property }}']
-        }
-        else{
-          $exists = $exists_check
-        }
-        Write-Host "Exists $exists" 
+- task: AzureCLI@2
+  ${{ if ne(parameters.name, '') }}:
+    name: ${{ parameters.name }}
+  displayName: Check to see if resource exists
+  inputs:
+    azureSubscription: ${{ parameters.az_service_connection }}
+    scriptType: ps
+    scriptLocation: inlineScript
+    inlineScript: |
+      $exists_check = az ${{ parameters.resource_type }} -n ${{ parameters.resource_name }} | ConvertFrom-Json
+      Write-Host "Resource ${{ parameters.resource_name }} exists - $exists_check"
 
-        if( '${{ parameters.invert}}' -eq 'True' )
-        {
-          Write-Host "Inverting exists" 
-          $exists = !($exists)
-        }
+      $exists = $false;
+      if( '${{ parameters.check_property }}' -ne '' )
+      {
+        Write-Host "Check property ${{ parameters.check_property }}" 
+        $exists = $exists_check['${{ parameters.check_property }}']
+      }
+      else{
+        $exists = $exists_check
+      }
+      Write-Host "Exists $exists" 
 
-        echo "##vso[task.setvariable variable=${{ parameters.exists_variable }};isOutput=true]$exists"
-        Write-Host "Output variable '${{ parameters.exists_variable }}' set to $exists"
+      if( '${{ parameters.invert}}' -eq 'True' )
+      {
+        Write-Host "Inverting exists" 
+        $exists = !($exists)
+      }
 
-        If ( (-Not $exists) -and ('${{ parameters.throw_on_fail }}' -eq 'True')){
-          throw "Resource doesn't exist"
-        }
+      echo "##vso[task.setvariable variable=${{ parameters.exists_variable }};isOutput=true]$exists"
+      Write-Host "Output variable '${{ parameters.exists_variable }}' set to $exists"
+
+      If ( (-Not $exists) -and ('${{ parameters.throw_on_fail }}' -eq 'True')){
+        throw "Resource doesn't exist"
+      }
 
 
           

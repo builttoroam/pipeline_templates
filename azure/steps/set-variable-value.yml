@@ -1,18 +1,18 @@
 parameters:
+# name - (Optional) - Specify a name if you need to extract output variable values
+- name: name
+  type: string
+  default: ''
 # new_value - Required - The new value of the variable
 - name: new_value
   type: string
   default: ''
-# variable_name - Required - The name of the variable to set
+# variable_name - (Optional) - The name of the variable to set (required if variables_to_set not specified)
 - name: variable_name
   type: string
   default: ''
-# variables_to_set - Required - Array {variable_name, new_value}
+# variables_to_set - (Optional) - Array {variable_name, new_value} (required if variable_name not specified) 
 - name: variables_to_set
-  type: string
-  default: ''
-# name - (Optional) - Specify a name if you need to extract output variable values
-- name: name
   type: string
   default: ''
 # ignore_null_or_empty_values - (Optional) - Ignores values that are null (or empty string), not setting the variable value (Default: false)
@@ -21,26 +21,26 @@ parameters:
   default: 'False'
 
 steps:
-  - task: Bash@3
-    displayName: 'Parameters'
-    condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
-    inputs:
-      targetType: inline
-      script: |
-        echo -------------------------------------------------------------
-        echo -------------------------------------------------------------
-        echo New value: "${{ parameters.new_value }}"
-        echo Variable name: "${{ parameters.variable_name }}"
-        echo Variable to set: "${{ parameters.variables_to_set }}"
-        echo Name: "${{ parameters.name }}"
-        echo Ignore null or empty: "${{ parameters.ignore_null_or_empty_values }}"
-        echo -------------------------------------------------------------
-        echo -------------------------------------------------------------
+- task: Bash@3
+  displayName: 'Parameters'
+  condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+  inputs:
+    targetType: inline
+    script: |
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+      echo Name: "${{ parameters.name }}"
+      echo New value: "${{ parameters.new_value }}"
+      echo Variable name: "${{ parameters.variable_name }}"
+      echo Variables to set: "${{ parameters.variables_to_set }}"
+      echo Ignore null or empty: "${{ parameters.ignore_null_or_empty_values }}"
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
     
+- ${{ if ne(parameters.variable_name,'') }}:
   - task: PowerShell@2
-    ${{ if and( ne(parameters.name, ''), ne(parameters.variable_name,'')) }}:
+    ${{ if ne(parameters.name, '') }}:
       name: ${{ parameters.name }}
-    condition: and( succeeded(), ${{ ne(parameters.variable_name,'') }})
     displayName: 'Set variable [${{ parameters.variable_name }}] to value [${{ parameters.new_value }}]'
     inputs:
       targetType: 'inline'
@@ -61,10 +61,10 @@ steps:
             Write-Host "Output variable '$variable_name' set to $variable_value"
           }
 
+- ${{ if eq(parameters.variable_name,'') }}:
   - task: PowerShell@2
-    ${{ if and( ne(parameters.name, ''), eq(parameters.variable_name,'')) }}:
+    ${{ if ne(parameters.name, '') }}:
       name: ${{ parameters.name }}
-    condition: and( succeeded(), ${{ eq(parameters.variable_name,'') }})
     displayName: 'Set variables'
     inputs:
       targetType: 'inline'
