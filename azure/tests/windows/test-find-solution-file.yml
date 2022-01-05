@@ -29,7 +29,7 @@ stages:
             output_solution_file_path: 'outsolutionfile'
             output_nuget_config_file_path: 'outnugetconfig'
 
-        - template: ../steps/checks/check-variable-value.yml
+        - template: ../../steps/checks/check-variable-value.yml
           parameters:
             name: SolutionFindCheck
             variable_to_check: 'SolutionFind.outsolutionfolder'
