@@ -1,0 +1,25 @@
+trigger:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - azure/steps/windows/windows-sdk-install.yml
+    - azure/steps/windows/windows-sdk-install-solution.yml
+
+variables:
+  - template: ../test-variables.yml
+
+stages:
+  - stage: Test_Windows_Sdk_Install_Solution
+    pool:
+      vmImage: 'windows-2022' # Pick this because it doesn't have all the windows sdks installed
+
+    jobs:
+    - job: Windows_Sdk_Install_Solution
+      steps:
+        - template: ../../steps/windows/windows-sdk-install-solution.yml
+          parameters:
+            name: InstallDefault
+            solution_file: $(test_solution_file_uno_solution_file)
+
