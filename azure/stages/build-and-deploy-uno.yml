@@ -34,6 +34,10 @@ parameters:
 #   type: string
 #   default: 'x86'
 
+- name: solution_build_enabled
+  type: boolean
+  default: true
+
 # # artifact_name - (Optional) The name of the artifact to copy application to
 # - name: artifact_name
 #   type: string
@@ -97,11 +101,11 @@ stages:
           echo -------------------------------------------------------------
           echo -------------------------------------------------------------
 
-
-- template:  build-solution.yml
-  parameters:
-    # Stage name and whether it's enabled
-    stage_name: '${{ parameters.name }}Build_Solution'
-    # Solution to build
-    solution_filename: ${{ parameters.solution_filename }}
+- ${{ if parameters.solution_build_enabled }}:
+  - template:  build-solution.yml
+    parameters:
+      # Stage name and whether it's enabled
+      stage_name: '${{ parameters.name }}Build_Solution'
+      # Solution to build
+      solution_filename: ${{ parameters.solution_filename }}
 
