@@ -1,4 +1,8 @@
 parameters:
+# name - (Optional) - Specify a name if you need to extract output variable values
+- name: name
+  type: string
+  default: ''
 # source_url - Required - The path to download
 - name: source_url
   type: string
@@ -14,10 +18,6 @@ parameters:
 - name: is_valid_path_variable
   type: string
   default: 'is_valid_path'
-# name - (Optional) - Specify a name if you need to extract output variable values
-- name: name
-  type: string
-  default: ''
 # throw_on_fail - (Optional) - Throw exception if file is missing
 - name: throw_on_fail
   type: boolean
@@ -25,54 +25,71 @@ parameters:
 
 
 steps:
-  - task: PowerShell@2
-    ${{ if ne(parameters.name, '') }}:
-      name: ${{ parameters.name }}
-    displayName: 'Download url [${{ parameters.source_url }}] to file [${{ parameters.target_path }}]'
-    inputs:
-      targetType: 'inline'
-      workingDirectory: $(Pipeline.Workspace)
-      script: |
-          $file_path = '${{ parameters.target_path }}'
-          Write-Host "Initial path $file_path"
+- task: Bash@3
+  displayName: 'Parameters'
+  condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+  inputs:
+    targetType: inline
+    script: |
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+      echo Name: "${{ parameters.name }}"
+      echo Source url: "${{ parameters.source_url }}"
+      echo Target path: "${{ parameters.target_path }}"
+      echo File path variable: "${{ parameters.file_path_variable }}"
+      echo Is valid path variable: "${{ parameters.is_valid_path_variable }}"
+      echo Throw on fail: "${{ parameters.throw_on_fail }}"
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+    
+- task: PowerShell@2
+  ${{ if ne(parameters.name, '') }}:
+    name: ${{ parameters.name }}
+  displayName: 'Download url [${{ parameters.source_url }}] to file [${{ parameters.target_path }}]'
+  inputs:
+    targetType: 'inline'
+    workingDirectory: $(Pipeline.Workspace)
+    script: |
+        $file_path = '${{ parameters.target_path }}'
+        Write-Host "Initial path $file_path"
 
-          $path_includes_filename = $true
-          If ( $file_path -ne '')
-          {
-            $path_includes_filename = (Split-Path -Path $file_path -Leaf).Contains('.')
-          }
+        $path_includes_filename = $true
+        If ( $file_path -ne '')
+        {
+          $path_includes_filename = (Split-Path -Path $file_path -Leaf).Contains('.')
+        }
 
-          If ( (-Not $path_includes_filename) -or ($file_path -eq ''))
+        If ( (-Not $path_includes_filename) -or ($file_path -eq ''))
+        {
+          $url = '${{ parameters.source_url }}' -as [System.Uri]
+          $filename = $url.Segments[$urlobj.Segments.length-1]
+          If ( $filename.Contains('.') )
           {
-            $url = '${{ parameters.source_url }}' -as [System.Uri]
-            $filename = $url.Segments[$urlobj.Segments.length-1]
-            If ( $filename.Contains('.') )
+            If ( $file_path -eq '')
             {
-              If ( $file_path -eq '')
-              {
-                $file_path = $filename
-              }
-              else
-              {
-                $file_path = Join-Path $file_path $filename
-              }
-              $path_includes_filename = $true
+              $file_path = $filename
             }
             else
             {
-              $path_includes_filename = $false
-              If ('${{ parameters.throw_on_fail }}' -eq 'True'){
-                throw 'target_path not specified or no filename provide and unable to retrieve filename from source_url'
-              }
+              $file_path = Join-Path $file_path $filename
+            }
+            $path_includes_filename = $true
+          }
+          else
+          {
+            $path_includes_filename = $false
+            If ('${{ parameters.throw_on_fail }}' -eq 'True'){
+              throw 'target_path not specified or no filename provide and unable to retrieve filename from source_url'
             }
           }
+        }
 
 
-          echo "##vso[task.setvariable variable=${{ parameters.is_valid_path_variable }};isOutput=true]$path_includes_filename"
-          Write-Host "Output variable '${{ parameters.is_valid_path_variable }}' set to $path_includes_filename"
+        echo "##vso[task.setvariable variable=${{ parameters.is_valid_path_variable }};isOutput=true]$path_includes_filename"
+        Write-Host "Output variable '${{ parameters.is_valid_path_variable }}' set to $path_includes_filename"
 
-          echo "##vso[task.setvariable variable=${{ parameters.file_path_variable }};isOutput=true]$file_path"
-          Write-Host "Output variable '${{ parameters.file_path_variable }}' set to $file_path"
+        echo "##vso[task.setvariable variable=${{ parameters.file_path_variable }};isOutput=true]$file_path"
+        Write-Host "Output variable '${{ parameters.file_path_variable }}' set to $file_path"
 
 
           

@@ -1,4 +1,8 @@
 parameters:
+# name - (Optional) - Specify a name if you need to extract output variable values
+- name: name
+  type: string
+  default: ''
 # path_to_check - Required - The file path (absolute or relative) to check
 - name: path_to_check
   type: string
@@ -10,10 +14,6 @@ parameters:
 - name: exists_variable
   type: string
   default: 'file_exists'
-# name - (Optional) - Specify a name if you need to extract output variable values
-- name: name
-  type: string
-  default: ''
 # throw_on_fail - (Optional) - Throw exception if file is missing
 - name: throw_on_fail
   type: boolean
@@ -21,38 +21,54 @@ parameters:
 
 
 steps:
-  - task: PowerShell@2
-    ${{ if ne(parameters.name, '') }}:
-      name: ${{ parameters.name }}
-    displayName: 'Check to see if file [${{ parameters.path_to_check }}] exists'
-    inputs:
-      targetType: 'inline'
-      workingDirectory: $(Pipeline.Workspace)
-      script: |
-          $file_path = '${{ parameters.path_to_check }}'
-          Write-Host "Path to check $file_path"
+- task: Bash@3
+  displayName: 'Parameters'
+  condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+  inputs:
+    targetType: inline
+    script: |
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+      echo Name: "${{ parameters.name }}"
+      echo Path to check: "${{ parameters.path_to_check }}"
+      echo Full path variable: "${{ parameters.full_path_variable }}"
+      echo Exists variable: "${{ parameters.exists_variable }}"
+      echo Throw on fail: "${{ parameters.throw_on_fail }}"
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
 
-          # Check to see if the target path is an absolute or relative path
-          $isAbsolute = Split-Path -Path $file_path -IsAbsolute
-          Write-Host "Is supplied path absolute - $isAbsolute"
-          
-          # If not absolute, then need to combine the path with the workspace folder
-          If (!($isAbsolute)){
-            $file_path = Join-Path $(Pipeline.Workspace) $file_path
-            Write-Host "Absolute path is $file_path"
-          }
+- task: PowerShell@2
+  ${{ if ne(parameters.name, '') }}:
+    name: ${{ parameters.name }}
+  displayName: 'Check to see if file [${{ parameters.path_to_check }}] exists'
+  inputs:
+    targetType: 'inline'
+    workingDirectory: $(Pipeline.Workspace)
+    script: |
+        $file_path = '${{ parameters.path_to_check }}'
+        Write-Host "Path to check $file_path"
 
-          echo "##vso[task.setvariable variable=${{ parameters.full_path_variable }};isOutput=true]$file_path"
-          Write-Host "Output variable '${{ parameters.full_path_variable }}' set to $file_path"
+        # Check to see if the target path is an absolute or relative path
+        $isAbsolute = Split-Path -Path $file_path -IsAbsolute
+        Write-Host "Is supplied path absolute - $isAbsolute"
+        
+        # If not absolute, then need to combine the path with the workspace folder
+        If (!($isAbsolute)){
+          $file_path = Join-Path $(Pipeline.Workspace) $file_path
+          Write-Host "Absolute path is $file_path"
+        }
 
-          $file_exists = Test-Path $file_path
-          Write-Host "File exists $file_exists"
+        echo "##vso[task.setvariable variable=${{ parameters.full_path_variable }};isOutput=true]$file_path"
+        Write-Host "Output variable '${{ parameters.full_path_variable }}' set to $file_path"
 
-          echo "##vso[task.setvariable variable=${{ parameters.exists_variable }};isOutput=true]$file_exists"
-          Write-Host "Output variable '${{ parameters.exists_variable }}' set to $file_exists"
+        $file_exists = Test-Path $file_path
+        Write-Host "File exists $file_exists"
 
-          If ( (-Not $file_exists) -and ('${{ parameters.throw_on_fail }}' -eq 'True')){
-            throw "File doesn't exist"
-          }
+        echo "##vso[task.setvariable variable=${{ parameters.exists_variable }};isOutput=true]$file_exists"
+        Write-Host "Output variable '${{ parameters.exists_variable }}' set to $file_exists"
+
+        If ( (-Not $file_exists) -and ('${{ parameters.throw_on_fail }}' -eq 'True')){
+          throw "File doesn't exist"
+        }
 
           
