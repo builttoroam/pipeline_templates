@@ -17,6 +17,20 @@ parameters:
   default: ''
 
 steps:
+- task: Bash@3
+  displayName: 'Parameters'
+  condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+  inputs:
+    targetType: inline
+    script: |
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+      echo Windows sdk url: "${{ parameters.windows_sdk_url }}"
+      echo Windows sdk version: "${{ parameters.windows_sdk_version }}"
+      echo Name: "${{ parameters.name }}"
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+
 - template: ../multi-download-and-cache.yml
   parameters:
     name: '${{ parameters.name }}windowssdkiso'
