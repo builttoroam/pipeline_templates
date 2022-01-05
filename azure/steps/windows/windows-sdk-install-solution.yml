@@ -61,9 +61,9 @@ steps:
     targetType: 'inline'
     workingDirectory: $(Pipeline.Workspace)
     script: |
-      $solutionFolder = $(${{ parameters.name }}SolutionFind.solutionFolder)
+      $solutionFolder = '$(${{ parameters.name }}SolutionFind.solutionFolder)'
       Write-Host $solutionFolder
-      $sdkisops = $(${{ parameters.name }}InstallSdkScript.${{ parameters.output_sdk_powershell_file_path_variable }})
+      $sdkisops = '$(${{ parameters.name }}InstallSdkScript.${{ parameters.output_sdk_powershell_file_path_variable }})'
       Write-Host $sdkisops
 
       $versions = New-Object Collections.Generic.List[string]
