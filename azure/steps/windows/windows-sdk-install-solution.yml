@@ -123,5 +123,6 @@ steps:
       foreach($ver in $versions)
       {
           Write-Host "Invoking $sdkisops for Version $ver"
-          Invoke-Command -FilePath $sdkisops -ArgumentList "$ver" -ComputerName localhost 
+          & $sdkisops $ver
+          #Invoke-Command -FilePath $sdkisops -ArgumentList "$ver" -ComputerName localhost 
       }
