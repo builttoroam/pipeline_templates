@@ -12,9 +12,14 @@ parameters:
 # Minimum supported version is 17763 as that's the earliest where there is an iso available
 # List of Windows SDK downloads
 # https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/
+# Omitting the sdk version will cause the sdkiso.ps1 to be downloaded so that it can be used elsewhere
 - name: windows_sdk_version
   type: string
-  default: '18362'
+  default: ''
+# output_sdk_powershell_file_path_variable - (Optional) - The variable to use for the full path sdk iso install ps1 file
+- name: output_sdk_powershell_file_path_variable
+  type: string
+  default: 'sdk_powershell_file_path'
 
 steps:
 - task: Bash@3
@@ -28,6 +33,7 @@ steps:
       echo Name: "${{ parameters.name }}"
       echo Windows sdk url: "${{ parameters.windows_sdk_url }}"
       echo Windows sdk version: "${{ parameters.windows_sdk_version }}"
+      echo Output sdk powershell file path variable: "${{ parameters.output_sdk_powershell_file_path_variable }}"
       echo -------------------------------------------------------------
       echo -------------------------------------------------------------
 
@@ -41,5 +47,12 @@ steps:
         source_url:  ${{ parameters.windows_sdk_url }}
         target_file_name:  'windowssdkiso.ps1'
 
-- powershell: '$(${{ parameters.name }}windowssdkiso${{ parameters.name }}windowsdkisofileDownloadItem.downloaded_file_path) ${{ parameters.windows_sdk_version }}'
-  displayName: 'Install Windows SDK ${{ parameters.windows_sdk_version }}'
+- template: ../set-variable-value.yml
+  parameters:
+    ${{ if ne(parameters.name, '') }}:
+      name: ${{ parameters.name }}
+    variables_to_set: '${{ parameters.output_sdk_powershell_file_path_variable }}|$(${{ parameters.name }}windowssdkiso${{ parameters.name }}windowsdkisofileDownloadItem.downloaded_file_path)'
+
+- ${{ if ne( parameters.windows_sdk_version, '') }}:
+  - powershell: '$(${{ parameters.name }}windowssdkiso${{ parameters.name }}windowsdkisofileDownloadItem.downloaded_file_path) ${{ parameters.windows_sdk_version }}'
+    displayName: 'Install Windows SDK ${{ parameters.windows_sdk_version }}'
