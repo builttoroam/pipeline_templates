@@ -43,6 +43,6 @@ variables:
     value: ''
 
   - name: test_sdk_powershell_downloaded_path
-    value: ''
+    value: 'D:\a\1\windowssdkiso\windowssdkiso.ps1'
     
     
