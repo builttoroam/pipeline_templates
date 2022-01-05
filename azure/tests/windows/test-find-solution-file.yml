@@ -21,7 +21,7 @@ stages:
     jobs:
     - job: Fine_Solution
       steps:
-        - template: ../steps/windows/find-solution-file.yml
+        - template: ../../steps/windows/find-solution-file.yml
           parameters:
             name: SolutionFind
             solution_filename: '$(test_solution_file_uno)' 
