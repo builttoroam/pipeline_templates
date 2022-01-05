@@ -4,80 +4,103 @@ parameters:
 - name: name
   type: string
   default: ''
-# depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
-# any other stage
-- name: depends_on
-  type: string
-  default: ''
-# vm_image - (Optional) The name of the vm image to use for execution. Defaults to windows-2022
-- name: vm_image
-  type: string
-  default: 'windows-2022'
-# build_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
-# cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
-# any stages that depend on this stage will attempt to execute
-- name: build_enabled
-  type: boolean
-  default: true
+# # depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
+# # any other stage
+# - name: depends_on
+#   type: string
+#   default: ''
+# # vm_image - (Optional) The name of the vm image to use for execution. Defaults to windows-2022
+# - name: vm_image
+#   type: string
+#   default: 'windows-2022'
+# # build_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
+# # cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
+# # any stages that depend on this stage will attempt to execute
+# - name: build_enabled
+#   type: boolean
+#   default: true
 
 # solution_filename - (Required) The relative path to the solution file that should be built
 - name: solution_filename
   type: string
-# solution_build_configuration - (Optional) The build configuration within the solution that should be invoked. 
-# Default is Release but can be overwritten if you want to do say a Debug build
-- name: solution_build_configuration
-  type: string
-  default: Debug
-# solution_target_platform - (Optional) The target platform that the solution build will use. 
-# Defaults to 'x86'
-- name: solution_target_platform
-  type: string
-  default: 'x86'
+# # solution_build_configuration - (Optional) The build configuration within the solution that should be invoked. 
+# # Default is Release but can be overwritten if you want to do say a Debug build
+# - name: solution_build_configuration
+#   type: string
+#   default: Debug
+# # solution_target_platform - (Optional) The target platform that the solution build will use. 
+# # Defaults to 'x86'
+# - name: solution_target_platform
+#   type: string
+#   default: 'x86'
 
-# artifact_name - (Optional) The name of the artifact to copy application to
-- name: artifact_name
-  type: string
-  default: 'drop'
-# artifact_folder - (Optional) The name of the folder to copy application to in the artifact
-- name: artifact_folder
-  type: string
-  default: 'Solution'
+# # artifact_name - (Optional) The name of the artifact to copy application to
+# - name: artifact_name
+#   type: string
+#   default: 'drop'
+# # artifact_folder - (Optional) The name of the folder to copy application to in the artifact
+# - name: artifact_folder
+#   type: string
+#   default: 'Solution'
 
-# onStart - (Optional) Steps to be executed before stage starts
-- name: onStart
-  type: stepList
-  default: []
-# preBuild - (Optional) Steps to be executed before the build starts
-- name: preBuild
-  type: stepList
-  default: []
-# postBuild - (Optional) Steps to be executed after the build has been invoked
-- name: postBuild
-  type: stepList
-  default: []
-# prePublish - (Optional) Steps to be executed before application package is published to artifact
-- name: prePublish
-  type: stepList
-  default: []
-# onEnd - (Optional) Steps to be executed at the end of the stage
-- name: onEnd
-  type: stepList
-  default: []
+# # onStart - (Optional) Steps to be executed before stage starts
+# - name: onStart
+#   type: stepList
+#   default: []
+# # preBuild - (Optional) Steps to be executed before the build starts
+# - name: preBuild
+#   type: stepList
+#   default: []
+# # postBuild - (Optional) Steps to be executed after the build has been invoked
+# - name: postBuild
+#   type: stepList
+#   default: []
+# # prePublish - (Optional) Steps to be executed before application package is published to artifact
+# - name: prePublish
+#   type: stepList
+#   default: []
+# # onEnd - (Optional) Steps to be executed at the end of the stage
+# - name: onEnd
+#   type: stepList
+#   default: []
 
-# windows_nuget_version - (Optional) Use to override the NuGet version (defaults to 6.0.0)
-- name: windows_nuget_version
-  type: string
-  default: '6.0.0'
-# net_core_version - (Optional) Use to override the .NET Core version (defaults to 6.0.x)
-- name: net_core_version 
-  type: string 
-  default: '6.0.x'
-# windows_sdk_version - (Optional) The version of the windows sdk to install (default '' for no installation)
-- name: windows_sdk_version 
-  type: string 
-  default: ''
+# # windows_nuget_version - (Optional) Use to override the NuGet version (defaults to 6.0.0)
+# - name: windows_nuget_version
+#   type: string
+#   default: '6.0.0'
+# # net_core_version - (Optional) Use to override the .NET Core version (defaults to 6.0.x)
+# - name: net_core_version 
+#   type: string 
+#   default: '6.0.x'
+# # windows_sdk_version - (Optional) The version of the windows sdk to install (default '' for no installation)
+# - name: windows_sdk_version 
+#   type: string 
+#   default: ''
 
 stages:
+- stage: '${{ parameters.name }}Print_Parameters'
+
+  pool:
+    vmImage: '${{ parameters.vm_image }}'
+
+  jobs:
+  - job: PrintParameters
+
+    steps:
+    - task: Bash@3
+      displayName: 'Parameters'
+      condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+      inputs:
+        targetType: inline
+        script: |
+          echo -------------------------------------------------------------
+          echo -------------------------------------------------------------
+          echo Solution filename: "${{ parameters.solution_filename }}"
+          echo Name: "${{ parameters.name }}"
+          echo -------------------------------------------------------------
+          echo -------------------------------------------------------------
+
+
 - template:  build-solution.yml
   parameters:
     # Stage name and whether it's enabled
