@@ -80,9 +80,6 @@ parameters:
 stages:
 - stage: '${{ parameters.name }}Print_Parameters'
 
-  pool:
-    vmImage: '${{ parameters.vm_image }}'
-
   jobs:
   - job: PrintParameters
 
