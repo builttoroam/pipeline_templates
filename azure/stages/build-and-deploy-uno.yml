@@ -103,6 +103,6 @@ stages:
     # Stage name and whether it's enabled
     stage_name: '${{ parameters.name }}Build_Solution'
     # Solution to build
-    solution_filename: $(solution_file)
+    solution_filename: ${{ parameters.solution_filename }}
     windows_sdk_version: '18362'
 
