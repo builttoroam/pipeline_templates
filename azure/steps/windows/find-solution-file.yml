@@ -48,7 +48,8 @@ steps:
     targetType: 'inline'                                                                                                 
     script: |
       $solutionFolder = (get-item '${{ parameters.solution_filename }}').directory.fullname 
-      Write-Host "Filter path is $solutionFolder"
+      Write-Host "Solution folder is $solutionFolder"
+      Write-Host "##vso[task.setvariable variable=solutionFolder]$solutionFolder"
       if( '${{ parameters.solution_filename }}'.contains(".slnf") ) {
           Write-Host "File specified is solution filter"
           $actualSolutionFile = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).solution.path
@@ -75,7 +76,7 @@ steps:
       }
       else{
           Write-Host "File specified is a solution file"
-          $solutionFile = "${{ parameters.solution_filename }}"
+          $solutionFile = (get-item '${{ parameters.solution_filename }}').fullname 
           Write-Host "Full path to solution file is $solutionFile"
           Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
           Write-Host "##vso[task.setvariable variable=buildProjectOrSolution]$solutionFile"
