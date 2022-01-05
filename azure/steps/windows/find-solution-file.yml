@@ -1,0 +1,96 @@
+parameters:
+# name - (Optional) - Specify a name if you want to use multiple times to avoid step name conflicts
+- name: name
+  type: string
+  default: ''
+
+# solution_filename - (Required) The relative path to the solution file or filter than should be used to locate the solution file
+- name: solution_filename
+  type: string
+
+# output_solution_folder - (Optional) - The variable to use for the full path to the folder that contains the solution file
+- name: output_solution_folder
+  type: string
+  default: 'solution_folder'
+
+# output_solution_file_path - (Optional) - The variable to use for the full path to the solution file
+- name: output_solution_file_path
+  type: string
+  default: 'solution_file_path'
+
+# output_nuget_config_file_path - (Optional) - The variable to use for the full path to the nuget config file if it exists
+- name: output_nuget_config_file_path
+  type: string
+  default: 'nuget_config_file_path'
+
+
+steps:
+- task: Bash@3
+  displayName: '${{ parameters.name }}Parameters'
+  condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+  inputs:
+    targetType: inline
+    script: |
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+      echo Name: "${{ parameters.name }}"
+      echo Solution filename: "${{ parameters.solution_filename }}"
+      echo Output solution folder: "${{ parameters.output_solution_folder }}"
+      echo Output solution file path: "${{ parameters.output_solution_file_path }}"
+      echo Output nuget.config file path: "${{ parameters.output_nuget_config_file_path }}"
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+
+# Check for solution filter - if filter, need to extract actual solution file
+- task: PowerShell@2
+  displayName: 'Determine Solution File for ${{ parameters.solution_filename }}'
+  inputs:
+    targetType: 'inline'                                                                                                 
+    script: |
+      $solutionFolder = (get-item '${{ parameters.solution_filename }}').directory.fullname 
+      Write-Host "Filter path is $solutionFolder"
+      if( '${{ parameters.solution_filename }}'.contains(".slnf") ) {
+          Write-Host "File specified is solution filter"
+          $actualSolutionFile = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).solution.path
+          Write-Host "Solution relative path is $actualSolutionFile"
+          $solutionFile = "$solutionFolder/$actualSolutionFile"
+          Write-Host "Full path to solution file is $solutionFile"
+          Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
+
+          Write-Host "Checking projects for wapproj for Windows fix"
+          $buildproject = '${{ parameters.solution_filename }}'
+          $projects = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).solution.projects
+          for($i=0;$i -lt $projects.length;$i++)
+          {
+              $proj = $projects[$i]
+              Write-Host "Project - $proj" 
+              if($proj.contains('wapproj'))
+              {
+                  $buildproject = $proj
+                  $buildproject = "$solutionFolder/$buildproject"
+                  Write-Host "Wapproj found - building $buildproject instead of solution"
+              }
+          }
+          Write-Host "##vso[task.setvariable variable=buildProjectOrSolution]$buildproject"
+      }
+      else{
+          Write-Host "File specified is a solution file"
+          $solutionFile = "${{ parameters.solution_filename }}"
+          Write-Host "Full path to solution file is $solutionFile"
+          Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
+          Write-Host "##vso[task.setvariable variable=buildProjectOrSolution]$solutionFile"
+      }
+      $nugetFile = "$solutionFolder/nuget.config"
+      Write-Host "Nuget config is $nugetFile"
+      $nugetExits = Test-Path -Path $nugetFile -PathType Leaf
+      if( $nugetExits -eq $false ){
+        Write-Host "Nuget config doesn't exist"
+        $nugetFile = ''
+      }
+      Write-Host "##vso[task.setvariable variable=nugetConfig]$nugetFile"
+
+- template: ../set-variable-value.yml
+  parameters:
+    ${{ if ne(parameters.name, '') }}:
+      name: ${{ parameters.name }}
+    variables_to_set: '${{ parameters.output_solution_folder }}|$solutionFolder;${{ parameters.output_solution_file_path }}|$solutionFilename;${{ parameters.output_nuget_config_file_path }}|$nugetConfig'
