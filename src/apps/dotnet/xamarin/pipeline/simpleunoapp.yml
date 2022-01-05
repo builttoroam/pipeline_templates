@@ -1,4 +1,12 @@
-trigger: none
+trigger:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - src/apps/dotnet/xamarin/SimpleUnoApp/*
+    - azure/stages/build-and-deploy-uno.yml
+    - azure/stages/build-solution.yml
   
 variables:
   - group: 'Common Variables'
