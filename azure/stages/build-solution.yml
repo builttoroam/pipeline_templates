@@ -91,6 +91,34 @@ stages:
 
     steps:
 
+    - task: Bash@3
+      displayName: 'Parameters'
+      condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+      inputs:
+        targetType: inline
+        script: |
+          echo -------------------------------------------------------------
+          echo -------------------------------------------------------------
+          echo Stage name: "${{ parameters.stage_name }}"
+          echo Depends on: "${{ parameters.depends_on }}"
+          echo VM image: "${{ parameters.vm_image }}"
+          echo Build enabled: "${{ parameters.build_enabled }}"
+          echo Solution filename: "${{ parameters.solution_filename }}"
+          echo Build configuration: "${{ parameters.solution_build_configuration }}"
+          echo Solution target platform: "${{ parameters.solution_target_platform }}"
+          echo Artifact name: "${{ parameters.artifact_name }}"
+          echo Artifact folder: "${{ parameters.artifact_folder }}"
+          echo Nuget version: "${{ parameters.windows_nuget_version }}"
+          echo Net core version: "${{ parameters.net_core_version  }}"
+          echo Windows sdk version: "${{ parameters.windows_sdk_version  }}"
+          echo On start: ${{ length(parameters.onStart) }}  steps
+          echo Pre build: ${{ length(parameters.preBuild) }}  steps
+          echo Post build: ${{ length(parameters.postBuild) }}  steps
+          echo Pre publish: ${{ length(parameters.prePublish) }}  steps
+          echo On end: ${{ length(parameters.onEnd) }}  steps
+          echo -------------------------------------------------------------
+          echo -------------------------------------------------------------
+
     # onStart steps - performed after any secure files are downloaded but before 
     # any other build steps are executed
     - ${{ parameters.onStart }}
