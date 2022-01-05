@@ -104,5 +104,4 @@ stages:
     stage_name: '${{ parameters.name }}Build_Solution'
     # Solution to build
     solution_filename: ${{ parameters.solution_filename }}
-    windows_sdk_version: '18362'
 
