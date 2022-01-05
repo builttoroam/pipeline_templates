@@ -30,3 +30,8 @@ variables:
   - name: create_storage_arm_template
     value: 'azure/tests/data/azuredeploy-storage.json'
 
+  - name: test_solution_file_uno
+    value: 'src/apps/dotnet/xamarin/SimpleUnoApp/SimpleUnoApp.sln'
+
+  - name: test_solution_file_uno_folder
+    value: 'D:\a\1\s\src\apps\dotnet\xamarin\SimpleUnoApp'

@@ -1,0 +1,36 @@
+trigger:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - azure/steps/windows/find-solution-file.yml
+    - azure/tests/windows/test-find-solution-file.yml
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  - template: test-variables.yml
+
+stages:
+  - stage: Test_Find_Solution_File
+    pool:
+      vmImage: 'windows-latest'
+
+    jobs:
+    - job: Fine_Solution
+      steps:
+        - template: ../steps/windows/find-solution-file.yml
+          parameters:
+            name: SolutionFind
+            solution_filename: '$(test_solution_file_uno)' 
+            output_solution_folder: 'outsolutionfolder'
+            output_solution_file_path: 'outsolutionfile'
+            output_nuget_config_file_path: 'outnugetconfig'
+
+        - template: ../steps/checks/check-variable-value.yml
+          parameters:
+            name: SolutionFindCheck
+            variable_to_check: 'SolutionFind.outsolutionfolder'
+            expected_value: '$(test_solution_file_uno_folder)'
