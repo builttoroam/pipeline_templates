@@ -1,0 +1,127 @@
+parameters:
+# name - (Optional) - Specify a name if you need to extract output variable values or want to use multiple times
+- name: name
+  type: string
+  default: ''
+# windows_sdk_url - (Optional) Override the download url for the Windows SDK
+- name: windows_sdk_url
+  type: string
+  # default: 'https://raw.githubusercontent.com/builttoroam/pipeline_templates/dev/nr/windowsios/azure/scripts/Install-WindowsSdkISO.ps1'
+  default: 'https://raw.githubusercontent.com/builttoroam/pipeline_templates/master/azure/scripts/Install-WindowsSdkISO.ps1'
+# windows_sdk_version - (Optional) Override the windows sdk version to install (default is 18362). 
+# Minimum supported version is 17763 as that's the earliest where there is an iso available
+# List of Windows SDK downloads
+# https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/
+# Omitting the sdk version will cause the sdkiso.ps1 to be downloaded so that it can be used elsewhere
+- name: windows_sdk_version
+  type: string
+  default: ''
+- name: solution_file
+  type: string
+  default: ''
+# output_sdk_powershell_file_path_variable - (Optional) - The variable to use for the full path sdk iso install ps1 file
+- name: output_sdk_powershell_file_path_variable
+  type: string
+  default: 'sdk_powershell_file_path'
+
+steps:
+- task: Bash@3
+  displayName: 'Parameters'
+  condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+  inputs:
+    targetType: inline
+    script: |
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+      echo Name: "${{ parameters.name }}"
+      echo Windows sdk url: "${{ parameters.windows_sdk_url }}"
+      echo Windows sdk version: "${{ parameters.windows_sdk_version }}"
+      echo Output sdk powershell file path variable: "${{ parameters.output_sdk_powershell_file_path_variable }}"
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+
+- template: windows-sdk-install-solution.yml
+  parameters:
+    name: '${{ parameters.name }}InstallSdkScript'
+    windows_sdk_url: '${{ parameters.windows_sdk_url }}'
+    windows_sdk_version: '${{ parameters.windows_sdk_version }}'
+    output_sdk_powershell_file_path_variable: '${{ parameters.output_sdk_powershell_file_path_variable }}'
+
+- template: find-solution-file.yml
+  parameters:
+    name: '${{ parameters.name }}SolutionFind'
+    solution_filename: '${{ parameters.solution_file }}'
+    output_solution_folder: 'solutionFolder'
+
+- task: PowerShell@2
+    ${{ if ne(parameters.name, '') }}:
+      name: ${{ parameters.name }}
+    displayName: 'Install all required versions'
+    inputs:
+      targetType: 'inline'
+      workingDirectory: $(Pipeline.Workspace)
+      script: |
+        $solutionFolder = $(${{ parameters.name }}SolutionFind.solutionFolder)
+        Write-Host $solutionFolder
+        $sdkisops = $(${{ parameters.name }}InstallSdkScript.${{ parameters.output_sdk_powershell_file_path_variable }})
+        Write-Host $sdkisops
+
+        $versions = New-Object Collections.Generic.List[string]
+
+        $projectFiles = Get-ChildItem -Path $solutionFolder -Filter *.csproj -Recurse
+        foreach( $proj in $projectFiles)
+        {
+            Write-Host $proj.FullName
+            [xml]$projectInfo = Get-Content $proj.FullName
+            $ns = @{ns="http://schemas.microsoft.com/developer/msbuild/2003"}
+            $version = Select-Xml -Xml $projectInfo -XPath "//ns:Project/ns:PropertyGroup/ns:TargetPlatformVersion" -Namespace $ns
+            if( $null -ne $version)
+            {
+                foreach($fxml in $version)
+                {
+                    Write-Host $fxml
+                    $trimmed =$fxml.ToString().Replace("10.0.","").Replace(".0","")
+                    Write-Host $trimmed
+                    if(-not $versions.Contains($trimmed)){
+                        $versions.Add($trimmed)
+                    }
+                }
+            }
+
+            $frameworks = Select-Xml -Xml $projectInfo -XPath "//Project/PropertyGroup/TargetFrameworks"
+
+            if( $null -ne $frameworks){
+                Write-Host $frameworks
+                foreach($fxml in $frameworks)
+                {
+                    $fx = ($fxml).ToString().Split(";")
+                    Write-Host $fx.Length
+                    foreach($fname in $fx)
+                    {
+                        #Write-Host "Test: $fname"
+                        if( ($fname).StartsWith('uap') -or ($fname).Contains('windows10') )
+                        {
+                            Write-Host $fname
+                            $trimmed =$fname.ToString().Replace("uap10.0.","")
+                            $idx = $trimmed.ToLower().IndexOf("windows")
+                            if($idx -ge 0)
+                            {
+                            $trimmed = $trimmed.Substring($idx)
+                            }
+                            $trimmed =$trimmed.Replace("windows10.0.","").Replace(".0","")
+                            Write-Host $trimmed
+                            if(-not $versions.Contains($trimmed)){
+                                $versions.Add($trimmed)
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+        Write-Host $versions
+        foreach($ver in $versions)
+        {
+            Write-Host "Invoking $sdkisops for Version $ver"
+            Invoke-Command -FilePath $sdkisops -ArgumentList "$ver" -ComputerName localhost 
+        }
