@@ -1,0 +1,17 @@
+trigger: none
+  
+variables:
+  - group: 'Common Variables'
+  - group: 'Apps Variables'
+  - group: 'DotNet Variables'
+  - group: 'Xamarin Variables'
+  - name: DISABLE_NODE6_DEPRECATION_WARNING
+    value: true
+
+stages:
+- template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+  parameters:
+    name: 'UnoApp'
+    # Solution to build
+    solution_filename: $(uno_solution_file)
+
