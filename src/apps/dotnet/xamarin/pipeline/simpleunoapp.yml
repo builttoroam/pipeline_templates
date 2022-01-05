@@ -15,3 +15,9 @@ stages:
     # Solution to build
     solution_filename: $(uno_solution_file)
 
+- template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+  parameters:
+    name: 'UnoApp_Skip_Solution_Build'
+    # Solution to build
+    solution_filename: $(uno_solution_file)
+    solution_build_enabled: false
