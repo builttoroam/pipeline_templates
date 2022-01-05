@@ -34,3 +34,17 @@ stages:
             name: SolutionFindCheck
             variable_to_check: 'SolutionFind.outsolutionfolder'
             expected_value: '$(test_solution_file_uno_folder)'
+
+        - template: ../../steps/checks/check-variable-value.yml
+          parameters:
+            name: SolutionFindCheck
+            variable_to_check: 'SolutionFind.outsolutionfile'
+            expected_value: '$(test_solution_file_uno_solution_file)'
+
+        - template: ../../steps/checks/check-variable-value.yml
+          parameters:
+            name: SolutionFindCheck
+            variable_to_check: 'SolutionFind.outnugetconfig'
+            expected_value: '$(test_solution_file_uno_nuget_config)'
+
+            
