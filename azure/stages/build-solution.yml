@@ -123,12 +123,6 @@ stages:
     # any other build steps are executed
     - ${{ parameters.onStart }}
 
-    - ${{ if ne( parameters.windows_sdk_version , '') }}:
-      - template: ../steps/windows/windows-sdk-install.yml
-        parameters:
-          name: DownloadInstallWindowsSdk
-          windows_sdk_version: '${{ parameters.windows_sdk_version }}'
-
     # Check for solution filter - if filter, need to extract actual solution file
     - task: PowerShell@2
       displayName: 'Determine Solution File for ${{ parameters.solution_filename }}'
@@ -176,6 +170,12 @@ stages:
             $nugetFile = ''
           }
           Write-Host "##vso[task.setvariable variable=nugetConfig]$nugetFile"
+
+    - template: ../steps/windows/windows-sdk-install-solution.yml
+      parameters:
+        name: DownloadInstallWindowsSdk
+        windows_sdk_version: '${{ parameters.windows_sdk_version }}'
+        solution_file: '${{ parameters.solution_filename }}'
 
     # Select the .Net Core version based on the net_core_version parameter          
     - task: UseDotNet@2
