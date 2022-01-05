@@ -11,7 +11,7 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  - template: test-variables.yml
+  - template: ../test-variables.yml
 
 stages:
   - stage: Test_Find_Solution_File
