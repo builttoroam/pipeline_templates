@@ -24,7 +24,13 @@ stages:
         - template: ../../steps/windows/windows-sdk-install.yml
           parameters:
             name: InstallDefault
+            output_sdk_powershell_file_path_variable: sdk_file_path
 
+        - template: ../../steps/checks/check-variable-value.yml
+          parameters:
+            name: Sdk_Powershell_Path
+            variable_to_check: 'InstallDefault.sdk_file_path'
+            expected_value: '$(test_sdk_powershell_downloaded_path)'
         # List of Windows SDK downloads
         # https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/
         # Earliest that has an iso is 17763
