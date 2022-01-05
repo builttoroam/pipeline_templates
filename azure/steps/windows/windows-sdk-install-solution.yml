@@ -54,74 +54,74 @@ steps:
     output_solution_folder: 'solutionFolder'
 
 - task: PowerShell@2
-    ${{ if ne(parameters.name, '') }}:
-      name: ${{ parameters.name }}
-    displayName: 'Install all required versions'
-    inputs:
-      targetType: 'inline'
-      workingDirectory: $(Pipeline.Workspace)
-      script: |
-        $solutionFolder = $(${{ parameters.name }}SolutionFind.solutionFolder)
-        Write-Host $solutionFolder
-        $sdkisops = $(${{ parameters.name }}InstallSdkScript.${{ parameters.output_sdk_powershell_file_path_variable }})
-        Write-Host $sdkisops
+  ${{ if ne(parameters.name, '') }}:
+    name: ${{ parameters.name }}
+  displayName: 'Install all required versions'
+  inputs:
+    targetType: 'inline'
+    workingDirectory: $(Pipeline.Workspace)
+    script: |
+      $solutionFolder = $(${{ parameters.name }}SolutionFind.solutionFolder)
+      Write-Host $solutionFolder
+      $sdkisops = $(${{ parameters.name }}InstallSdkScript.${{ parameters.output_sdk_powershell_file_path_variable }})
+      Write-Host $sdkisops
 
-        $versions = New-Object Collections.Generic.List[string]
+      $versions = New-Object Collections.Generic.List[string]
 
-        $projectFiles = Get-ChildItem -Path $solutionFolder -Filter *.csproj -Recurse
-        foreach( $proj in $projectFiles)
-        {
-            Write-Host $proj.FullName
-            [xml]$projectInfo = Get-Content $proj.FullName
-            $ns = @{ns="http://schemas.microsoft.com/developer/msbuild/2003"}
-            $version = Select-Xml -Xml $projectInfo -XPath "//ns:Project/ns:PropertyGroup/ns:TargetPlatformVersion" -Namespace $ns
-            if( $null -ne $version)
-            {
-                foreach($fxml in $version)
-                {
-                    Write-Host $fxml
-                    $trimmed =$fxml.ToString().Replace("10.0.","").Replace(".0","")
-                    Write-Host $trimmed
-                    if(-not $versions.Contains($trimmed)){
-                        $versions.Add($trimmed)
-                    }
-                }
-            }
+      $projectFiles = Get-ChildItem -Path $solutionFolder -Filter *.csproj -Recurse
+      foreach( $proj in $projectFiles)
+      {
+          Write-Host $proj.FullName
+          [xml]$projectInfo = Get-Content $proj.FullName
+          $ns = @{ns="http://schemas.microsoft.com/developer/msbuild/2003"}
+          $version = Select-Xml -Xml $projectInfo -XPath "//ns:Project/ns:PropertyGroup/ns:TargetPlatformVersion" -Namespace $ns
+          if( $null -ne $version)
+          {
+              foreach($fxml in $version)
+              {
+                  Write-Host $fxml
+                  $trimmed =$fxml.ToString().Replace("10.0.","").Replace(".0","")
+                  Write-Host $trimmed
+                  if(-not $versions.Contains($trimmed)){
+                      $versions.Add($trimmed)
+                  }
+              }
+          }
 
-            $frameworks = Select-Xml -Xml $projectInfo -XPath "//Project/PropertyGroup/TargetFrameworks"
+          $frameworks = Select-Xml -Xml $projectInfo -XPath "//Project/PropertyGroup/TargetFrameworks"
 
-            if( $null -ne $frameworks){
-                Write-Host $frameworks
-                foreach($fxml in $frameworks)
-                {
-                    $fx = ($fxml).ToString().Split(";")
-                    Write-Host $fx.Length
-                    foreach($fname in $fx)
-                    {
-                        #Write-Host "Test: $fname"
-                        if( ($fname).StartsWith('uap') -or ($fname).Contains('windows10') )
-                        {
-                            Write-Host $fname
-                            $trimmed =$fname.ToString().Replace("uap10.0.","")
-                            $idx = $trimmed.ToLower().IndexOf("windows")
-                            if($idx -ge 0)
-                            {
-                            $trimmed = $trimmed.Substring($idx)
-                            }
-                            $trimmed =$trimmed.Replace("windows10.0.","").Replace(".0","")
-                            Write-Host $trimmed
-                            if(-not $versions.Contains($trimmed)){
-                                $versions.Add($trimmed)
-                            }
-                        }
+          if( $null -ne $frameworks){
+              Write-Host $frameworks
+              foreach($fxml in $frameworks)
+              {
+                  $fx = ($fxml).ToString().Split(";")
+                  Write-Host $fx.Length
+                  foreach($fname in $fx)
+                  {
+                      #Write-Host "Test: $fname"
+                      if( ($fname).StartsWith('uap') -or ($fname).Contains('windows10') )
+                      {
+                          Write-Host $fname
+                          $trimmed =$fname.ToString().Replace("uap10.0.","")
+                          $idx = $trimmed.ToLower().IndexOf("windows")
+                          if($idx -ge 0)
+                          {
+                          $trimmed = $trimmed.Substring($idx)
+                          }
+                          $trimmed =$trimmed.Replace("windows10.0.","").Replace(".0","")
+                          Write-Host $trimmed
+                          if(-not $versions.Contains($trimmed)){
+                              $versions.Add($trimmed)
+                          }
+                      }
 
-                    }
-                }
-            }
-        }
-        Write-Host $versions
-        foreach($ver in $versions)
-        {
-            Write-Host "Invoking $sdkisops for Version $ver"
-            Invoke-Command -FilePath $sdkisops -ArgumentList "$ver" -ComputerName localhost 
-        }
+                  }
+              }
+          }
+      }
+      Write-Host $versions
+      foreach($ver in $versions)
+      {
+          Write-Host "Invoking $sdkisops for Version $ver"
+          Invoke-Command -FilePath $sdkisops -ArgumentList "$ver" -ComputerName localhost 
+      }
