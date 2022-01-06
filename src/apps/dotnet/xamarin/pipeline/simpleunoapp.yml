@@ -7,6 +7,7 @@ trigger:
     - src/apps/dotnet/xamarin/SimpleUnoApp/*
     - azure/stages/build-and-deploy-uno.yml
     - azure/stages/build-solution.yml
+    - src/apps/dotnet/xamarin/pipeline/simpleunoapp.yml
   
 variables:
   - group: 'Common Variables'
