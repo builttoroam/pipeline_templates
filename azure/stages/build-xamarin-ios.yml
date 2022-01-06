@@ -49,6 +49,7 @@ parameters:
 # of the certificate in Secure Files
 - name: ios_cert_securefiles_filename 
   type: string 
+  default: ''
 # ios_cert_password - (Optional) The password to unlock the certificate so it can be used. This is required
 # if the certificate has a password set
 - name: ios_cert_password 
@@ -57,7 +58,8 @@ parameters:
 # ios_provisioning_profile_securefiles_filename - (Required) The provisioning profile to use when signing the application.
 # This is the name of the provisioning profile in Secure Files
 - name: ios_provisioning_profile_securefiles_filename 
-  type: string 
+  type: string
+  default: '' 
 # ios_signing_identity - (Optional) The signing identity that maps to the signing certificate. If not provided, the template
 # will use the value extracted during the certificate installation process.
 - name: ios_signing_identity 
@@ -145,32 +147,35 @@ stages:
     steps:
     # Download and install the ios signing certifcate from secure files
     # with the name specified in parameter ios_cert_securefiles_filename
-    - task: InstallAppleCertificate@2
-      displayName: 'Install Signing Certificate'
-      inputs:
-        certSecureFile: '${{ parameters.ios_cert_securefiles_filename }}'
-        certPwd: '${{ parameters.ios_cert_password }}'
-        keychain: 'temp'
-        deleteCert: true  
+    - ${{ if ne( parameters.ios_cert_securefiles_filename, '' ) }}:
+      - task: InstallAppleCertificate@2
+        displayName: 'Install Signing Certificate'
+        inputs:
+          certSecureFile: '${{ parameters.ios_cert_securefiles_filename }}'
+          certPwd: '${{ parameters.ios_cert_password }}'
+          keychain: 'temp'
+          deleteCert: true  
 
     # Download and install the provisioning profile from secure files
     # with the name specified in the parameter ios_provisioning_profile_securefiles_filename
-    - task: InstallAppleProvisioningProfile@1
-      displayName: 'Install Provisioning Profile'
-      inputs:
-        provisioningProfileLocation: 'secureFiles'
-        provProfileSecureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
-        removeProfile: true
+    - ${{ if ne( parameters.ios_provisioning_profile_securefiles_filename, '' ) }}:
+      - task: InstallAppleProvisioningProfile@1
+        displayName: 'Install Provisioning Profile'
+        inputs:
+          provisioningProfileLocation: 'secureFiles'
+          provProfileSecureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
+          removeProfile: true
 
     # Download the provisioning profile from secure files with the name
     # specified in the parameter ios_provisioning_profile_securefiles_filename
     # The script needs to do this because the previous task deletes the profile
     # after its done installing it  
-    - task: DownloadSecureFile@1
-      displayName: 'Download secure file ${{ parameters.ios_provisioning_profile_securefiles_filename }}'
-      name: provision_profile_file
-      inputs:
-        secureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
+    - ${{ if ne( parameters.ios_provisioning_profile_securefiles_filename, '' ) }}:
+      - task: DownloadSecureFile@1
+        displayName: 'Download secure file ${{ parameters.ios_provisioning_profile_securefiles_filename }}'
+        name: provision_profile_file
+        inputs:
+          secureFile: '${{ parameters.ios_provisioning_profile_securefiles_filename }}'
   
     # onStart steps - performed after any secure files are downloaded but before 
     # any other build steps are executed
@@ -180,36 +185,37 @@ stages:
     # the provisioning profile. This is very hacky as we're not really decoding
     # the provisioning profile using CMS; instead we're just opening as text
     # and searching for the correct key-value pair
-    - task: PowerShell@2
-      displayName: 'Extract bundle id from provisioning profile'
-      condition: and( succeeded(), eq( variables['bundle_id'], '') )
-      inputs:
-        targetType: 'inline'                                                                                                 
-        script: |
-          Write-Host "Loading content"
-          $content = Get-Content $(provision_profile_file.secureFilePath) -Raw
-          Write-Host "Content loaded"
-          $pattern = '<key>.*<\/key>\s*<string>.*<\/string>'
-          Write-Host "Pattern: $pattern"
-          $valuepattern = '<string>(.*)<\/string>'
-          Write-Host "Value Pattern: $valuepattern"
-          $matches = $content | Select-String $pattern -AllMatches
-          Write-Host "Matches: $matches.Matches"
-          $idkvp = ($matches.Matches | Where-Object {$_.Value.contains('application-identifier')}).Value
-          Write-Host "ID key value pair: $idkvp"
-          $idmatch = $idkvp | Select-String $valuepattern
-          Write-Host "ID match: $idmatch"
-          $id = $idmatch.Matches[0].Groups[1].Value
-          Write-Host "ID: $id"
-          $teamkvp = ($matches.Matches | Where-Object {$_.Value.contains('com.apple.developer.team-identifier')}).Value
-          Write-Host "Team key value pair: $teamkvp"
-          $teammatch = $teamkvp | Select-String $valuepattern
-          Write-Host "Team match: $teammatch"
-          $teamid = $teammatch.Matches[0].Groups[1].Value
-          Write-Host "Team id: $teamid"
-          $bundleid = $id.Replace($teamid + ".","")
-          Write-Host "Bundle id : $bundleid"
-          Write-Host "##vso[task.setvariable variable=bundle_id]$bundleid"
+    - ${{ if ne( parameters.ios_provisioning_profile_securefiles_filename, '' ) }}:
+      - task: PowerShell@2
+        displayName: 'Extract bundle id from provisioning profile'
+        condition: and( succeeded(), eq( variables['bundle_id'], '') )
+        inputs:
+          targetType: 'inline'                                                                                                 
+          script: |
+            Write-Host "Loading content"
+            $content = Get-Content $(provision_profile_file.secureFilePath) -Raw
+            Write-Host "Content loaded"
+            $pattern = '<key>.*<\/key>\s*<string>.*<\/string>'
+            Write-Host "Pattern: $pattern"
+            $valuepattern = '<string>(.*)<\/string>'
+            Write-Host "Value Pattern: $valuepattern"
+            $matches = $content | Select-String $pattern -AllMatches
+            Write-Host "Matches: $matches.Matches"
+            $idkvp = ($matches.Matches | Where-Object {$_.Value.contains('application-identifier')}).Value
+            Write-Host "ID key value pair: $idkvp"
+            $idmatch = $idkvp | Select-String $valuepattern
+            Write-Host "ID match: $idmatch"
+            $id = $idmatch.Matches[0].Groups[1].Value
+            Write-Host "ID: $id"
+            $teamkvp = ($matches.Matches | Where-Object {$_.Value.contains('com.apple.developer.team-identifier')}).Value
+            Write-Host "Team key value pair: $teamkvp"
+            $teammatch = $teamkvp | Select-String $valuepattern
+            Write-Host "Team match: $teammatch"
+            $teamid = $teammatch.Matches[0].Groups[1].Value
+            Write-Host "Team id: $teamid"
+            $bundleid = $id.Replace($teamid + ".","")
+            Write-Host "Bundle id : $bundleid"
+            Write-Host "##vso[task.setvariable variable=bundle_id]$bundleid"
 
     # If the ios_plist_filename parameter hasn't been specified then just search for working directory
     # for Info.plist file. If you have multiple iOS projects you need to specify the ios_plist_filename 
@@ -236,41 +242,44 @@ stages:
         printFile: true
 
     # Update the Info.plist with the correct bundle id
-    - task: ios-bundle-identifier@1
-      displayName: 'Setting application bundle id ${{ parameters.ios_plist_filename }}'
-      condition: and( succeeded(), ne( variables['bundle_id'], '') )
-      inputs:
-        sourcePath: '$(manifestPath)'
-        bundleIdentifier: '$(bundle_id)'
-        printFile: true
+    - ${{ if ne( parameters.ios_provisioning_profile_securefiles_filename, '' ) }}:
+      - task: ios-bundle-identifier@1
+        displayName: 'Setting application bundle id ${{ parameters.ios_plist_filename }}'
+        condition: and( succeeded(), ne( variables['bundle_id'], '') )
+        inputs:
+          sourcePath: '$(manifestPath)'
+          bundleIdentifier: '$(bundle_id)'
+          printFile: true
  
     # This task is linked to the InstallAppleCertificate task at the begining of this template
     # As part of the InstallAppleCertificate the APPLE_CERTIFICATE_SIGNING_IDENTITY environment
     # variable is set to the signing identity found in the certificate file
-    - task: PowerShell@2
-      displayName: 'Extract signing identity'
-      condition: and( succeeded(), eq( variables['signing_identity'], '') )
-      inputs:
-        targetType: 'inline'                                                                                                 
-        script: |
-          Write-Host "Extracting certificate CN $env:APPLE_CERTIFICATE_SIGNING_IDENTITY"
-          $cn = $env:APPLE_CERTIFICATE_SIGNING_IDENTITY
-          Write-Host "Signing Identity: $cn"
-          Write-Host "##vso[task.setvariable variable=signing_identity]$cn"
+    - ${{ if ne( parameters.ios_cert_securefiles_filename, '' ) }}:
+      - task: PowerShell@2
+        displayName: 'Extract signing identity'
+        condition: and( succeeded(), eq( variables['signing_identity'], '') )
+        inputs:
+          targetType: 'inline'                                                                                                 
+          script: |
+            Write-Host "Extracting certificate CN $env:APPLE_CERTIFICATE_SIGNING_IDENTITY"
+            $cn = $env:APPLE_CERTIFICATE_SIGNING_IDENTITY
+            Write-Host "Signing Identity: $cn"
+            Write-Host "##vso[task.setvariable variable=signing_identity]$cn"
 
     # This task is linked to the InstallAppleProvisioningProfile task at the begining of this template
     # As part of the InstallAppleProvisioningProfile the APPLE_PROV_PROFILE_UUID environment
     # variable is set to the provisioning profile id found in the provisioning profile file
-    - task: PowerShell@2
-      displayName: 'Extract provisioning profile id'
-      condition: and( succeeded(), eq( variables['prov_profile'], '') )
-      inputs:
-        targetType: 'inline'                                                                                                 
-        script: |
-          Write-Host "Extracting profile id $env:APPLE_PROV_PROFILE_UUID"
-          $cn = $env:APPLE_PROV_PROFILE_UUID
-          Write-Host "Provisioning Profile: $cn"
-          Write-Host "##vso[task.setvariable variable=prov_profile]$cn"
+    - ${{ if ne( parameters.ios_provisioning_profile_securefiles_filename, '' ) }}:
+      - task: PowerShell@2
+        displayName: 'Extract provisioning profile id'
+        condition: and( succeeded(), eq( variables['prov_profile'], '') )
+        inputs:
+          targetType: 'inline'                                                                                                 
+          script: |
+            Write-Host "Extracting profile id $env:APPLE_PROV_PROFILE_UUID"
+            $cn = $env:APPLE_PROV_PROFILE_UUID
+            Write-Host "Provisioning Profile: $cn"
+            Write-Host "##vso[task.setvariable variable=prov_profile]$cn"
 
     # Select the Xamarin SDK version based on the xamarin_sdk_version parameter          
     - script: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh '${{ parameters.xamarin_sdk_version }}'
@@ -405,8 +414,10 @@ stages:
         configuration: '${{ parameters.solution_build_configuration }}'
         buildForSimulator: false
         packageApp: true
-        signingIdentity: '$(signing_identity)'
-        signingProvisioningProfileID: '$(prov_profile)'
+        ${{ if ne( parameters.ios_cert_securefiles_filename, '' ) }}:
+          signingIdentity: '$(signing_identity)'
+        ${{ if ne( parameters.ios_provisioning_profile_securefiles_filename, '' ) }}:
+          signingProvisioningProfileID: '$(prov_profile)'
 
     # postBuild steps - performs steps immediately after executing the solution build
     - ${{ parameters.postBuild }}
