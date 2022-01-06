@@ -150,7 +150,7 @@ stages:
       # Version information
       full_version_number: ${{ parameters.full_version_number }}
       # Solution to build
-      project_filename: ${{ wasm_project_file }}
+      project_filename: ${{ parameters.wasm_project_file }}
       # Output information
       artifact_folder: 'Wasm'
       # preBuild:
