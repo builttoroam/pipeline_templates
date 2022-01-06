@@ -131,8 +131,8 @@ parameters:
 - name: postArtifactDownload
   type: stepList
   default: []
-# preAppCenterPublish - (Optional) Steps to be executed before application package is published to App Center
-- name: preAppCenterPublish
+# prePublish - (Optional) Steps to be executed before application package is published to App Center
+- name: prePublish
   type: stepList
   default: []
 # onEnd - (Optional) Steps to be executed at the end of the stage
@@ -162,7 +162,7 @@ stages:
       appcenter_release_notes: ${{ parameters.appcenter_release_notes }}
       appcenter_release_notes_file: ${{ parameters.appcenter_release_notes_file }}
       appcenter_is_mandatory_update: ${{ parameters.appcenter_is_mandatory_update }}
-      appcenter_destination_type: ${{ parameters.appcenter_destination_typea }}
+      appcenter_destination_type: ${{ parameters.appcenter_destination_type }}
       appcenter_distribution_group_ids: ${{ parameters.appcenter_distribution_group_ids }}
       appcenter_destination_store_id: ${{ parameters.appcenter_destination_store_id }}
       appcenter_dont_notify_testers: ${{ parameters.appcenter_dont_notify_testers }}
