@@ -1,0 +1,108 @@
+parameters:
+
+- name: solution_filename
+  type: string
+
+- name: appsettings_securefile
+  type: string
+  default: ''
+
+- name: appsettings_filename
+  type: string
+  default: 'appsettings.json'
+
+- name: image_modification_enabled
+  type: boolean
+  default: false
+
+- name: image_expression
+  type: string
+
+- name: bannerVersionNamePosition
+  type: string
+  default: 'bottomRight'
+  values:
+  - none
+  - bottomRight
+  - bottomLeft
+  - topLeft
+  - topRight
+
+- name: bannerVersionNameText
+  type: string
+  default: ''
+
+- name: bannerVersionNameColor
+  type: string
+  default: '#C5000D'
+
+- name: bannerVersionNameTextColor
+  type: string
+  default: '#FFFFFF'
+
+- name: bannerVersionNumberPosition
+  type: string
+  default: 'none'
+  values:
+  - none
+  - top
+  - bottom
+  - center
+
+- name: bannerVersionNumberText
+  type: string
+  default: ''
+
+- name: bannerVersionNumberColor
+  type: string
+  default: '#34424F'
+
+- name: bannerVersionNumberTextColor
+  type: string
+  default: '#FFFFFF'
+
+steps:
+# Download the appsettings file from securefiles
+- ${{ if ne(parameters.appsettings_securefile, '') }}:
+  - task: DownloadSecureFile@1
+    displayName: 'Download secure file ${{ parameters.appsettings_securefile }}'
+    name: appsettingsfile
+    inputs:
+      secureFile: '${{ parameters.appsettings_securefile }}'
+
+# Replace the default appsettings with the downloaded settings file
+- ${{ if and( ne(parameters.appsettings_securefile, ''),ne(parameters.appsettings_filename, '') ) }}:
+  - task: PowerShell@2
+    displayName: 'Replace appsettings'
+    inputs:
+      targetType: 'inline'                                                                                                 
+      script: |
+        $filterPath = (get-item '${{ parameters.solution_filename }}').directory.fullname 
+        $existingSettings = (Get-ChildItem -Path $filterPath -Filter  ${{ parameters.appsettings_filename }} -Recurse -ErrorAction SilentlyContinue -Force).fullname
+        Remove-Item -Path $existingSettings -Force
+        Copy-Item "$(appsettingsfile.secureFilePath)" -Destination $existingSettings
+
+- ${{ if eq(parameters.image_modification_enabled, true) }}:
+  - task: PowerShell@2
+    displayName: 'Find solution folder'
+    inputs:
+      targetType: 'inline'                                                                                                 
+      script: |
+        $filterPath = (get-item '${{ parameters.solution_filename }}').directory.fullname 
+        Write-Host "Solution folder $filerPath"
+        Write-Host "##vso[task.setvariable variable=solutionFolder]$filterPath"
+
+
+- ${{ if eq(parameters.image_modification_enabled, true) }}:
+  - task: LaunchIconBadge@1
+    inputs:
+      sourceFolder: '$(solutionFolder)'
+      contents: '${{ parameters.image_expression }}'
+      bannerVersionNamePosition: '${{ parameters.bannerVersionNamePosition }}'
+      bannerVersionNameText: '${{ parameters.bannerVersionNameText }}'
+      bannerVersionNameColor: '${{ parameters.bannerVersionNameColor }}'
+      bannerVersionNameTextColor: '${{ parameters.bannerVersionNameTextColor }}'
+      bannerVersionNumberPosition: '${{ parameters.bannerVersionNumberPosition }}'
+      bannerVersionNumberText: '${{ parameters.bannerVersionNumberText }}'
+      bannerVersionNumberColor: '${{ parameters.bannerVersionNumberColor }}'
+      bannerVersionNumberTextColor: '${{ parameters.bannerVersionNumberTextColor }}' 
