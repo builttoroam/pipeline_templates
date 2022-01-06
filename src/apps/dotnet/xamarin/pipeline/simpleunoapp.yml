@@ -55,7 +55,7 @@ stages:
 #     wasm_enabled: true
 #     wasm_project_file: $(uno_wasm_project_name)
 #     deploy_enabled: true
-#     azure_subscription_connection_name: $(azure_subscription_name)
+#     azure_subscription_connection_name: $(azure_connection_name)
 #     wasm_static_app_name: $(uno_wasm_static_web_app_name)
 #     resource_group_name: $(azure_resource_group)
 
@@ -66,6 +66,9 @@ stages:
     solution_build_enabled: false
     android_enabled: true
     deploy_enabled: true
+    appcenter_service_connection: $(appcenter_connection_name)
+    appcenter_organisation: $(appcenter_organisation)
+    appcenter_android_appid: $(appcenter_android_appid)
 
 # - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
 #   parameters:
@@ -76,6 +79,6 @@ stages:
 #     android_enabled: true
 #     wasm_project_file: $(uno_wasm_project_name)
 #     deploy_enabled: true
-#     azure_subscription_connection_name: $(azure_subscription_name)
+#     azure_subscription_connection_name: $(azure_connection_name)
 #     wasm_static_app_name: $(uno_wasm_static_web_app_name)
 #     resource_group_name: $(azure_resource_group)

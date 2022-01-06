@@ -186,6 +186,49 @@ parameters:
 #   type: string 
 #   default: ''
 
+# appcenter_service_connection - (Required) The name of the service connection that connects Azure DevOps
+# to App Center. Go to Service Connections in Azure DevOps to setup the connection and assign permissions
+# for pipelines to access it
+- name: appcenter_service_connection
+  type: string
+  default: ''
+
+# appcenter_organisation - (Required) The organisation (or individual) in App Center that the application 
+# is associated with. In AppCenter navigate to the application and extract organisation from URL
+# eg https://appcenter.ms/users/[organisation]/apps/[applicationid]
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_organisation
+  type: string
+  default: ''
+
+# appcenter_applicationid - (Required) The application id in App Center that identifies 
+# the application. In AppCenter navigate to the application and extract application id from URL
+# eg https://appcenter.ms/users/[organisation]/apps/[applicationid]
+# More information at https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/app-center-distribute?view=azure-devops
+- name: appcenter_applicationid_android
+  type: string
+  default: ''
+- name: appcenter_applicationid_ios
+  type: string
+  default: ''
+- name: appcenter_applicationid_uwp
+  type: string
+  default: ''
+
+# android_secure_file_keystore_filename - (Optiona) IMPORTANT: This is required if application package is an AAB. 
+# The keystore file used to sign the APK when extracte from an AAB. This is the name of the keystore in Secure Files. 
+- name: android_secure_file_keystore_filename
+  type: string
+  default: ''
+# keystore_alias - (Optional) IMPORTANT: This is required if application package is an AAB. The alias of the keystore. 
+- name: android_keystore_alias
+  type: string
+  default: ''
+# keystore_password - (Optional) IMPORTANT: This is required if application package is an AAB. The password to access the keystore
+- name: android_keystore_password
+  type: string
+  default: ''
+
 stages:
 - stage: '${{ parameters.name }}Print_Parameters'
 
@@ -226,6 +269,14 @@ stages:
           echo Wasm static web app name: "${{ parameters.wasm_static_app_name }}"
           echo Azure subscription connection name: "${{ parameters.azure_subscription_connection_name }}"
           echo Resource group name: "${{ parameters.resource_group_name }}"
+          echo Appcenter service connection: "${{ parameters.appcenter_service_connection }}"
+          echo Appcenter organisation: "${{ parameters.appcenter_organisation }}"
+          echo Appcenter applicationid Android: "${{ parameters.appcenter_applicationid_android }}"
+          echo Appcenter applicationid iOS: "${{ parameters.appcenter_applicationid_ios }}"
+          echo Appcenter applicationid UWP: "${{ parameters.appcenter_applicationid_uwp }}"
+          echo Android Secure file - keystore filename: "${{ parameters.android_secure_file_keystore_filename }}"
+          echo Android Keystore alias: "${{ parameters.android_keystore_alias }}"
+          echo Android Keystore password: "${{ parameters.android_keystore_password }}"
           echo -------------------------------------------------------------
           echo -------------------------------------------------------------
 
@@ -302,9 +353,9 @@ stages:
       # Version information
       full_version_number: ${{ parameters.full_version_number }}
       # # # Signing information
-      # secure_file_keystore_filename: '$(android_keystore_filename)'
-      # keystore_alias: '$(android_keystore_alias)'
-      # keystore_password: '$(android_keystore_password)'
+      secure_file_keystore_filename: ${{ android_secure_file_keystore_filename }}
+      keystore_alias: ${{ android_keystore_alias }}
+      keystore_password: ${{ android_keystore_password }}
       # Solution to build
       solution_filename: ${{ parameters.solution_filename }}
       # Output information
@@ -330,3 +381,22 @@ stages:
                 banner_version_number_text: '${{ parameters.full_version_number }}'
               banner_version_number_color: '${{ parameters.banner_version_number_color }}'
               banner_version_number_text_color: '${{ parameters.banner_version_number_text_color }}' 
+
+- ${{ if and( eq( parameters.android_enabled, true ), eq( parameters.deploy_enabled, true) ) }}:
+  - template:  appcenter.yml
+    parameters:
+      # Stage name and whether it's enabled
+      stage_name: '${{ parameters.name }}Deploy_Android'
+      depends_on: '${{ parameters.name }}Build_Android'
+      environment_name: ${{ parameters.deploy_environment }}
+      # Build artifacts
+      artifact_folder: 'Android'
+      application_package: 'UnoAndroidApp.aab'
+      # Signing information (for Android repack to APK)
+      secure_file_keystore_filename: ${{ android_secure_file_keystore_filename }}
+      keystore_alias: ${{ android_keystore_alias }}
+      keystore_password: ${{ android_keystore_password }}
+      # Deployment to AppCenter
+      appcenter_service_connection: ${{ parameters.appcenter_service_connection }}
+      appcenter_organisation: ${{ parameters.appcenter_organisation }}
+      appcenter_applicationid: ${{ parameters.appcenter_android_appid }}
