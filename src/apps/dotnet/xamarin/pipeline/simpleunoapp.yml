@@ -17,34 +17,34 @@ variables:
     value: true
 
 stages:
-- template:  ../../../../../azure/stages/build-and-deploy-uno.yml
-  parameters:
-    name: 'UnoApp_Do_Nothing'
-    solution_filename: $(uno_solution_file)
+# - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+#   parameters:
+#     name: 'UnoApp_Do_Nothing'
+#     solution_filename: $(uno_solution_file)
 
-- template:  ../../../../../azure/stages/build-and-deploy-uno.yml
-  parameters:
-    name: 'UnoApp_Solution_Build_Only'
-    solution_filename: $(uno_solution_file)
-    full_version_number: '$(version_prefix).$(Build.BuildId)'
-    solution_build_enabled: true
+# - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+#   parameters:
+#     name: 'UnoApp_Solution_Build_Only'
+#     solution_filename: $(uno_solution_file)
+#     full_version_number: '$(version_prefix).$(Build.BuildId)'
+#     solution_build_enabled: true
 
-- template:  ../../../../../azure/stages/build-and-deploy-uno.yml
-  parameters:
-    name: 'UnoApp_Skip_Solution_Build'
-    solution_filename: $(uno_solution_file)
-    full_version_number: '$(version_prefix).$(Build.BuildId)'
-    wasm_enabled: true
-    wasm_project_file: $(uno_wasm_project_name)
-    banner_enabled: true
+# - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+#   parameters:
+#     name: 'UnoApp_Skip_Solution_Build'
+#     solution_filename: $(uno_solution_file)
+#     full_version_number: '$(version_prefix).$(Build.BuildId)'
+#     wasm_enabled: true
+#     wasm_project_file: $(uno_wasm_project_name)
+#     banner_enabled: true
 
-- template:  ../../../../../azure/stages/build-and-deploy-uno.yml
-  parameters:
-    name: 'UnoApp_Build_Everything'
-    solution_filename: $(uno_solution_file)
-    solution_build_enabled: true
-    wasm_enabled: true
-    wasm_project_file: $(uno_wasm_project_name)
+# - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+#   parameters:
+#     name: 'UnoApp_Build_Everything'
+#     solution_filename: $(uno_solution_file)
+#     solution_build_enabled: true
+#     wasm_enabled: true
+#     wasm_project_file: $(uno_wasm_project_name)
 
 - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
   parameters:
@@ -54,3 +54,6 @@ stages:
     wasm_enabled: true
     wasm_project_file: $(uno_wasm_project_name)
     deploy_enabled: true
+    azure_subscription_connection_name: $(azure_subscription_name)
+    wasm_static_app_name: $(uno_wasm_static_web_app_name)
+    resource_group_name: $(azure_resource_group)
