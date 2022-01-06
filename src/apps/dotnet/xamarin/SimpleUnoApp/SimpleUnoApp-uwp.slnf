@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "SimpleUnoApp.sln",
+    "projects": [
+      "SimpleUnoApp\\SimpleUnoApp.Shared\\SimpleUnoApp.Shared.shproj",
+      "SimpleUnoApp\\SimpleUnoApp.UWP\\SimpleUnoApp.UWP.csproj"
+    ]
+  }
+}
