@@ -281,11 +281,10 @@ stages:
       # Stage name and whether it's enabled
       stage_name: '${{ parameters.name }}Deploy_Wasm'
       depends_on: '${{ parameters.name }}Build_Wasm'
-      parameters:
-        environment_name: ${{ parameters.deploy_environment }}
-        # Build artifacts
-        artifact_folder: 'Wasm'
-        # Deployment to Static Web Apps
-        staticwebapp_name: ${{ parameters.wasm_static_app_name }}
-        azure_subscription_connection_name: ${{ parameters.azure_subscription_connection_name }}
-        resource_group_name: ${{ parameters.resource_group_name }}
+      environment_name: ${{ parameters.deploy_environment }}
+      # Build artifacts
+      artifact_folder: 'Wasm'
+      # Deployment to Static Web Apps
+      staticwebapp_name: ${{ parameters.wasm_static_app_name }}
+      azure_subscription_connection_name: ${{ parameters.azure_subscription_connection_name }}
+      resource_group_name: ${{ parameters.resource_group_name }}
