@@ -24,12 +24,13 @@ parameters:
 - name: solution_filename
   type: string
 
-
-
 - name: wasm_project_file
   type: string
   default: ''
 
+- name: ios_solution_filter
+  type: string
+  default: ''
 
 # # solution_build_configuration - (Optional) The build configuration within the solution that should be invoked. 
 # # Default is Release but can be overwritten if you want to do say a Debug build
@@ -229,6 +230,25 @@ parameters:
   type: string
   default: ''
 
+# ios_plist_filename - (Optional) The Info.plist file that contains the application information such as bundle id
+# and version information. If not specified, template will locate the first Info.plist automatically.
+- name: ios_plist_filename
+  type: string
+  default: ''
+# ios_cert_securefiles_filename - (Required) The certificate file used to sign the application. This is the name
+# of the certificate in Secure Files
+- name: ios_cert_securefiles_filename 
+  type: string 
+# ios_cert_password - (Optional) The password to unlock the certificate so it can be used. This is required
+# if the certificate has a password set
+- name: ios_cert_password 
+  type: string 
+  default: ''
+# ios_provisioning_profile_securefiles_filename - (Required) The provisioning profile to use when signing the application.
+# This is the name of the provisioning profile in Secure Files
+- name: ios_provisioning_profile_securefiles_filename 
+  type: string 
+
 stages:
 - stage: '${{ parameters.name }}Print_Parameters'
 
@@ -277,6 +297,10 @@ stages:
           echo Android Secure file - keystore filename: "${{ parameters.android_secure_file_keystore_filename }}"
           echo Android Keystore alias: "${{ parameters.android_keystore_alias }}"
           echo Android Keystore password: "${{ parameters.android_keystore_password }}"
+          echo iOS plist filename: "${{ parameters.ios_plist_filename }}"
+          echo iOS Certificate securefiles filename: "${{ parameters.ios_cert_securefiles_filename }}"
+          echo iOS Certificate password: "${{ parameters.ios_cert_password }}"
+          echo iOS Provisioning profile securefiles filename: "${{ parameters.ios_provisioning_profile_securefiles_filename }}"
           echo -------------------------------------------------------------
           echo -------------------------------------------------------------
 
@@ -400,3 +424,62 @@ stages:
       appcenter_service_connection: ${{ parameters.appcenter_service_connection }}
       appcenter_organisation: ${{ parameters.appcenter_organisation }}
       appcenter_applicationid: ${{ parameters.appcenter_applicationid_android }}
+
+
+- ${{ if eq( parameters.ios_enabled, true ) }}:
+  - template:  build-xamarin-ios.yml
+    parameters:
+      # Stage name and whether it's enabled
+      stage_name: '${{ parameters.name }}Build_iOS'
+      ${{ if parameters.solution_build_enabled }}:
+        depends_on: '${{ parameters.name }}Build_Solution'
+      ${{ else }}:
+        depends_on: '${{ parameters.name }}Print_Parameters'
+      build_enabled: ${{ parameters.ios_enabled }}
+      # Version information
+      full_version_number: ${{ parameters.full_version_number }}
+      # Solution to build
+      solution_filename: $(ios_solution_filter)
+      # Signing information
+      ios_plist_filename: ${{ parameters.ios_plist_filename }}
+      ios_cert_password: ${{ parameters.ios_cert_password }}
+      ios_cert_securefiles_filename: ${{ parameters.ios_cert_securefiles_filename }}
+      ios_provisioning_profile_securefiles_filename: ${{ parameters.ios_provisioning_profile_securefiles_filename }}
+      # Output information
+      artifact_folder: 'iOS'
+      application_package: 'iOS.ipa'
+      ${{ if or( ne( parameters.appsettings_securefile, '' ), eq( parameters.banner_enabled, true ) ) }}:
+        preBuild:
+          - template: ../steps/app-prebuild.yml
+            parameters:
+              appsettings_filename: ${{ parameters.appsettings_filename }}
+              appsettings_securefile: ${{ parameters.appsettings_securefile }}
+              solution_filename: ${{ parameters.solution_filename }}
+              banner_enabled: ${{ parameters.banner_enabled }}
+              banner_image_expression: '**/*SplaschScreen*.png'
+              banner_version_name_position: '${{ parameters.banner_version_name_position }}'
+              banner_version_name_text: '${{ parameters.banner_version_name_text }}'
+              banner_version_name_color: '${{ parameters.banner_version_name_color }}'
+              banner_version_name_text_color: '${{ parameters.banner_version_name_text_color }}'
+              banner_version_number_position: '${{ parameters.banner_version_number_position }}'
+              ${{ if ne( parameters.banner_version_number_text, '' ) }}:
+                banner_version_number_text: '${{ parameters.banner_version_number_text }}'
+              ${{ else }}:
+                banner_version_number_text: '${{ parameters.full_version_number }}'
+              banner_version_number_color: '${{ parameters.banner_version_number_color }}'
+              banner_version_number_text_color: '${{ parameters.banner_version_number_text_color }}' 
+
+- ${{ if and( eq( parameters.ios_enabled, true ), eq( parameters.deploy_enabled, true) ) }}:
+  - template:  deploy-appcenter.yml
+    parameters:
+      # Stage name and whether it's enabled
+      stage_name: '${{ parameters.name }}Deploy_iOS'
+      depends_on: '${{ parameters.name }}Build_iOS'
+      environment_name: ${{ parameters.deploy_environment }}
+      # Build artifacts
+      artifact_folder: 'iOS'
+      application_package: 'iOS.ipa'
+      # Deployment to AppCenter
+      appcenter_service_connection: ${{ parameters.appcenter_service_connection }}
+      appcenter_organisation: ${{ parameters.appcenter_organisation }}
+      appcenter_applicationid: ${{ parameters.appcenter_applicationid_ios }}
