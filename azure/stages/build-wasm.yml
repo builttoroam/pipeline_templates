@@ -13,10 +13,10 @@ parameters:
 - name: vm_image
   type: string
   default: 'ubuntu-latest'
-# build_wasm_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
+# build_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
 # cancel the stage, it will merely skip most of the steps. The stage will appear to complete successfully, so
 # any stages that depend on this stage will attempt to execute
-- name: build_wasm_enabled
+- name: build_enabled
   type: boolean
   default: true
 
@@ -78,7 +78,7 @@ parameters:
 stages:
 - stage: ${{ parameters.stage_name }}
   dependsOn: ${{ parameters.depends_on }} 
-  condition: and(succeeded(), ${{ parameters.build_wasm_enabled }} )
+  condition: and(succeeded(), ${{ parameters.build_enabled }} )
   # variables: 
   #   - name: 
   #     value: 
