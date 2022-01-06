@@ -383,7 +383,7 @@ stages:
               banner_version_number_text_color: '${{ parameters.banner_version_number_text_color }}' 
 
 - ${{ if and( eq( parameters.android_enabled, true ), eq( parameters.deploy_enabled, true) ) }}:
-  - template:  appcenter.yml
+  - template:  deploy-appcenter.yml
     parameters:
       # Stage name and whether it's enabled
       stage_name: '${{ parameters.name }}Deploy_Android'
