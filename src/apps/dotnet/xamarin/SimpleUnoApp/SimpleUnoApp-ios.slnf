@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "SimpleUnoApp-mac.sln",
+    "projects": [
+      "SimpleUnoApp\\SimpleUnoApp.Shared\\SimpleUnoApp.Shared.shproj",
+      "SimpleUnoApp\\SimpleUnoApp.iOS\\SimpleUnoApp.iOS.csproj"
+    ]
+  }
+}
