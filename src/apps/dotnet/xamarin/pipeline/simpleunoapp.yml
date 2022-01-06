@@ -68,7 +68,7 @@ stages:
     deploy_enabled: true
     appcenter_service_connection: $(appcenter_connection_name)
     appcenter_organisation: $(appcenter_organisation)
-    appcenter_android_appid: $(appcenter_android_appid)
+    appcenter_applicationid_android: $(appcenter_android_appid)
 
 # - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
 #   parameters:
