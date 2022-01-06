@@ -129,7 +129,7 @@ parameters:
 
 - name: deploy_environment
   type: string
-  default: ''
+  default: 'Default'
 
 - name: wasm_static_app_name
   type: string
