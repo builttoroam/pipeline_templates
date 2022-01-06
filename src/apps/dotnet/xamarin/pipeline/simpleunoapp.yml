@@ -70,6 +70,9 @@ stages:
     appcenter_service_connection: $(appcenter_connection_name)
     appcenter_organisation: $(appcenter_organisation)
     appcenter_applicationid_android: $(appcenter_android_appid)
+    android_secure_file_keystore_filename: $(android_keystore)
+    android_keystore_alias: $(android_keystore_alias)
+    android_keystore_password: $(android_keystore_password)
 
 # - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
 #   parameters:
