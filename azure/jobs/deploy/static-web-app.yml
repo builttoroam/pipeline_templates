@@ -6,7 +6,7 @@ parameters:
 # environment_name - (Optional) The environment to deploy to. Can be used to introduce a manual gate for approval for stage to proceed
 - name: environment_name
   type: string
-  default: ''
+  default: 'Default'
 
 # artifact_name - (Optional) The name of the artifact to copy application from
 - name: artifact_name
