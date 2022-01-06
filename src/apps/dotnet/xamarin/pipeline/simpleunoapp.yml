@@ -30,6 +30,17 @@ stages:
     name: 'UnoApp_Skip_Solution_Build'
     # Solution to build
     solution_filename: $(uno_solution_file)
+    full_version_number: '$(version_prefix).$(Build.BuildId)'
     solution_build_enabled: false
+    wasm_enabled: true
+    wasm_project_file: $(uno_wasm_project_name)
+    banner_enabled: true
+
+- template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+  parameters:
+    name: 'UnoApp_Build_Everything'
+    # Solution to build
+    solution_filename: $(uno_solution_file)
+    solution_build_enabled: true
     wasm_enabled: true
     wasm_project_file: $(uno_wasm_project_name)

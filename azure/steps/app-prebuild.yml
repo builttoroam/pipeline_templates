@@ -11,14 +11,15 @@ parameters:
   type: string
   default: 'appsettings.json'
 
-- name: image_modification_enabled
+- name: banner_enabled
   type: boolean
   default: false
 
-- name: image_expression
+- name: banner_image_expression
   type: string
+  default: '**/*.png'
 
-- name: bannerVersionNamePosition
+- name: banner_version_name_position
   type: string
   default: 'bottomRight'
   values:
@@ -28,19 +29,19 @@ parameters:
   - topLeft
   - topRight
 
-- name: bannerVersionNameText
+- name: banner_version_name_text
   type: string
   default: ''
 
-- name: bannerVersionNameColor
+- name: banner_version_name_color
   type: string
   default: '#C5000D'
 
-- name: bannerVersionNameTextColor
+- name: banner_version_name_text_color
   type: string
   default: '#FFFFFF'
 
-- name: bannerVersionNumberPosition
+- name: banner_version_number_position
   type: string
   default: 'none'
   values:
@@ -49,19 +50,43 @@ parameters:
   - bottom
   - center
 
-- name: bannerVersionNumberText
+- name: banner_version_number_text
   type: string
   default: ''
 
-- name: bannerVersionNumberColor
+- name: banner_version_number_color
   type: string
   default: '#34424F'
 
-- name: bannerVersionNumberTextColor
+- name: banner_version_number_text_color
   type: string
   default: '#FFFFFF'
 
 steps:
+- task: Bash@3
+  displayName: 'Parameters'
+  condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+  inputs:
+    targetType: inline
+    script: |
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+      echo Solution filename: "${{ parameters.solution_filename }}"
+      echo Appsettings secure file: "${{ parameters.appsettings_securefile }}"
+      echo Appsettings filename: "${{ parameters.appsettings_filename }}"
+      echo Banner enabled: "${{ parameters.banner_enabled }}"
+      echo Banner image expression: "${{ parameters.banner_image_expression }}"
+      echo Banner version name position: "${{ parameters.banner_version_name_position }}"
+      echo Banner version name text: "${{ parameters.banner_version_name_text }}"
+      echo Banner version name color: "${{ parameters.banner_version_name_color }}"
+      echo Banner version name text color: "${{ parameters.banner_version_name_text_color }}"
+      echo Banner version number position: "${{ parameters.banner_version_number_position }}"
+      echo Banner version number text: "${{ parameters.banner_version_number_text }}"
+      echo Banner version number color: "${{ parameters.banner_version_number_color }}"
+      echo Banner version number text color: "${{ parameters.banner_version_number_text_color }}"
+      echo -------------------------------------------------------------
+      echo -------------------------------------------------------------
+
 # Download the appsettings file from securefiles
 - ${{ if ne(parameters.appsettings_securefile, '') }}:
   - task: DownloadSecureFile@1
@@ -82,7 +107,7 @@ steps:
         Remove-Item -Path $existingSettings -Force
         Copy-Item "$(appsettingsfile.secureFilePath)" -Destination $existingSettings
 
-- ${{ if eq(parameters.image_modification_enabled, true) }}:
+- ${{ if eq(parameters.banner_enabled, true) }}:
   - task: PowerShell@2
     displayName: 'Find solution folder'
     inputs:
@@ -93,16 +118,16 @@ steps:
         Write-Host "##vso[task.setvariable variable=solutionFolder]$filterPath"
 
 
-- ${{ if eq(parameters.image_modification_enabled, true) }}:
+- ${{ if eq(parameters.banner_enabled, true) }}:
   - task: LaunchIconBadge@1
     inputs:
       sourceFolder: '$(solutionFolder)'
-      contents: '${{ parameters.image_expression }}'
-      bannerVersionNamePosition: '${{ parameters.bannerVersionNamePosition }}'
-      bannerVersionNameText: '${{ parameters.bannerVersionNameText }}'
-      bannerVersionNameColor: '${{ parameters.bannerVersionNameColor }}'
-      bannerVersionNameTextColor: '${{ parameters.bannerVersionNameTextColor }}'
-      bannerVersionNumberPosition: '${{ parameters.bannerVersionNumberPosition }}'
-      bannerVersionNumberText: '${{ parameters.bannerVersionNumberText }}'
-      bannerVersionNumberColor: '${{ parameters.bannerVersionNumberColor }}'
-      bannerVersionNumberTextColor: '${{ parameters.bannerVersionNumberTextColor }}' 
+      contents: '${{ parameters.banner_image_expression }}'
+      banner_version_name_position: '${{ parameters.banner_version_name_position }}'
+      banner_version_name_text: '${{ parameters.banner_version_name_text }}'
+      banner_version_name_color: '${{ parameters.banner_version_name_color }}'
+      banner_version_name_text_color: '${{ parameters.banner_version_name_text_color }}'
+      banner_version_number_position: '${{ parameters.banner_version_number_position }}'
+      banner_version_number_text: '${{ parameters.banner_version_number_text }}'
+      banner_version_number_color: '${{ parameters.banner_version_number_color }}'
+      banner_version_number_text_color: '${{ parameters.banner_version_number_text_color }}' 
