@@ -239,6 +239,7 @@ parameters:
 # of the certificate in Secure Files
 - name: ios_cert_securefiles_filename 
   type: string 
+  default: ''
 # ios_cert_password - (Optional) The password to unlock the certificate so it can be used. This is required
 # if the certificate has a password set
 - name: ios_cert_password 
@@ -247,7 +248,8 @@ parameters:
 # ios_provisioning_profile_securefiles_filename - (Required) The provisioning profile to use when signing the application.
 # This is the name of the provisioning profile in Secure Files
 - name: ios_provisioning_profile_securefiles_filename 
-  type: string 
+  type: string
+  default: '' 
 
 stages:
 - stage: '${{ parameters.name }}Print_Parameters'
