@@ -33,9 +33,25 @@ parameters:
 - name: artifact_folder
   type: string
 
-# staticwebapp_token - (Required) The token for deployting a static web app
+# staticwebapp_name - (Optional) The name of the static web app to deploy too (Required if staticwebapp_token not specified)
+- name: staticwebapp_name
+  type: string
+  default: ''
+
+# azure_subscription_connection_name - (Optional) Required if staticwebapp_token is not specified
+- name: azure_subscription_connection_name
+  type: string
+  default: ''
+
+# resource_group_name  - (Optional)  Required if staticwebapp_token is not specified
+- name: resource_group_name 
+  type: string
+  default: ''
+
+# staticwebapp_token - (Optional) The token for deploying a static web app (Required if staticwebapp_name not specified)
 - name: staticwebapp_token
   type: string
+  default: ''
 
 # onStart - (Optional) Steps to be executed before stage starts
 - name: onStart
@@ -45,8 +61,8 @@ parameters:
 - name: postArtifactDownload
   type: stepList
   default: []
-# preAppCenterPublish - (Optional) Steps to be executed before application package is published to App Center
-- name: preAppCenterPublish
+# prePublish - (Optional) Steps to be executed before application package is published to App Center
+- name: prePublish
   type: stepList
   default: []
 # onEnd - (Optional) Steps to be executed at the end of the stage
@@ -70,6 +86,9 @@ stages:
       environment_name: ${{ parameters.environment_name }}
       artifact_name: ${{ parameters.artifact_name }}
       artifact_folder: ${{ parameters.artifact_folder }}
+      staticwebapp_name: ${{ parameters.staticwebapp_name }}
+      azure_subscription_connection_name: ${{ parameters.azure_subscription_connection_name }}
+      resource_group_name: ${{ parameters.resource_group_name }}
       staticwebapp_token: ${{ parameters.staticwebapp_token }}
       onStart: ${{ parameters.onStart }}
       postArtifactDownload: ${{ parameters.postArtifactDownload }}
