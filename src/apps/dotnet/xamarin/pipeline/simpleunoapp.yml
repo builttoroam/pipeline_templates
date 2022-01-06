@@ -19,19 +19,21 @@ variables:
 stages:
 - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
   parameters:
-    name: 'UnoApp'
-    # Solution to build
+    name: 'UnoApp_Do_Nothing'
+    solution_filename: $(uno_solution_file)
+
+- template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+  parameters:
+    name: 'UnoApp_Solution_Build_Only'
     solution_filename: $(uno_solution_file)
     full_version_number: '$(version_prefix).$(Build.BuildId)'
-    wasm_enabled: false
+    solution_build_enabled: true
 
 - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
   parameters:
     name: 'UnoApp_Skip_Solution_Build'
-    # Solution to build
     solution_filename: $(uno_solution_file)
     full_version_number: '$(version_prefix).$(Build.BuildId)'
-    solution_build_enabled: false
     wasm_enabled: true
     wasm_project_file: $(uno_wasm_project_name)
     banner_enabled: true
@@ -39,8 +41,16 @@ stages:
 - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
   parameters:
     name: 'UnoApp_Build_Everything'
-    # Solution to build
     solution_filename: $(uno_solution_file)
     solution_build_enabled: true
     wasm_enabled: true
     wasm_project_file: $(uno_wasm_project_name)
+
+- template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+  parameters:
+    name: 'UnoApp_Build_Everything_And_Deploy'
+    solution_filename: $(uno_solution_file)
+    solution_build_enabled: true
+    wasm_enabled: true
+    wasm_project_file: $(uno_wasm_project_name)
+    deploy_enabled: true
