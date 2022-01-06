@@ -71,6 +71,29 @@ jobs:
       deploy:
         steps:
 
+          - task: Bash@3
+            displayName: 'Parameters'
+            condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
+            inputs:
+              targetType: inline
+              script: |
+                echo -------------------------------------------------------------
+                echo -------------------------------------------------------------
+                echo Vm image: "${{ vm_image }}"
+                echo Enivronment name: "${{ environment_name }}"
+                echo Artiface name: "${{ artifact_name }}"
+                echo Artiface folder: "${{ artifact_folder }}"
+                echo Static web app name: "${{ staticwebapp_name }}"
+                echo Azure subscription connection name: "${{ azure_subscription_connection_name }}"
+                echo Resource group name: "${{ resource_group_name  }}"
+                echo Static web app token: "${{ staticwebapp_token }}"
+                echo On start: ${{ length(parameters.onStart) }}  steps
+                echo Post artifact download : ${{ length(parameters.postArtifactDownload) }}  steps
+                echo Pre publish: ${{ length(parameters.prePublish) }}  steps
+                echo On end: ${{ length(parameters.onEnd) }}  steps
+                echo -------------------------------------------------------------
+                echo -------------------------------------------------------------
+
           # onStart steps - performed after any secure files are downloaded but before 
           # artifacts are downloaded and any other steps
           - ${{ parameters.onStart }}
