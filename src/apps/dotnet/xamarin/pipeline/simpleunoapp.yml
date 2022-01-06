@@ -47,17 +47,25 @@ stages:
 #     wasm_enabled: true
 #     wasm_project_file: $(uno_wasm_project_name)
 
+# - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+#   parameters:
+#     name: 'UnoApp_Build_And_Deploy_Wasm'
+#     solution_filename: $(uno_solution_file)
+#     solution_build_enabled: false
+#     wasm_enabled: true
+#     wasm_project_file: $(uno_wasm_project_name)
+#     deploy_enabled: true
+#     azure_subscription_connection_name: $(azure_subscription_name)
+#     wasm_static_app_name: $(uno_wasm_static_web_app_name)
+#     resource_group_name: $(azure_resource_group)
+
 - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
   parameters:
-    name: 'UnoApp_Build_And_Deploy_Wasm'
+    name: 'UnoApp_Build_And_Deploy_Android'
     solution_filename: $(uno_solution_file)
     solution_build_enabled: false
-    wasm_enabled: true
-    wasm_project_file: $(uno_wasm_project_name)
+    android_enabled: true
     deploy_enabled: true
-    azure_subscription_connection_name: $(azure_subscription_name)
-    wasm_static_app_name: $(uno_wasm_static_web_app_name)
-    resource_group_name: $(azure_resource_group)
 
 # - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
 #   parameters:
@@ -65,6 +73,7 @@ stages:
 #     solution_filename: $(uno_solution_file)
 #     solution_build_enabled: true
 #     wasm_enabled: true
+#     android_enabled: true
 #     wasm_project_file: $(uno_wasm_project_name)
 #     deploy_enabled: true
 #     azure_subscription_connection_name: $(azure_subscription_name)
