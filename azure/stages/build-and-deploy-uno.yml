@@ -353,9 +353,9 @@ stages:
       # Version information
       full_version_number: ${{ parameters.full_version_number }}
       # # # Signing information
-      secure_file_keystore_filename: ${{ android_secure_file_keystore_filename }}
-      keystore_alias: ${{ android_keystore_alias }}
-      keystore_password: ${{ android_keystore_password }}
+      secure_file_keystore_filename: ${{ parameters.android_secure_file_keystore_filename }}
+      keystore_alias: ${{ parameters.android_keystore_alias }}
+      keystore_password: ${{ parameters.android_keystore_password }}
       # Solution to build
       solution_filename: ${{ parameters.solution_filename }}
       # Output information
@@ -393,10 +393,10 @@ stages:
       artifact_folder: 'Android'
       application_package: 'UnoAndroidApp.aab'
       # Signing information (for Android repack to APK)
-      secure_file_keystore_filename: ${{ android_secure_file_keystore_filename }}
-      keystore_alias: ${{ android_keystore_alias }}
-      keystore_password: ${{ android_keystore_password }}
+      secure_file_keystore_filename: ${{ parameters.android_secure_file_keystore_filename }}
+      keystore_alias: ${{ parameters.android_keystore_alias }}
+      keystore_password: ${{ parameters.android_keystore_password }}
       # Deployment to AppCenter
       appcenter_service_connection: ${{ parameters.appcenter_service_connection }}
       appcenter_organisation: ${{ parameters.appcenter_organisation }}
-      appcenter_applicationid: ${{ parameters.appcenter_android_appid }}
+      appcenter_applicationid: ${{ parameters.appcenter_applicationid_android }}
