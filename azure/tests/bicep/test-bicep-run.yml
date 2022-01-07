@@ -57,7 +57,7 @@ stages:
 
       - template: ../../steps/checks/check-az-resource-exists.yml
         parameters:
-          name: CheckStorageAccountExists
+          name: CheckStorageAccountExistsNameAvailable
           az_service_connection: $(az_testing_service_connection)
           resource_type: 'storage account check-name'
           check_property: 'nameAvailable'
@@ -67,7 +67,7 @@ stages:
 
       - template: ../../steps/checks/check-az-resource-exists.yml
         parameters:
-          name: CheckStorageAccountExists
+          name: CheckStorageAccountExistsContainerExists
           az_service_connection: $(az_testing_service_connection)
           resource_type: 'storage container exists --account-name $(az_testing_storageaccount_name)'
           resource_name: $(az_testing_blob_container_name)
