@@ -7,6 +7,12 @@ trigger:
     - src/apps/dotnet/xamarin/SimpleUnoApp/*
     - azure/stages/build-and-deploy-uno.yml
     - azure/stages/build-solution.yml
+    - azure/stages/build-wasm.yml
+    - azure/stages/build-xamarin-android.yml
+    - azure/stages/build-xamarin-ios.yml
+    - azure/stages/build-xamarin-windows.yml
+    - azure/stages/deploy-appcenter.yml
+    - azure/stages/deploy-static-web-app.yml
     - src/apps/dotnet/xamarin/pipeline/simpleunoapp.yml
   
 variables:
