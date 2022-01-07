@@ -498,7 +498,7 @@ stages:
 
 
 - ${{ if eq( parameters.uwp_enabled, true ) }}:
-  - template:  build-xamarin-windows.yml
+  - template:  build-uwp.yml
     parameters:
       # Stage name and whether it's enabled
       stage_name: '${{ parameters.name }}Build_UWP'
