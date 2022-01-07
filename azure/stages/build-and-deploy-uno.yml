@@ -405,7 +405,7 @@ stages:
               appsettings_securefile: ${{ parameters.appsettings_securefile }}
               solution_filename: ${{ parameters.solution_filename }}
               banner_enabled: ${{ parameters.banner_enabled }}
-              banner_image_expression: '**/*SplaschScreen*.png'
+              banner_image_expression: '**/*icon*.png'
               banner_version_name_position: '${{ parameters.banner_version_name_position }}'
               banner_version_name_text: '${{ parameters.banner_version_name_text }}'
               banner_version_name_color: '${{ parameters.banner_version_name_color }}'
@@ -468,7 +468,7 @@ stages:
               appsettings_securefile: ${{ parameters.appsettings_securefile }}
               solution_filename: ${{ parameters.solution_filename }}
               banner_enabled: ${{ parameters.banner_enabled }}
-              banner_image_expression: '**/*SplaschScreen*.png'
+              banner_image_expression: '**/*icon*.png'
               banner_version_name_position: '${{ parameters.banner_version_name_position }}'
               banner_version_name_text: '${{ parameters.banner_version_name_text }}'
               banner_version_name_color: '${{ parameters.banner_version_name_color }}'
@@ -495,3 +495,60 @@ stages:
       appcenter_service_connection: ${{ parameters.appcenter_service_connection }}
       appcenter_organisation: ${{ parameters.appcenter_organisation }}
       appcenter_applicationid: ${{ parameters.appcenter_applicationid_ios }}
+
+
+- ${{ if eq( parameters.uwp_enabled, true ) }}:
+  - template:  build-xamarin-windows.yml
+    parameters:
+      # Stage name and whether it's enabled
+      stage_name: '${{ parameters.name }}Build_UWP'
+      ${{ if parameters.solution_build_enabled }}:
+        depends_on: '${{ parameters.name }}Build_Solution'
+      ${{ else }}:
+        depends_on: '${{ parameters.name }}Print_Parameters'
+      build_enabled: ${{ parameters.uwp_enabled }}
+      # Version information
+      full_version_number: ${{ parameters.full_version_number }}
+      # # Signing information
+      # windows_cert_securefiles_filename: '$(windows_signing_certificate_securefiles_filename)'
+      # windows_cert_password: '$(windows_signing_certificate_password)'
+      # Solution to build
+      solution_filename: $(uwp_solution_filter)
+      # Output information
+      artifact_folder: 'UWP'
+      application_package: 'uwp.msixbundle'
+      ${{ if or( ne( parameters.appsettings_securefile, '' ), eq( parameters.banner_enabled, true ) ) }}:
+        preBuild:
+          - template: ../steps/app-prebuild.yml
+            parameters:
+              appsettings_filename: ${{ parameters.appsettings_filename }}
+              appsettings_securefile: ${{ parameters.appsettings_securefile }}
+              solution_filename: ${{ parameters.solution_filename }}
+              banner_enabled: ${{ parameters.banner_enabled }}
+              banner_image_expression: '**/*Logo*.png'
+              banner_version_name_position: '${{ parameters.banner_version_name_position }}'
+              banner_version_name_text: '${{ parameters.banner_version_name_text }}'
+              banner_version_name_color: '${{ parameters.banner_version_name_color }}'
+              banner_version_name_text_color: '${{ parameters.banner_version_name_text_color }}'
+              banner_version_number_position: '${{ parameters.banner_version_number_position }}'
+              ${{ if ne( parameters.banner_version_number_text, '' ) }}:
+                banner_version_number_text: '${{ parameters.banner_version_number_text }}'
+              ${{ else }}:
+                banner_version_number_text: '${{ parameters.full_version_number }}'
+              banner_version_number_color: '${{ parameters.banner_version_number_color }}'
+              banner_version_number_text_color: '${{ parameters.banner_version_number_text_color }}' 
+
+- ${{ if and( eq( parameters.uwp_enabled, true ), eq( parameters.deploy_enabled, true) ) }}:
+  - template:  deploy-appcenter.yml
+    parameters:
+      # Stage name and whether it's enabled
+      stage_name: '${{ parameters.name }}Deploy_UWP'
+      depends_on: '${{ parameters.name }}Build_UWP'
+      environment_name: ${{ parameters.deploy_environment }}
+      # Build artifacts
+      artifact_folder: 'UWP'
+      application_package: 'uwp.msixbundle'
+      # Deployment to AppCenter
+      appcenter_service_connection: ${{ parameters.appcenter_service_connection }}
+      appcenter_organisation: ${{ parameters.appcenter_organisation }}
+      appcenter_applicationid: ${{ parameters.appcenter_applicationid_uwp }}
