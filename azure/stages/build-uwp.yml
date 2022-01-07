@@ -152,9 +152,10 @@ stages:
     # any other build steps are executed
     - ${{ parameters.onStart }}
 
-    - template: ../steps/windows/windows-sdk-install.yml
+    - template: ../steps/windows/windows-sdk-install-solution.yml
       parameters:
         name: DownloadInstallWindowsSdk
+        solution_file: '${{ parameters.solution_filename }}'
 
     # This task searches for the package.appxmanifest file so that the version information can be updated
     # The windows_package_manifest_filename property can be used to set this location if the source code includes
