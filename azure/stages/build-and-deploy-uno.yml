@@ -513,7 +513,7 @@ stages:
       # windows_cert_securefiles_filename: '$(windows_signing_certificate_securefiles_filename)'
       # windows_cert_password: '$(windows_signing_certificate_password)'
       # Solution to build
-      solution_filename: $(uwp_solution_filter)
+      solution_filename: ${{ parameters.uwp_solution_filter }}
       # Output information
       artifact_folder: 'UWP'
       application_package: 'uwp.msixbundle'
