@@ -116,6 +116,7 @@ stages:
     wasm_enabled: true
     wasm_project_file: $(uno_wasm_project_name)
     android_enabled: true
+    android_solution_filter: $(uno_android_solution_filter)
     ios_enabled: true
     ios_solution_filter: $(uno_ios_solution_filter)
     uwp_enabled: true
