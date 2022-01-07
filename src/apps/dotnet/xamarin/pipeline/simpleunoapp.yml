@@ -85,6 +85,7 @@ stages:
     appcenter_service_connection: $(appcenter_connection_name)
     appcenter_organisation: $(appcenter_organisation)
     appcenter_applicationid_ios: $(appcenter_ios_appid)
+    ios_plist_filename: $(uno_ios_plist_filename)
     ios_provisioning_profile_securefiles_filename: $(ios_provisioning_profile_securefiles_filename)
     ios_cert_password: $(ios_signing_certificate_password)
     ios_cert_securefiles_filename: $(ios_signing_certificate_securefiles_filename)
