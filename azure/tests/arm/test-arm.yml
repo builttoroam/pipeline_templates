@@ -23,7 +23,7 @@ stages:
       - task: AzureCLI@2
         displayName: Delete existing resource group - tidy up from any failed runs
         inputs:
-          azureSubscription: $(az_testing_service_connection)
+          azureSubscription: $(az_testing_no_resource_group_service_connection)
           scriptType: ps
           scriptLocation: inlineScript
           inlineScript: |
@@ -38,7 +38,7 @@ stages:
       - task: AzureCLI@2
         displayName: Create testing resource group
         inputs:
-          azureSubscription: $(az_testing_service_connection)
+          azureSubscription: $(az_testing_no_resource_group_service_connection)
           scriptType: ps
           scriptLocation: inlineScript
           inlineScript: |
@@ -51,7 +51,7 @@ stages:
       - task: AzureResourceGroupDeployment@2
         displayName: Deploying ARM template
         inputs:
-          azureSubscription: $(az_testing_service_connection)
+          azureSubscription: $(az_testing_no_resource_group_service_connection)
           action: 'Create Or Update Resource Group' # Options: create Or Update Resource Group, select Resource Group, start, stop, stopWithDeallocate, restart, delete, deleteRG
           resourceGroupName: $(az_testing_resource_group_name)
           location: $(az_testing_resource_location) # Required when action == Create Or Update Resource Group
@@ -63,7 +63,7 @@ stages:
       - template: ../../steps/checks/check-az-resource-exists.yml
         parameters:
           name: CheckResourceExists
-          az_service_connection: $(az_testing_service_connection)
+          az_service_connection: $(az_testing_no_resource_group_service_connection)
           resource_type: 'storage account check-name'
           check_property: 'nameAvailable'
           resource_name: 'storepipelinetesting'
@@ -75,7 +75,7 @@ stages:
         displayName: Delete testing resource group
         condition: succeededOrFailed()
         inputs:
-          azureSubscription: $(az_testing_service_connection)
+          azureSubscription: $(az_testing_no_resource_group_service_connection)
           scriptType: ps
           scriptLocation: inlineScript
           inlineScript: |

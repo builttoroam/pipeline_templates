@@ -16,8 +16,10 @@ variables:
   - name: storageaccount_bicep_filepath
     value: 'azure/tests/data/storageaccount.bicep'
 
-  - name: az_testing_service_connection
+  - name: az_testing_no_resource_group_service_connection
     value: 'az-testing'
+  - name: az_testing_no_resource_group_service_connection
+    value: 'az-testing-no-resourcegroup'
   - name: az_testing_resource_group_name
     value: 'AZTesting_PipelineTesting'
   - name: az_testing_resource_location
