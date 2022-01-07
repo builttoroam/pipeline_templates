@@ -59,32 +59,32 @@ stages:
 #     wasm_static_app_name: $(uno_wasm_static_web_app_name)
 #     resource_group_name: $(azure_resource_group)
 
-- template:  ../../../../../azure/stages/build-and-deploy-uno.yml
-  parameters:
-    name: 'UnoApp_Build_And_Deploy_Android'
-    solution_filename: $(uno_solution_file)
-    android_solution_filter: $(uno_android_solution_filter)
-    solution_build_enabled: false
-    android_enabled: true
-    deploy_enabled: true
-    appcenter_service_connection: $(appcenter_connection_name)
-    appcenter_organisation: $(appcenter_organisation)
-    appcenter_applicationid_android: $(appcenter_android_appid)
-    android_secure_file_keystore_filename: $(android_keystore)
-    android_keystore_alias: $(android_keystore_alias)
-    android_keystore_password: $(android_keystore_password)
-
 # - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
 #   parameters:
-#     name: 'UnoApp_Build_And_Deploy_iOS'
+#     name: 'UnoApp_Build_And_Deploy_Android'
 #     solution_filename: $(uno_solution_file)
+#     android_solution_filter: $(uno_android_solution_filter)
 #     solution_build_enabled: false
-#     ios_enabled: true
-#     ios_solution_filter: $(uno_ios_solution_filter)
+#     android_enabled: true
 #     deploy_enabled: true
 #     appcenter_service_connection: $(appcenter_connection_name)
 #     appcenter_organisation: $(appcenter_organisation)
-#     appcenter_applicationid_ios: $(appcenter_ios_appid)
+#     appcenter_applicationid_android: $(appcenter_android_appid)
+#     android_secure_file_keystore_filename: $(android_keystore)
+#     android_keystore_alias: $(android_keystore_alias)
+#     android_keystore_password: $(android_keystore_password)
+
+- template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+  parameters:
+    name: 'UnoApp_Build_And_Deploy_iOS'
+    solution_filename: $(uno_solution_file)
+    solution_build_enabled: false
+    ios_enabled: true
+    ios_solution_filter: $(uno_ios_solution_filter)
+    deploy_enabled: true
+    appcenter_service_connection: $(appcenter_connection_name)
+    appcenter_organisation: $(appcenter_organisation)
+    appcenter_applicationid_ios: $(appcenter_ios_appid)
 
 # - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
 #   parameters:
@@ -104,3 +104,6 @@ stages:
 #     appcenter_organisation: $(appcenter_organisation)
 #     appcenter_applicationid_android: $(appcenter_android_appid)
 #     appcenter_applicationid_ios: $(appcenter_ios_appid)
+#     android_secure_file_keystore_filename: $(android_keystore)
+#     android_keystore_alias: $(android_keystore_alias)
+#     android_keystore_password: $(android_keystore_password)
