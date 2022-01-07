@@ -34,6 +34,7 @@ stages:
     solution_filename: $(solution_file)
     solution_build_configuration: $(solution_build_config)
     # Signing information
+    ios_plist_filename: 'src/apps/dotnet/xamarin/XamarinApps/XamariniOSApp/Info.plist'
     ios_cert_password: '$(ios_signing_certificate_password)'
     ios_cert_securefiles_filename: '$(ios_signing_certificate_securefiles_filename)'
     ios_provisioning_profile_securefiles_filename: '$(ios_provisioning_profile_securefiles_filename)'
