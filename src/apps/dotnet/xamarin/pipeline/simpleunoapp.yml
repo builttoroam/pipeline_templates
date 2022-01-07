@@ -80,21 +80,33 @@ stages:
 #     android_keystore_alias: $(android_keystore_alias)
 #     android_keystore_password: $(android_keystore_password)
 
+# - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
+#   parameters:
+#     name: 'UnoApp_Build_And_Deploy_iOS'
+#     solution_filename: $(uno_solution_file)
+#     solution_build_enabled: false
+#     ios_enabled: true
+#     ios_solution_filter: $(uno_ios_solution_filter)
+#     deploy_enabled: true
+#     appcenter_service_connection: $(appcenter_connection_name)
+#     appcenter_organisation: $(appcenter_organisation)
+#     appcenter_applicationid_ios: $(appcenter_ios_appid)
+#     ios_plist_filename: $(uno_ios_plist_filename)
+#     ios_provisioning_profile_securefiles_filename: $(ios_provisioning_profile_securefiles_filename)
+#     ios_cert_password: $(ios_signing_certificate_password)
+#     ios_cert_securefiles_filename: $(ios_signing_certificate_securefiles_filename)
+
 - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
   parameters:
-    name: 'UnoApp_Build_And_Deploy_iOS'
+    name: 'UnoApp_Build_And_Deploy_UWP'
     solution_filename: $(uno_solution_file)
     solution_build_enabled: false
-    ios_enabled: true
-    ios_solution_filter: $(uno_ios_solution_filter)
+    uwp_enabled: true
+    uwp_solution_filter: $(uno_uwp_solution_filter)
     deploy_enabled: true
     appcenter_service_connection: $(appcenter_connection_name)
     appcenter_organisation: $(appcenter_organisation)
-    appcenter_applicationid_ios: $(appcenter_ios_appid)
-    ios_plist_filename: $(uno_ios_plist_filename)
-    ios_provisioning_profile_securefiles_filename: $(ios_provisioning_profile_securefiles_filename)
-    ios_cert_password: $(ios_signing_certificate_password)
-    ios_cert_securefiles_filename: $(ios_signing_certificate_securefiles_filename)
+    appcenter_applicationid_uwp: $(appcenter_uwp_appid)
 
 # - template:  ../../../../../azure/stages/build-and-deploy-uno.yml
 #   parameters:
@@ -106,6 +118,8 @@ stages:
 #     android_enabled: true
 #     ios_enabled: true
 #     ios_solution_filter: $(uno_ios_solution_filter)
+#     uwp_enabled: true
+#     uwp_solution_filter: $(uno_uwp_solution_filter)
 #     deploy_enabled: true
 #     azure_subscription_connection_name: $(azure_connection_name)
 #     wasm_static_app_name: $(uno_wasm_static_web_app_name)
@@ -114,6 +128,11 @@ stages:
 #     appcenter_organisation: $(appcenter_organisation)
 #     appcenter_applicationid_android: $(appcenter_android_appid)
 #     appcenter_applicationid_ios: $(appcenter_ios_appid)
+#     appcenter_applicationid_uwp: $(appcenter_uwp_appid)
 #     android_secure_file_keystore_filename: $(android_keystore)
 #     android_keystore_alias: $(android_keystore_alias)
 #     android_keystore_password: $(android_keystore_password)
+#     ios_plist_filename: $(uno_ios_plist_filename)
+#     ios_provisioning_profile_securefiles_filename: $(ios_provisioning_profile_securefiles_filename)
+#     ios_cert_password: $(ios_signing_certificate_password)
+#     ios_cert_securefiles_filename: $(ios_signing_certificate_securefiles_filename)
