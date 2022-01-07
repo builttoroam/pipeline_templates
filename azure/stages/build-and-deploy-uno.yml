@@ -261,6 +261,7 @@ parameters:
 
 stages:
 - stage: '${{ parameters.name }}Print_Parameters'
+  condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
 
   jobs:
   - job: PrintParameters
@@ -268,7 +269,6 @@ stages:
     steps:
     - task: Bash@3
       displayName: 'Parameters'
-      condition: and( succeeded(), eq(variables['agent.diagnostic'], 'true') )
       inputs:
         targetType: inline
         script: |
