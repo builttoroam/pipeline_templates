@@ -123,57 +123,17 @@ stages:
     # any other build steps are executed
     - ${{ parameters.onStart }}
 
-    # Check for solution filter - if filter, need to extract actual solution file
-    - task: PowerShell@2
-      displayName: 'Determine Solution File for ${{ parameters.solution_filename }}'
-      inputs:
-        targetType: 'inline'                                                                                                 
-        script: |
-          $filterPath = (get-item '${{ parameters.solution_filename }}').directory.fullname 
-          Write-Host "Filter path is $filterPath"
-          if( '${{ parameters.solution_filename }}'.contains(".slnf") ) {
-              Write-Host "File specified is solution filter"
-              $actualSolutionFile = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).solution.path
-              Write-Host "Solution relative path is $actualSolutionFile"
-              $solutionFile = "$filterPath/$actualSolutionFile"
-              Write-Host "Full path to solution file is $solutionFile"
-              Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
-
-              Write-Host "Checking projects for wapproj for Windows fix"
-              $buildproject = '${{ parameters.solution_filename }}'
-              $projects = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).solution.projects
-              for($i=0;$i -lt $projects.length;$i++)
-              {
-                  $proj = $projects[$i]
-                  Write-Host "Project - $proj" 
-                  if($proj.contains('wapproj'))
-                  {
-                      $buildproject = $proj
-                      $buildproject = "$filterPath/$buildproject"
-                      Write-Host "Wapproj found - building $buildproject instead of solution"
-                  }
-              }
-              Write-Host "##vso[task.setvariable variable=buildProjectOrSolution]$buildproject"
-          }
-          else{
-              Write-Host "File specified is a solution file"
-              $solutionFile = "${{ parameters.solution_filename }}"
-              Write-Host "Full path to solution file is $solutionFile"
-              Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
-              Write-Host "##vso[task.setvariable variable=buildProjectOrSolution]$solutionFile"
-          }
-          $nugetFile = "$filterPath/nuget.config"
-          Write-Host "Nuget config is $nugetFile"
-          $nugetExits = Test-Path -Path $nugetFile -PathType Leaf
-          if( $nugetExits -eq $false ){
-            Write-Host "Nuget config doesn't exist"
-            $nugetFile = ''
-          }
-          Write-Host "##vso[task.setvariable variable=nugetConfig]$nugetFile"
+    - template: ../../steps/windows/find-solution-file.yml
+      parameters:
+        name: '${{ parameters.stage_name }}SolutionFind'
+        solution_filename: '${{ parameters.solution_filename }}' 
+        output_solution_folder: 'outsolutionfolder'
+        output_solution_file_path: 'outsolutionfile'
+        output_nuget_config_file_path: 'outnugetconfig'
 
     - template: ../steps/windows/windows-sdk-install-solution.yml
       parameters:
-        name: DownloadInstallWindowsSdk
+        name: '${{ parameters.stage_name }}DownloadInstallWindowsSdk'
         windows_sdk_version: '${{ parameters.windows_sdk_version }}'
         solution_file: '${{ parameters.solution_filename }}'
 
@@ -187,26 +147,8 @@ stages:
     - template: ../steps/nuget-install-and-restore.yml
       parameters:
         nuget_version_to_install: '${{ parameters.windows_nuget_version }}'
-        solution_filename: '$(solutionFilename)'
-        # nuget_config_file: '$(nugetConfig)'
-        # nuget_cache_enabled: true
-
-    # - powershell: |
-    #     dotnet tool update -g dotnet-vs
-    #     $MSBUILDPATH="$(vs where release --prop=InstallationPath)\MSBuild\Current\Bin"
-    #     Write-Host "##vso[task.setvariable variable=MSBUILDPATH;]$MSBUILDPATH"
-    #     echo MSBUILDPATH: $MSBUILDPATH
-    #   displayName: Setup VS Path
-
-    # - task: Cache@2
-    #   displayName: Cache NuGet packages
-    #   inputs:
-    #     key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'
-    #     path: '$(Pipeline.Workspace)/.nuget/packages'
-    #     restoreKeys: |
-    #       nuget | "$(Agent.OS)"
-    #       nuget
-    #     cacheHitVar: 'CACHE_RESTORED'
+        solution_filename: '$(${{ parameters.stage_name }}SolutionFind.outsolutionfile)'
+        nuget_config_file: '$(${{ parameters.stage_name }}SolutionFind.outnugetconfig)'
 
     # preBuild steps - performs steps prior to executing the solution build
     - ${{ parameters.preBuild }}
@@ -215,10 +157,7 @@ stages:
     - task: VSBuild@1
       displayName: 'Building solution ${{ parameters.solution_filename }}'
       inputs:
-        solution: '$(solutionFilename)'
-        # ${{ if ne( variables.CACHE_RESTORED , true ) }}:
-        #   msbuildArgs: '/r /p:platform="${{ parameters.solution_target_platform }}" /p:RestoreConfigFile="$(nugetConfig)"' 
-        # ${{ if eq( variables.CACHE_RESTORED , true ) }}:
+        solution: '$(${{ parameters.stage_name }}SolutionFind.outsolutionfile)'
         msbuildArgs: '/p:platform="${{ parameters.solution_target_platform }}"' 
         configuration: '${{ parameters.solution_build_configuration }}'
 
