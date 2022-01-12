@@ -123,7 +123,7 @@ stages:
     # any other build steps are executed
     - ${{ parameters.onStart }}
 
-    - template: ../../steps/windows/find-solution-file.yml
+    - template: ../steps/windows/find-solution-file.yml
       parameters:
         name: '${{ parameters.stage_name }}SolutionFind'
         solution_filename: '${{ parameters.solution_filename }}' 
