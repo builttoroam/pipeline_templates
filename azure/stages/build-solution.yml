@@ -157,7 +157,7 @@ stages:
     - task: VSBuild@1
       displayName: 'Building solution ${{ parameters.solution_filename }}'
       inputs:
-        solution: '$(${{ parameters.stage_name }}SolutionFind.outsolutionfile)'
+        solution: '${{ parameters.solution_filename }}'
         msbuildArgs: '/p:platform="${{ parameters.solution_target_platform }}"' 
         configuration: '${{ parameters.solution_build_configuration }}'
 
