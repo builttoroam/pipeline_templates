@@ -262,6 +262,9 @@ parameters:
 stages:
 - stage: '${{ parameters.name }}Print_Parameters'
 
+  pool:
+    vmImage: 'ubuntu-latest'
+
   jobs:
   - job: PrintParameters
 
