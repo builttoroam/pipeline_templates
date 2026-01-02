@@ -44,6 +44,9 @@ variables:
   - name: test_solution_file_uno_basic
     value: 'src/apps/dotnet/BasicUnoApp/BasicUnoApp.slnx'
 
+  - name: test_solution_file_uno_basic_filter
+    value: 'src/apps/dotnet/BasicUnoApp/BasicUnoApp-AllProjects.slnf'
+
   - name: test_solution_file_uno_basic_folder
     value: 'D:\a\1\s\src\apps\dotnet\BasicUnoApp'
 

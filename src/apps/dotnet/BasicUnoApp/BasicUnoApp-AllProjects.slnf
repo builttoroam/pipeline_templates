@@ -1,0 +1,8 @@
+{
+  "solution": {
+    "path": "BasicUnoApp.slnx",
+    "projects": [
+      "BasicUnoApp\\BasicUnoApp.csproj"
+    ]
+  }
+}
