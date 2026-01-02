@@ -41,6 +41,15 @@ variables:
   - name: test_solution_file_uno_solution_file
     value: 'D:\a\1\s\src\apps\dotnet\xamarin\SimpleUnoApp\SimpleUnoApp.sln'
 
+  - name: test_solution_file_uno_basic
+    value: 'src/apps/dotnet/BasicUnoApp/BasicUnoApp.slnx'
+
+  - name: test_solution_file_uno_basic_folder
+    value: 'D:\a\1\s\src\apps\dotnet\BasicUnoApp'
+
+  - name: test_solution_file_uno_basic_solution_file
+    value: 'D:\a\1\s\src\apps\dotnet\BasicUnoApp\BasicUnoApp.slnx'
+
   - name: test_solution_file_uno_nuget_config
     value: ''
 

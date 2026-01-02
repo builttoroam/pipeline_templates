@@ -47,4 +47,22 @@ stages:
             variable_to_check: 'SolutionFind.outnugetconfig'
             expected_value: '$(test_solution_file_uno_nuget_config)'
 
+        - template: ../../steps/windows/find-solution-file.yml
+          parameters:
+            name: BasicSolutionFind
+            solution_filename: '$(test_solution_file_uno_basic)' 
+            output_solution_folder: 'outsolutionfolder'
+            output_solution_file_path: 'outsolutionfile'
+
+        - template: ../../steps/checks/check-variable-value.yml
+          parameters:
+            name: BasicSolutionFindCheck_Folder
+            variable_to_check: 'BasicSolutionFind.outsolutionfolder'
+            expected_value: '$(test_solution_file_uno_basic_folder)'
+
+        - template: ../../steps/checks/check-variable-value.yml
+          parameters:
+            name: BasicSolutionFindCheck_File
+            variable_to_check: 'BasicSolutionFind.outsolutionfile'
+            expected_value: '$(test_solution_file_uno_basic_solution_file)'
             
