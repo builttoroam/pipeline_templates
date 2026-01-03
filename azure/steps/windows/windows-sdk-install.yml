@@ -42,6 +42,8 @@ steps:
     name: '${{ parameters.name }}windowssdkiso'
     cache_name: 'windowssdkiso'
     folder_to_cache: 'windowssdkiso'
+    # Update version to append to cache key to invalidate cache when needed
+    version: '20260104'
     downloads:  
       - name:  '${{ parameters.name }}windowsdkisofile'
         source_url:  ${{ parameters.windows_sdk_url }}

@@ -1,3 +1,5 @@
+# Note: When updating this script, please also update the 'version' attribute in windows-sdk-install.yml for cache busting
+
 [CmdletBinding()]
 param([Parameter(Mandatory=$true)]
       [string]$buildNumber)
