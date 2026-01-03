@@ -263,6 +263,15 @@ if ($InstallWindowsSDK)
         $uri = 'https://software-download.microsoft.com/download/sg/22000.194.210911-1543.co_release_svc_prod1_WindowsSDK.iso'
     }
 
+    if($buildNumber -eq 22621)
+    {
+        $uri = 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/22621.2428.230929-1800.ni_release_svc_prod1_WindowsSDK.iso'
+    }
+
+    if($buildNumber -eq 26100)
+    {
+        $uri = 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/26100.1742.240904-1906.ge_release_svc_prod1_WindowsSDK.iso'
+    }
 
     if ($env:TEMP -eq $null)
     {

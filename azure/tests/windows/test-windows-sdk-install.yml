@@ -70,3 +70,13 @@ stages:
           parameters:
             name: Install22000
             windows_sdk_version: '22000'
+
+        - template: ../../steps/windows/windows-sdk-install.yml
+          parameters:
+            name: Install22621
+            windows_sdk_version: '22621'
+
+        - template: ../../steps/windows/windows-sdk-install.yml
+          parameters:
+            name: Install26100
+            windows_sdk_version: '26100'
