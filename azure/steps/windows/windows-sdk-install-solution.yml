@@ -62,28 +62,34 @@ steps:
     workingDirectory: $(Pipeline.Workspace)
     script: |
       $solutionFolder = '$(${{ parameters.name }}SolutionFind.solutionFolder)'
-      Write-Host $solutionFolder
+      Write-Host "Solution folder: $solutionFolder"
       $sdkisops = '$(${{ parameters.name }}InstallSdkScript.${{ parameters.output_sdk_powershell_file_path_variable }})'
-      Write-Host $sdkisops
+      Write-Host "Downloaded Windows ISO script: $sdkisops"
 
       $versions = New-Object Collections.Generic.List[string]
 
       $projectFiles = Get-ChildItem -Path $solutionFolder -Filter *.csproj -Recurse
       foreach( $proj in $projectFiles)
       {
-          Write-Host $proj.FullName
+          Write-Host "Project file: $($proj.FullName)"
           [xml]$projectInfo = Get-Content $proj.FullName
-          $ns = @{ns="http://schemas.microsoft.com/developer/msbuild/2003"}
-          $version = Select-Xml -Xml $projectInfo -XPath "//ns:Project/ns:PropertyGroup/ns:TargetPlatformVersion" -Namespace $ns
+          # $ns = @{ns="http://schemas.microsoft.com/developer/msbuild/2003"}
+          $version = Select-Xml -Xml $projectInfo -XPath "//Project/PropertyGroup/TargetFramework"
           if( $null -ne $version)
           {
               foreach($fxml in $version)
               {
-                  Write-Host $fxml
-                  $trimmed =$fxml.ToString().Replace("10.0.","").Replace(".0","")
-                  Write-Host $trimmed
-                  if(-not $versions.Contains($trimmed)){
+                  $versionString = ($fxml).ToString()
+                  Write-Host "Target framework: $versionString"
+                  $versionIndex = $versionString.ToLower().IndexOf("windows10.0")
+                  Write-Host "Version Index: $versionIndex"
+                  if( $versionIndex -ge 0)
+                  {
+                    $trimmed = $versionString.ToString().Substring($versionIndex + 12).Replace(".0","")
+                    Write-Host "Windows build: $trimmed"
+                    if(-not $versions.Contains($trimmed)){
                       $versions.Add($trimmed)
+                    }
                   }
               }
           }
@@ -91,25 +97,25 @@ steps:
           $frameworks = Select-Xml -Xml $projectInfo -XPath "//Project/PropertyGroup/TargetFrameworks"
 
           if( $null -ne $frameworks){
-              Write-Host $frameworks
+              Write-Host "Target frameworks: $frameworks"
               foreach($fxml in $frameworks)
               {
                   $fx = ($fxml).ToString().Split(";")
-                  Write-Host $fx.Length
+                  Write-Host "Frameworks count: $($fx.Length)"
                   foreach($fname in $fx)
                   {
-                      #Write-Host "Test: $fname"
+                      #Write-Host "Framework to check: $fname"
                       if( ($fname).StartsWith('uap') -or ($fname).Contains('windows10') )
                       {
-                          Write-Host $fname
+                          Write-Host "Windows framework: $fname"
                           $trimmed =$fname.ToString().Replace("uap10.0.","")
                           $idx = $trimmed.ToLower().IndexOf("windows")
                           if($idx -ge 0)
                           {
-                          $trimmed = $trimmed.Substring($idx)
+                            $trimmed = $trimmed.Substring($idx)
                           }
                           $trimmed =$trimmed.Replace("windows10.0.","").Replace(".0","")
-                          Write-Host $trimmed
+                          Write-Host "Trimmed Windows framework: $trimmed"
                           if(-not $versions.Contains($trimmed)){
                               $versions.Add($trimmed)
                           }
@@ -119,7 +125,7 @@ steps:
               }
           }
       }
-      Write-Host $versions
+      Write-Host "Version count: $($versions.Count)"
       foreach($ver in $versions)
       {
           Write-Host "Invoking $sdkisops for Version $ver"

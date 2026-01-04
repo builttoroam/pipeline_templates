@@ -20,6 +20,10 @@ stages:
       steps:
         - template: ../../steps/windows/windows-sdk-install-solution.yml
           parameters:
-            name: InstallDefault
-            solution_file: $(test_solution_file_uno_basic)
+            name: InstallWindowsDefault
+            solution_file: $(test_solution_file_windows)
 
+        - template: ../../steps/windows/windows-sdk-install-solution.yml
+          parameters:
+            name: InstallUnoBasicDefault
+            solution_file: $(test_solution_file_uno_basic)
