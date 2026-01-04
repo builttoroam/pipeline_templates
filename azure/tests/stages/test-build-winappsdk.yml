@@ -1,0 +1,42 @@
+trigger:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  paths:
+    include:
+    - azure/stages/build-winappsdk.yml
+    - azure/steps/windows/*.yml
+
+variables:
+  - template: ../test-variables.yml
+  - name: test_variable_1_name
+    value: 'variable1'
+  - name: test_variable_1_value
+    value: 'output value'
+
+stages:
+  - template:  ../../stages/build-winappsdk.yml
+    parameters:
+      stage_name:  'Build_WinAppSdk' 
+      solution_filename: '$(test_solution_file_windows)'
+      # windows_cert_securefiles_filename:
+      #stage_name:  # Optional 
+      #depends_on:  # Optional 
+      #build_windows_enabled:  # Optional 
+      #build_number:  # Optional 
+      #full_version_number:  # Optional 
+      #solution_build_configuration:  # Optional 
+      #solution_target_platform:  # Optional
+      #uwpPackagePlatforms:  # Optional
+      #windows_package_manifest_filename:  # Optional 
+      #windows_cert_password:  # Optional 
+      #artifact_name:  # Optional 
+      #artifact_folder:  # Optional
+      #application_package:  # Optional 
+      #windows_upload_name:  # Optional 
+      #onStart:  # Optional 
+      #preBuild:  # Optional
+      #postBuild:  # Optional 
+      #prePublish:  # Optional
+      #onEnd:  # Optional 
+      #windows_nuget_version:  # Optional 

@@ -1,9 +1,9 @@
 parameters:
 # stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
-# Defaults to 'Build_UWP'
+# Defaults to 'Build_Windows'
 - name: stage_name
   type: string
-  default: 'Build_UWP'
+  default: 'Build_Windows'
 # depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
 # any other stage
 - name: depends_on
@@ -44,11 +44,11 @@ parameters:
 - name: solution_target_platform
   type: string
   default: 'x86'
-# uwpPackagePlatforms - (Optional) The platforms the the application package will include
-# Defaults to 'x86|x64|ARM'
-- name: uwpPackagePlatforms
+# windowsPackagePlatforms - (Optional) The platforms the the application package will include
+# Defaults to 'x86|x64|arm64'
+- name: windowsPackagePlatforms
   type: string
-  default: 'x86|x64|ARM'
+  default: 'x86|x64|arm64'
 
 # windows_package_manifest_filename - (Optional) The relative path to the package.appxmanifest file
 # that defines the application manifest. If not specified, template will search for package.appxmanifest file
@@ -287,13 +287,13 @@ stages:
       displayName: 'Building solution ${{ parameters.solution_filename }}'
       inputs:
         solution: '$(buildProjectOrSolution)'
-        msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.uwpPackagePlatforms }}" 
+        msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.windowsPackagePlatforms }}" 
               /p:DebugSymbols=false 
               /p:DebugType=None 
               /p:AppxPackageDir="$(appxPackageDir)"
               /p:AppxBundle=Always 
               /p:AppxPackageSigningEnabled=true 
-              /p:UapAppxPackageBuildMode=StoreUpload 
+              /p:UapAppxPackageBuildMode=CI 
               /p:platform="${{ parameters.solution_target_platform }}"  $(package_signing)' 
         configuration: '${{ parameters.solution_build_configuration }}'
 
