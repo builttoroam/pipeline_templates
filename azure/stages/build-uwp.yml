@@ -1,9 +1,9 @@
 parameters:
 # stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
-# Defaults to 'Build_Windows'
+# Defaults to 'Build_UWP'
 - name: stage_name
   type: string
-  default: 'Build_Windows'
+  default: 'Build_UWP'
 # depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
 # any other stage
 - name: depends_on

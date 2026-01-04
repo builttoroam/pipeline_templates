@@ -1,0 +1,353 @@
+parameters:
+# stage_name - (Optional) The name of the stage, so that it can be referenced elsewhere (eg for dependsOn property). 
+# Defaults to 'Build_Windows'
+- name: stage_name
+  type: string
+  default: 'Build_Windows'
+# depends_on - (Optional) The array of stages that this stage depends on. Default is that this stage does not depend on 
+# any other stage
+- name: depends_on
+  type: string
+  default: ''
+# vm_image - (Optional) The name of the vm image to use for execution. Defaults to windows-2022
+- name: vm_image
+  type: string
+  default: 'windows-2022'
+# build_enabled - (Optional) Whether this stages should be executed. Note that setting this to false won't completely
+# cancel the stage, it will merely skip most of the stages. The stage will appear to complete successfully, so
+# any stages that depend on this stage will attempt to execute
+- name: build_enabled
+  type: boolean
+  default: true
+
+# build_number - (Optional) The build number to be applied to the application. Defaults to Build.BuildId 
+# built in variable
+- name: build_number
+  type: string
+  default: '$(Build.BuildId)'
+# full_version_number - (Optional) The full application version number. Defaults to 1.0.XXX where XXX is the 
+# same as the build_number
+- name: full_version_number
+  type: string
+  default: '1.0.$(Build.BuildId)'
+
+# solution_filename - (Required) The relative path to the solution file that should be built
+- name: solution_filename
+  type: string
+# solution_build_configuration - (Optional) The build configuration within the solution that should be invoked. 
+# Default is Release but can be overwritten if you want to do say a Debug build
+- name: solution_build_configuration
+  type: string
+  default: Release
+# solution_target_platform - (Optional) The target platform that the solution build will use. 
+# Defaults to 'x86'
+- name: solution_target_platform
+  type: string
+  default: 'x86'
+# windowsPackagePlatforms - (Optional) The platforms the the application package will include
+# Defaults to 'x86|x64|arm64'
+- name: windowsPackagePlatforms
+  type: string
+  default: 'x86|x64|arm64'
+
+# windows_package_manifest_filename - (Optional) The relative path to the package.appxmanifest file
+# that defines the application manifest. If not specified, template will search for package.appxmanifest file
+- name: windows_package_manifest_filename
+  type: string
+  default: ''
+# windows_cert_securefiles_filename - (Optional) The certificate file used to sign the application. This is the name
+# of the certificate in Secure Files
+- name:  windows_cert_securefiles_filename
+  type: string
+  default: ''
+# windows_cert_password - (Optional) The password to unlock the certificate so it can be used. This is required
+# if the certificate has a password set
+- name: windows_cert_password
+  type: string
+  default: ''
+
+# artifact_name - (Optional) The name of the artifact to copy application to
+- name: artifact_name
+  type: string
+  default: 'drop'
+# artifact_folder - (Optional) The name of the folder to copy application to in the artifact
+- name: artifact_folder
+  type: string
+  default: 'Windows'
+# application_package - (Optional) The name of the application package to output
+- name: application_package
+  type: string
+  default: 'SignedWindows.appxbundle'
+# windows_upload_name - (Optional) The name of the upload package that can be submitted to the Microsoft Store
+- name: windows_upload_name
+  type: string
+  default: ''
+
+# onStart - (Optional) Steps to be executed before stage starts
+- name: onStart
+  type: stepList
+  default: []
+# preBuild - (Optional) Steps to be executed before the build starts
+- name: preBuild
+  type: stepList
+  default: []
+# postBuild - (Optional) Steps to be executed after the build has been invoked
+- name: postBuild
+  type: stepList
+  default: []
+# prePublish - (Optional) Steps to be executed before application package is published to artifact
+- name: prePublish
+  type: stepList
+  default: []
+# onEnd - (Optional) Steps to be executed at the end of the stage
+- name: onEnd
+  type: stepList
+  default: []
+
+# windows_nuget_version - (Optional) Use to override the NuGet version (defaults to 7.0.1)
+- name: windows_nuget_version
+  type: string
+  default: '7.0.1'
+
+stages:
+- stage: ${{ parameters.stage_name }}
+  dependsOn: ${{ parameters.depends_on }} 
+  condition: and(succeeded(),${{ parameters.build_enabled }})
+  variables: 
+    - name: cert_thumbprint
+      value: ''
+    - name: cert_subject
+      value: ''
+    - name: appxPackageDir
+      value: '$(System.DefaultWorkingDirectory)\AppxPackages'
+    - name: manifestPath
+      value: ${{ parameters.windows_package_manifest_filename}}
+    - name: windows_upload_filename
+      value: ${{ parameters. windows_upload_name }}
+    - name: package_signing    
+      ${{ if and( ne( parameters.windows_cert_securefiles_filename , ''), ne( parameters.windows_cert_password , '') ) }}:
+        value: '/p:PackageCertificateThumbprint="$(cert_thumbprint)" 
+              /p:PackageCertificateKeyFile="$(signing_certificate.secureFilePath)" 
+              /p:PackageCertificatePassword="${{ parameters.windows_cert_password }}"'
+      ${{ else }}:
+        value: ''  
+
+  pool:
+    vmImage: '${{ parameters.vm_image }}'
+
+  jobs:
+  - job: BuildWindows
+
+    steps:
+    # Download the signing certificate from secure files with the name
+    # specified in the parameter windows_cert_securefiles_filename
+    - task: DownloadSecureFile@1
+      displayName: 'Download secure file ${{ parameters.windows_cert_securefiles_filename }}'
+      condition: and( succeeded(), ne( '${{ parameters.windows_cert_securefiles_filename }}', ''))
+      name: signing_certificate
+      inputs:
+        secureFile: '${{ parameters.windows_cert_securefiles_filename }}'
+
+    # onStart steps - performed after any secure files are downloaded but before 
+    # any other build steps are executed
+    - ${{ parameters.onStart }}
+
+    - template: ../steps/windows/windows-sdk-install-solution.yml
+      parameters:
+        name: 'DownloadInstallWindowsSdk'
+        solution_file: '${{ parameters.solution_filename }}'
+        output_solution_folder: 'windowsSdkSolutionFolder'
+
+    # This task searches for the package.appxmanifest file so that the version information can be updated
+    # The windows_package_manifest_filename property can be used to set this location if the source code includes
+    # multiple windows projects
+    - task: PowerShell@2
+      displayName: 'Determine the location of the package.appxmanifest file'
+      condition: and( succeeded(), eq( variables['manifestPath'], '') )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Finding Package Manifest (ie .appxmanifest). Set windows_package_manifest_filename parameter to override"
+          $folder = '$(DownloadInstallWindowsSdkSetOutputSolutionFolder.windowsSdkSolutionFolder)'
+          Write-Host "Search folder $folder"
+          $manifest = (Get-ChildItem -Filter "*.appxmanifest" -Path "$folder"  -Recurse | Select-Object -First 1 ).FullName
+          Write-Host "Found at $manifest"
+          Write-Host "##vso[task.setvariable variable=manifestPath]$manifest"
+
+    # This task determines the name of the upload file, based on the bundle file name (specified
+    # via the application_package parameter). This can be overridden by specifying the 
+    # windows_upload_name parameter
+    - task: PowerShell@2
+      displayName: 'Determine upload file name'
+      condition: and( succeeded(), eq( variables['windows_upload_filename'], '') )
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Write-Host "Setting upload filename"
+          $uploadFilename = '${{ parameters.application_package }}'.replace('bundle','upload')
+          Write-Host "Upload filename $uploadFilename"
+          Write-Host "##vso[task.setvariable variable=windows_upload_filename]$uploadFilename"
+
+    # This task installs the signing certificate (windows_cert_securefiles_filename parameter that is the name
+    # of the Secure File) so that it can be used for signing. It also extracts the thumbprint
+    # and subject of the certificate
+    - task: PowerShell@2
+      displayName: Extract certificate thumbnail and subject
+      condition: and( succeeded(), ne( '${{ parameters.windows_cert_securefiles_filename }}', ''))
+      inputs:
+        targetType: 'inline'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+        script: |
+          Write-Host "Start adding the PFX file to the certificate store."
+
+          $pfxpath = '$(signing_certificate.secureFilePath)'
+          $password = '${{ parameters.windows_cert_password }}'
+          
+          Add-Type -AssemblyName System.Security
+          $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+          $cert.Import($pfxpath, $password, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]"PersistKeySet")
+          $store = new-object system.security.cryptography.X509Certificates.X509Store -argumentlist "MY", CurrentUser
+          $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]"ReadWrite")
+          $store.Add($cert)
+          $store.Close() 
+          
+          $thumb = $cert.thumbprint
+          $subject = $cert.subject
+          Write-Host "Thumbprint: $thumb  Subject: $subject"
+
+          Write-Host "##vso[task.setvariable variable=cert_thumbprint]$thumb"
+          Write-Host "##vso[task.setvariable variable=cert_subject]$subject"
+
+          Write-Host "Variables exported"
+
+    # Update appxmanifest. This must be done before the build.
+    - task: PowerShell@2
+      displayName: 'Updating manifest file with version number and publisher - $(manifestPath)'
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          # Update appxmanifest. This must be done before the build.
+          Write-Host "Version ${{ parameters.full_version_number }}"
+          [xml]$manifest= get-content "$(manifestPath)"
+          Write-Host "Original manifest $($manifest.OuterXml)"
+          $manifest.Package.Identity.Version = "${{ parameters.full_version_number }}.0"
+          if( '$(cert_subject)' -ne '')
+          {
+            $manifest.Package.Identity.Publisher = "$(cert_subject)"
+          }
+          $outxml = $manifest.OuterXml
+          Write-Host "Updated manifest $outxml"
+          $manifest.save("$(manifestPath)")
+
+    # Check for solution filter - if filter, need to extract actual solution file
+    - task: PowerShell@2
+      displayName: 'Determine Solution File for ${{ parameters.solution_filename }}'
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          if( '${{ parameters.solution_filename }}'.contains(".slnf") ) {
+              Write-Host "File specified is solution filter"
+              $actualSolutionFile = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).solution.path
+              Write-Host "Solution relative path is $actualSolutionFile"
+              $filterPath = (get-item '${{ parameters.solution_filename }}').directory.fullname 
+              Write-Host "Filter path is $filterPath"
+              $solutionFile = "$filterPath/$actualSolutionFile"
+              Write-Host "Full path to solution file is $solutionFile"
+              Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
+
+              Write-Host "Checking projects for wapproj for Windows fix"
+              $buildproject = '${{ parameters.solution_filename }}'
+              $projects = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).solution.projects
+              for($i=0;$i -lt $projects.length;$i++)
+              {
+                  $proj = $projects[$i]
+                  Write-Host "Project - $proj" 
+                  if($proj.contains('wapproj'))
+                  {
+                      $buildproject = $proj
+                      $buildproject = "$filterPath/$buildproject"
+                      Write-Host "Wapproj found - building $buildproject instead of solution"
+                  }
+              }
+              Write-Host "##vso[task.setvariable variable=buildProjectOrSolution]$buildproject"
+          }
+          else{
+              Write-Host "File specified is a solution file"
+              $solutionFile = "${{ parameters.solution_filename }}"
+              Write-Host "Full path to solution file is $solutionFile"
+              Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
+              Write-Host "##vso[task.setvariable variable=buildProjectOrSolution]$solutionFile"
+          }
+        
+    # Install and Restore NuGet for the solution
+    - template: ../steps/nuget-install-and-restore.yml
+      parameters:
+        nuget_version_to_install: '${{ parameters.windows_nuget_version }}'
+        solution_filename: '$(solutionFilename)'
+
+    # preBuild steps - performs steps prior to executing the solution build
+    - ${{ parameters.preBuild }}
+
+    # Build the solution
+    - task: VSBuild@1
+      displayName: 'Building solution ${{ parameters.solution_filename }}'
+      inputs:
+        solution: '$(buildProjectOrSolution)'
+        msbuildArgs: '/p:AppxBundlePlatforms="${{ parameters.windowsPackagePlatforms }}" 
+              /p:DebugSymbols=false 
+              /p:DebugType=None 
+              /p:AppxPackageDir="$(appxPackageDir)"
+              /p:AppxBundle=Always 
+              /p:AppxPackageSigningEnabled=true 
+              /p:UapAppxPackageBuildMode=CI 
+              /p:platform="${{ parameters.solution_target_platform }}"  $(package_signing)' 
+        configuration: '${{ parameters.solution_build_configuration }}'
+
+    # postBuild steps - performs steps immediately after executing the solution build
+    - ${{ parameters.postBuild }}
+
+    # Copy bundle files to the correct directory in the staging folder. It uses flattenFolders
+    # so there is a risk that multiple artifacts could overwrite each other if they
+    # have the same filename
+    - task: CopyFiles@2
+      displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
+      inputs:
+        contents: '$(appxPackageDir)\**\*.*xbundle'
+        targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
+        flattenFolders: true
+        overWrite: true       
+
+    # Copy upload files to the correct directory in the staging folder. It uses flattenFolders
+    # so there is a risk that multiple artifacts could overwrite each other if they
+    # have the same filename
+    - task: CopyFiles@2
+      displayName: 'Copying files to artifact folder ${{ parameters.artifact_folder }}'
+      inputs:
+        contents: '$(appxPackageDir)\**\*.*xupload' 
+        targetFolder: '$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}'
+        flattenFolders: true
+        overWrite: true
+
+    # Rename the application package to the name specified in the application_package parameter
+    - task: PowerShell@2
+      displayName: 'Rename application package'
+      inputs:
+        targetType: 'inline'                                                                                                 
+        script: |
+          Get-ChildItem -Filter "*.*xbundle" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "${{ parameters.application_package }}" | Write-Host
+          Get-ChildItem -Filter "*.*xupload" -Path "$(build.artifactStagingDirectory)/${{ parameters.artifact_folder }}"  -Recurse | Select-Object -First 1 | Rename-Item -NewName "$(windows_upload_filename)" | Write-Host
+
+    # prePublish steps - performs steps prior to publishing all artifacts from the staging directory
+    - ${{ parameters.prePublish }}
+ 
+    # Publish artifacts from this stage
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publishing artifacts to ${{ parameters.artifact_name }}'
+      inputs:
+        pathtoPublish: '$(build.artifactStagingDirectory)' 
+        artifactName: '${{ parameters.artifact_name }}' 
+        publishLocation: Container
+
+    # onEnd steps - performs steps after publishing artifacts, at the end of the build stage
+    - ${{ parameters.onEnd }}
+
+

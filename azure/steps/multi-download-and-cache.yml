@@ -175,7 +175,7 @@ steps:
     condition: and( succeeded(), eq( variables['${{ parameters.name }}${{ download.name }}DownloadCheck.should_download'] , 'True') )
     inputs:
       ${{ if ne(parameters.version, '') }}:
-        key: ${{ parameters.cache_name }} | ${{ parameters.version }} | "$(${{ parameters.name }}${{ download.name }}Timestamp.downloaded_timestamp)"
+        key: ${{ parameters.cache_name }} | ${{ parameters.version }}
       ${{ if eq(parameters.version, '') }}:
         key: ${{ parameters.cache_name }} | "$(${{ parameters.name }}${{ download.name }}Timestamp.downloaded_timestamp)"
       path: $(Pipeline.Workspace)/${{ parameters.folder_to_cache }}

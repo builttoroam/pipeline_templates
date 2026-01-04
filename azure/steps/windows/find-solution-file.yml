@@ -23,6 +23,10 @@ parameters:
   type: string
   default: 'nuget_config_file_path'
 
+# output_build_project_file_path - (Optional) - The variable to use for the full path to either the solution file or the wapproj project file if it exists
+- name: output_build_project_file_path
+  type: string
+  default: 'output_build_project_file_path'
 
 steps:
 - task: Bash@3
@@ -54,7 +58,7 @@ steps:
           Write-Host "File specified is solution filter"
           $actualSolutionFile = (Get-Content -Path '${{ parameters.solution_filename }}' -RAW | ConvertFrom-Json).solution.path
           Write-Host "Solution relative path is $actualSolutionFile"
-          $solutionFile = "$solutionFolder/$actualSolutionFile"
+          $solutionFile = "$solutionFolder\$actualSolutionFile"
           Write-Host "Full path to solution file is $solutionFile"
           Write-Host "##vso[task.setvariable variable=solutionFilename]$solutionFile"
 
@@ -68,7 +72,7 @@ steps:
               if($proj.contains('wapproj'))
               {
                   $buildproject = $proj
-                  $buildproject = "$solutionFolder/$buildproject"
+                  $buildproject = "$solutionFolder\$buildproject"
                   Write-Host "Wapproj found - building $buildproject instead of solution"
               }
           }
@@ -94,4 +98,4 @@ steps:
   parameters:
     ${{ if ne(parameters.name, '') }}:
       name: ${{ parameters.name }}
-    variables_to_set: '${{ parameters.output_solution_folder }}|$(solutionFolder);${{ parameters.output_solution_file_path }}|$(solutionFilename);${{ parameters.output_nuget_config_file_path }}|$(nugetConfig)'
+    variables_to_set: '${{ parameters.output_solution_folder }}|$(solutionFolder);${{ parameters.output_solution_file_path }}|$(solutionFilename);${{ parameters.output_nuget_config_file_path }}|$(nugetConfig);${{ parameters.output_build_project_file_path }}|$(buildProjectOrSolution)'

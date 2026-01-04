@@ -80,6 +80,12 @@ steps:
             $variable_value = $splits[1]
             Write-Host "Variable value: $variable_value"
 
+            if (($variable_name -eq $null) -or ($variable_name -eq ""))
+            {
+              Write-Host "Variable name is null or empty - skipping"
+              continue
+            }
+
             If ( (($variable_value -eq $null) -or ($variable_value -eq "")) -and ('${{ parameters.ignore_null_or_empty_values }}' -eq 'True') )
             {
               Write-Host "New value is null and Ignore null values is true - Not setting variable"

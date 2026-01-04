@@ -2,11 +2,11 @@ variables:
   - name: system.debug
     value: true
   - name: small_download_url
-    value: 'http://speedtest-syd.apac-tools.ovh/files/100Mb.dat'
+    value: 'https://ash-speed.hetzner.com/100MB.bin'
   - name: medium_download_url
-    value: 'http://speedtest-syd.apac-tools.ovh/files/100Mio.dat'
+    value: 'https://ash-speed.hetzner.com/1GB.bin'
   - name: large_download_url
-    value: 'http://speedtest-syd.apac-tools.ovh/files/1Gb.dat'
+    value: 'https://ash-speed.hetzner.com/10GB.bin'
 
   - name: empty_bicep_filepath
     value: 'azure/tests/data/empty.bicep'
@@ -41,6 +41,18 @@ variables:
   - name: test_solution_file_uno_solution_file
     value: 'D:\a\1\s\src\apps\dotnet\xamarin\SimpleUnoApp\SimpleUnoApp.sln'
 
+  - name: test_solution_file_uno_basic
+    value: 'src/apps/dotnet/BasicUnoApp/BasicUnoApp.slnx'
+
+  - name: test_solution_file_uno_basic_filter
+    value: 'src/apps/dotnet/BasicUnoApp/BasicUnoApp-AllProjects.slnf'
+
+  - name: test_solution_file_uno_basic_folder
+    value: 'D:\a\1\s\src\apps\dotnet\BasicUnoApp'
+
+  - name: test_solution_file_uno_basic_solution_file
+    value: 'D:\a\1\s\src\apps\dotnet\BasicUnoApp\BasicUnoApp.slnx'
+
   - name: test_solution_file_uno_nuget_config
     value: ''
 
@@ -48,3 +60,27 @@ variables:
     value: 'D:\a\1\windowssdkiso\windowssdkiso.ps1'
     
     
+  - name: test_solution_file_windows
+    value: 'src/apps/dotnet/WinUIApp/WinUIApp.slnx'
+
+  - name: test_solution_file_windows_folder
+    value: 'D:\a\1\s\src\apps\dotnet\WinUIApp'
+
+  - name: test_solution_file_windows_solution_file
+    value: 'D:\a\1\s\src\apps\dotnet\WinUIApp\WinUIApp.slnx'
+
+  - name: test_solution_file_windows_build_project_file
+    value: 'D:\a\1\s\src\apps\dotnet\WinUIApp\WinUIApp.slnx'
+
+  - name: test_solution_file_windows_package
+    value: 'src/apps/dotnet/WinUIPackagingApp/WinUIPackagingApp-AllProjects.slnf'
+
+  - name: test_solution_file_windows_package_folder
+    value: 'D:\a\1\s\src\apps\dotnet\WinUIPackagingApp'
+
+  - name: test_solution_file_windows_package_solution_file
+    value: 'D:\a\1\s\src\apps\dotnet\WinUIPackagingApp\WinUIPackagingApp.slnx'
+
+  - name: test_solution_file_windows_package_build_project_file
+    value: 'D:\a\1\s\src\apps\dotnet\WinUIPackagingApp\WinUIPackagingApp (Package)\WinUIPackagingApp (Package).wapproj'
+

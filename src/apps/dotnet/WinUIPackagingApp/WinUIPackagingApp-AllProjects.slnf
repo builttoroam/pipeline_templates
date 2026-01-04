@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "WinUIPackagingApp.slnx",
+    "projects": [
+      "WinUIPackagingApp (Package)\\WinUIPackagingApp (Package).wapproj",
+      "WinUIPackagingApp\\WinUIPackagingApp.csproj"
+    ]
+  }
+}
