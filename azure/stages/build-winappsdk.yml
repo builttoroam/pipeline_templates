@@ -104,10 +104,10 @@ parameters:
   type: stepList
   default: []
 
-# windows_nuget_version - (Optional) Use to override the NuGet version (defaults to 6.0.0)
+# windows_nuget_version - (Optional) Use to override the NuGet version (defaults to 7.0.1)
 - name: windows_nuget_version
   type: string
-  default: '6.0.0'
+  default: '7.0.1'
 
 stages:
 - stage: ${{ parameters.stage_name }}
@@ -154,8 +154,9 @@ stages:
 
     - template: ../steps/windows/windows-sdk-install-solution.yml
       parameters:
-        name: DownloadInstallWindowsSdk
+        name: 'DownloadInstallWindowsSdk'
         solution_file: '${{ parameters.solution_filename }}'
+        output_solution_folder: 'windowsSdkSolutionFolder'
 
     # This task searches for the package.appxmanifest file so that the version information can be updated
     # The windows_package_manifest_filename property can be used to set this location if the source code includes
@@ -167,7 +168,9 @@ stages:
         targetType: 'inline'                                                                                                 
         script: |
           Write-Host "Finding Package Manifest (ie .appxmanifest). Set windows_package_manifest_filename parameter to override"
-          $manifest = (Get-ChildItem -Filter "*.appxmanifest" -Path "$(System.DefaultWorkingDirectory)"  -Recurse | Select-Object -First 1 ).FullName
+          $folder = '$(DownloadInstallWindowsSdkSetOutputSolutionFolder.windowsSdkSolutionFolder)'
+          Write-Host "Search folder $folder"
+          $manifest = (Get-ChildItem -Filter "*.appxmanifest" -Path "$folder"  -Recurse | Select-Object -First 1 ).FullName
           Write-Host "Found at $manifest"
           Write-Host "##vso[task.setvariable variable=manifestPath]$manifest"
 
@@ -223,7 +226,9 @@ stages:
         targetType: 'inline'                                                                                                 
         script: |
           # Update appxmanifest. This must be done before the build.
+          Write-Host "Version ${{ parameters.full_version_number }}"
           [xml]$manifest= get-content "$(manifestPath)"
+          Write-Host "Original manifest $($manifest.OuterXml)"
           $manifest.Package.Identity.Version = "${{ parameters.full_version_number }}.0"
           if( '$(cert_subject)' -ne '')
           {

@@ -23,7 +23,11 @@ parameters:
 - name: output_sdk_powershell_file_path_variable
   type: string
   default: 'sdk_powershell_file_path'
-
+# output_solution_folder - (Optional) - The variable to use for the full path to the folder that contains the solution file
+- name: output_solution_folder
+  type: string
+  default: 'solution_folder'
+  
 steps:
 - task: Bash@3
   displayName: 'Parameters'
@@ -53,9 +57,13 @@ steps:
     solution_filename: '${{ parameters.solution_file }}'
     output_solution_folder: 'solutionFolder'
 
+- template: ../set-variable-value.yml
+  parameters:
+    name: '${{ parameters.name }}SetOutputSolutionFolder'
+    variables_to_set: '${{ parameters.output_solution_folder }}|$(${{ parameters.name }}SolutionFind.solutionFolder);'
+
 - task: PowerShell@2
-  ${{ if ne(parameters.name, '') }}:
-    name: ${{ parameters.name }}
+  name: '${{ parameters.name }}InstallRequiredVersions'
   displayName: 'Install all required versions'
   inputs:
     targetType: 'inline'
